@@ -1,6 +1,7 @@
 .PHONY: clean clean_android clean_desktop clean_html
 .PHONY: build_android build_desktop build_html
 .PHONY: dist dist_android dist_desktop dist_html
+.PHONY: run_desktop run_html
 
 VERSION=1.0
 
@@ -70,3 +71,10 @@ dist_html: build_html
 	# After building html copy the created directory into a new bin directory
 	mkdir -p bin
 	cp -R html/build/dist bin/html-$(VERSION)
+
+run_desktop: dist_desktop
+	java -jar bin/desktop-$(VERSION).jar
+
+run_html: dist_html
+	cd bin/html-$(VERSION); \
+	python -m http.server
