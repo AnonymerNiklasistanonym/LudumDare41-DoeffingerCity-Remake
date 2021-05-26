@@ -76,5 +76,4 @@ run_desktop: dist_desktop
 	java -jar bin/desktop-$(VERSION).jar
 
 run_html: dist_html
-	cd bin/html-$(VERSION); \
-	python -m http.server
+	python -m http.server --directory bin/html-$(VERSION)
