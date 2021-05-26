@@ -1,5 +1,5 @@
 .PHONY: clean clean_android clean_desktop clean_html
-.PHONY: build_android build_desktop build_html
+.PHONY: build_android build_android_debug build_desktop build_html
 .PHONY: dist dist_android dist_desktop dist_html
 .PHONY: run_desktop run_html
 
@@ -46,6 +46,10 @@ build_android:
 	@echo "----------------------------------------------------------------------------"
 	# Run the gradle command to build a signed executable (APK file)
 	./gradlew android:assembleRelease
+
+build_android_debug:
+	# Run the gradle command to build a debug executable (APK file)
+	./gradlew android:assembleDebug
 
 build_desktop:
 	# Run the gradle command to build the desktop executable (JAR file)

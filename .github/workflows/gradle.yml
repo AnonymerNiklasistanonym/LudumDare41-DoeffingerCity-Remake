@@ -1,0 +1,41 @@
+# This workflow will build a Java project with Gradle
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    container:
+      # Image that supports the specified android API
+      # (https://hub.docker.com/r/fabernovel/android/tags?page=1&ordering=last_updated)
+      image: docker://fabernovel/android:api-30-v1.3.0
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install gradle
+      run: |
+        wget https://downloads.gradle-dn.com/distributions/gradle-6.7.1-bin.zip
+        unzip -d /opt/gradle gradle-6.7.1-bin.zip
+        /opt/gradle/gradle-6.7.1/bin/gradle -v
+    - name: Install gradle wrapper
+      working-directory: ./td-racing-remake/
+      run: /opt/gradle/gradle-6.7.1/bin/gradle wrapper
+    - name: Build with Gradle the desktop binary (via Makefile)
+      working-directory: ./td-racing-remake/
+      run: make dist_desktop
+    - name: Build with Gradle the html directory (via Makefile)
+      working-directory: ./td-racing-remake/
+      run: make dist_html
+    # Do not build the release apk since this apk needs to be signed with a
+    # private keystore and private credentials
+    - name: Build with Gradle the android debug APK (via Makefile)
+      working-directory: ./td-racing-remake/
+      run: make build_android_debug
