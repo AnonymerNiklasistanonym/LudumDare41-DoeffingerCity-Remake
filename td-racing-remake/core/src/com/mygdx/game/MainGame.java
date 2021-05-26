@@ -8,7 +8,32 @@ import com.badlogic.gdx.utils.ScreenUtils;
 public class MainGame extends ApplicationAdapter {
 	SpriteBatch batch;
 	Texture img;
-	
+
+	/**
+	 * Height of the game screen (the window)
+	 */
+	public final static int GAME_HEIGHT = 720;
+	/**
+	 * Width of the game screen (the window)
+	 */
+	public final static int GAME_WIDTH = 1280;
+	/**
+	 * Name of the game
+	 */
+	public final static String GAME_NAME = "TnT (Tracks `n Towers)";
+
+	/**
+	 * The provided icon sizes
+	 */
+	public final static int[] GAME_ICON_SIZES = { 16, 32, 64 };
+	/**
+	 * Get the filepath of a game icon given its size
+	 * @param IconSize The size of the game icon
+	 */
+	public static String getGameIconFilePath(int IconSize) {
+		return "icon/icon_" + IconSize + ".png";
+	}
+
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
