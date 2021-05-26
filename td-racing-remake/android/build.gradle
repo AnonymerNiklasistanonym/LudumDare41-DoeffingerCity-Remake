@@ -27,10 +27,19 @@ android {
         versionCode 1
         versionName "1.0"
     }
+    signingConfigs {
+        release {
+            storeFile file("$System.env.KEY_STORE_PATH")
+            storePassword = "$System.env.KEY_STORE_PASSWORD"
+            keyAlias = "$System.env.KEY_ALIAS"
+            keyPassword = "$System.env.KEY_ALIAS_PASSWORD"
+        }
+    }
     buildTypes {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }

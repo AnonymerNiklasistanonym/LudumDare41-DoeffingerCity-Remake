@@ -1,10 +1,22 @@
-.PHONY: clean clean_desktop clean_html build_desktop build_html
+.PHONY: clean clean_android clean_desktop clean_html
+.PHONY: build_android build_desktop build_html
+.PHONY: export_android
 
 VERSION=1.0
 
 all: export_desktop export_html
 
-clean: clean_desktop clean_html
+clean: clean_android clean_desktop clean_html
+	# Clean gradlew build files in general additionally
+	./gradlew clean
+	# Remove the created bin directory
+	rm -rf bin/
+
+clean_android:
+	# Run the gradle command to clean the desktop build files
+	./gradlew android:clean
+	# Remove the created JAR file
+	rm -f bin/android-$(VERSION).apk
 
 clean_desktop:
 	# Run the gradle command to clean the desktop build files
@@ -18,13 +30,32 @@ clean_html:
 	# Remove the created HTML directory
 	rm -rf bin/html-$(VERSION)
 
+build_android:
+	# I recommend saving the following necessary variables in a shell file as
+	# environment variables and the sourcing this file before executing this target
+	# [Because of the singing step this is excluded from the default make call]
+	@echo "----------------------------------------------------------------------------"
+	@echo "You need to set the following environment variables to sign the APK:"
+	@echo "KEY_STORE_PATH=$(KEY_STORE_PATH)"
+	@echo "KEY_STORE_PASSWORD=$(KEY_STORE_PASSWORD)"
+	@echo "KEY_ALIAS=$(KEY_ALIAS)"
+	@echo "KEY_ALIAS_PASSWORD=$(KEY_ALIAS_PASSWORD)"
+	@echo "----------------------------------------------------------------------------"
+	# Run the gradle command to build a signed executable (APK file)
+	./gradlew android:assembleRelease
+
 build_desktop:
-	# Run the gradle command to build the desktop exectuable (JAR file)
+	# Run the gradle command to build the desktop executable (JAR file)
 	./gradlew desktop:dist
 
 build_html:
 	# Run the gradle command to build the html directory (can be hosted)
 	./gradlew html:dist
+
+export_android: build_android
+	# After building android copy the created apk into a new bin directory
+	mkdir -p bin
+	cp android/build/outputs/apk/release/android-release.apk bin/android-$(VERSION).apk
 
 export_desktop: build_desktop
 	# After building desktop copy the created jar into a new bin directory
