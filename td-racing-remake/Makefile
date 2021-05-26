@@ -1,10 +1,10 @@
 .PHONY: clean clean_android clean_desktop clean_html
 .PHONY: build_android build_desktop build_html
-.PHONY: export_android
+.PHONY: dist dist_android dist_desktop dist_html
 
 VERSION=1.0
 
-all: export_desktop export_html
+all: dist_desktop
 
 clean: clean_android clean_desktop clean_html
 	# Clean gradlew build files in general additionally
@@ -30,6 +30,8 @@ clean_html:
 	# Remove the created HTML directory
 	rm -rf bin/html-$(VERSION)
 
+build: build_android build_desktop build_html
+
 build_android:
 	# I recommend saving the following necessary variables in a shell file as
 	# environment variables and the sourcing this file before executing this target
@@ -52,17 +54,19 @@ build_html:
 	# Run the gradle command to build the html directory (can be hosted)
 	./gradlew html:dist
 
-export_android: build_android
+dist: dist_android dist_desktop dist_html
+
+dist_android: build_android
 	# After building android copy the created apk into a new bin directory
 	mkdir -p bin
 	cp android/build/outputs/apk/release/android-release.apk bin/android-$(VERSION).apk
 
-export_desktop: build_desktop
+dist_desktop: build_desktop
 	# After building desktop copy the created jar into a new bin directory
 	mkdir -p bin
 	cp desktop/build/libs/desktop-$(VERSION).jar bin/desktop-$(VERSION).jar
 
-export_html: build_html
+dist_html: build_html
 	# After building html copy the created directory into a new bin directory
 	mkdir -p bin
 	cp -R html/build/dist bin/html-$(VERSION)

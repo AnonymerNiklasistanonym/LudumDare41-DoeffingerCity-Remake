@@ -87,6 +87,28 @@ You can either just run the command `make` in the directory to export a desktop 
   java -jar NameOfTheJar.jar
   ```
 
+  ---
+
+  If you get any problems try running it with Java version 8. You can do this for example by directly calling it:
+
+  ```sh
+  # java -jar desktop.jar
+  # WARNING: An illegal reflective access operation has occurred
+  # WARNING: Illegal reflective access by org.lwjgl.LWJGLUtil$3
+  # [....]
+  /usr/lib/jvm/java-8-openjdk/bin/java -jar bin/desktop-1.0.jar
+  # Now the error should be gone but it could be that you need to recompile the project:
+  make clean dist_desktop
+  ```
+
+  Or when you are on an Arch Linux based distribution you should be able to run the following to temporarily change the Java version to 8:
+
+  ```sh
+  sudo archlinux-java set java-8-openjdk
+  ```
+
+  ----
+
 - To run the web app you can create a local web server in the terminal:
 
   ```sh
