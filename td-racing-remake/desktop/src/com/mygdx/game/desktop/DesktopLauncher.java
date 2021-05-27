@@ -19,6 +19,10 @@ public class DesktopLauncher {
       config.addIcon(MainGame.getGameIconFilePath(size), Files.FileType.Internal);
     }
 
+    // The following line is necessary for a safe exit when pressing the window close button
+    // (https://gamedev.stackexchange.com/a/109253)
+    config.forceExit = false;
+
     new LwjglApplication(new MainGame(), config);
   }
 }

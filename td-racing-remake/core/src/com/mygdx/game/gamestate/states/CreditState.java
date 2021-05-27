@@ -43,7 +43,7 @@ public class CreditState extends GameState implements ControllerMenuCallbackInte
 				"MUSIC BY SASCHA CZEPPEL" };
 
 		// calculate the text positions so that every line is centered
-		textContentPosition = GameStateMethods.calculateCenteredMultiLineTextPositons(MainGame.fontUpperCaseBig,
+		textContentPosition = GameStateMethods.calculateCenteredMultiLineTextPositions(MainGame.fontUpperCaseBig,
 				textContent, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
 
 		// add controller listener

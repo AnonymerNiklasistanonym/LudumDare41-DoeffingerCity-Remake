@@ -38,9 +38,8 @@ public class GameStateMethods {
 	/**
 	 * Get the current mouse position
 	 *
-	 * @param camera
-	 *            (State camera)
-	 * @return mouse position
+	 * @param camera the game state camera
+	 * @return the current mouse position
 	 */
 	public static Vector3 getMousePosition(final Camera camera) {
 		return camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
@@ -49,14 +48,10 @@ public class GameStateMethods {
 	/**
 	 * Get the coordinates to render text centered
 	 *
-	 * @param font
-	 *            - BitmapFont which will be used to draw the text
-	 * @param text
-	 *            - text that should be displayed
-	 * @param width
-	 *            - Width of screen
-	 * @param height
-	 *            - Height of screen
+	 * @param font BitmapFont which will be used to draw the text
+	 * @param text text that should be displayed
+	 * @param width width of screen
+	 * @param height height of screen
 	 * @return x and y coordinate for drawing the text
 	 */
 	public static Vector2 calculateCenteredTextPositon(final BitmapFont font, final String text, final float width,
@@ -68,17 +63,13 @@ public class GameStateMethods {
 	/**
 	 * Get the coordinates to render text centered
 	 *
-	 * @param font
-	 *            - BitmapFont which will be used to draw the text
-	 * @param text
-	 *            - texts that should be displayed
-	 * @param width
-	 *            - Width of screen
-	 * @param height
-	 *            - Height of screen
-	 * @return x and y coordinates for drawing the texts
+	 * @param font BitmapFont which will be used to draw the text
+	 * @param text array of text that should be displayed
+	 * @param width width of screen
+	 * @param height height of screen
+	 * @return x and y coordinates for drawing the array of text
 	 */
-	public static Vector2[] calculateCenteredMultiLineTextPositons(final BitmapFont font, final String[] text,
+	public static Vector2[] calculateCenteredMultiLineTextPositions(final BitmapFont font, final String[] text,
 			final float width, final float height) {
 		final Vector2[] positions = new Vector2[text.length];
 		for (int i = 0; i < text.length; i++) {

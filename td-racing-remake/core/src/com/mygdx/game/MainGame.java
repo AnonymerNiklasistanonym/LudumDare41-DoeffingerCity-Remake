@@ -62,26 +62,26 @@ public class MainGame implements ApplicationListener {
    */
   private GameStateManager gameStateManager;
   /**
-   * libGDX SpriteBatch
+   * A batch/collection of draw calls for rendering with OpenGL
    */
   private SpriteBatch spriteBatch;
 
   /**
    * Get the filepath of a game icon given its size
    *
-   * @param IconSize The size of the game icon
+   * @param iconSize The size of the game icon
    */
-  public static String getGameIconFilePath(int IconSize) {
-    return "icon/icon_" + IconSize + ".png";
+  public static String getGameIconFilePath(final int iconSize) {
+    return "icon/icon_" + iconSize + ".png";
   }
 
   /**
    * Get the filepath of a game font given its name
    *
-   * @param FontName The name of the game font
+   * @param fontName The name of the game font
    */
-  public static String getGameFontFilePath(String FontName) {
-    return "fonts/font_" + FontName + ".fnt";
+  public static String getGameFontFilePath(final String fontName) {
+    return "fonts/font_" + fontName + ".fnt";
   }
 
   /**
@@ -147,7 +147,8 @@ public class MainGame implements ApplicationListener {
     Gdx.gl.glClearColor(0, 0, 0, 1);
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-    // Update game state (deltaTime gives the time in seconds between render times)
+    // Update game state
+    // (deltaTime gives the time span between the current frame and the last frame in seconds)
     gameStateManager.update(Gdx.graphics.getDeltaTime());
 
     // Render the current state
@@ -155,7 +156,7 @@ public class MainGame implements ApplicationListener {
   }
 
   @Override
-  public void resize(int width, int height) {
+  public void resize(final int width, final int height) {
     Gdx.app.log("main:resize",
         getCurrentTimeStampLogString() + "the game was resized to " + width + "x" + height);
 
