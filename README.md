@@ -2,6 +2,15 @@
 
 A remake of the original https://github.com/AnonymerNiklasistanonym/LudumDare41-DoeffingerCity
 
+TODO:
+
+- [x] Get the old project running with Java 8
+- [x] Get the old project running on Android
+- [ ] Update Controller implementation to be fun to use
+- [ ] Optimize performance and frame rate
+- [ ] Make desktop project run and build on Linux and Windows
+- [ ] Add [Android] touch controls to make it playable on this platform (try to do this on the web app too)
+
 ## Setup
 
 ### libGDX project template generation
