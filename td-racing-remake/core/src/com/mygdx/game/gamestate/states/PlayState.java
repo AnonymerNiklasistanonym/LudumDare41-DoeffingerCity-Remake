@@ -1060,7 +1060,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	private boolean allEnemiesAreActive() {
 		for (final Enemy enemy : enemies) {
-			if (enemy.isActivated() == false)
+			if (!enemy.isActivated())
 				return false;
 		}
 		return true;
@@ -1072,7 +1072,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	}
 
 	private void victoryLevel() {
-		System.out.println("Level finished " + MainGame.level);
+		System.out.println("Level finished " + scoreBoard.getLevel());
 
 		// play victory sound
 		if (soundOn)

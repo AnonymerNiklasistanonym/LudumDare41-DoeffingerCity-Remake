@@ -1,5 +1,6 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
@@ -9,109 +10,178 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Scaling;
 import com.mygdx.game.gamestate.GameStateManager;
 import com.mygdx.game.gamestate.states.MenuState;
+import java.sql.Timestamp;
+import java.util.Date;
 
 public class MainGame implements ApplicationListener {
 
-    /**
-     * Height of the game screen (the window)
-     */
-    public final static int GAME_HEIGHT = 720;
-    /**
-     * Width of the game screen (the window)
-     */
-    public final static int GAME_WIDTH = 1280;
-    /**
-     * Name of the game
-     */
-    public final static String GAME_NAME = "TnT (Tracks `n Towers)";
-    /**
-     * The provided icon sizes
-     */
-    public final static int[] GAME_ICON_SIZES = {16, 32, 64};
+  /**
+   * Height of the game screen
+   */
+  public final static int GAME_HEIGHT = 720;
+  /**
+   * Width of the game screen
+   */
+  public final static int GAME_WIDTH = 1280;
+  /**
+   * Name of the game
+   */
+  public final static String GAME_NAME = "TnT (Tracks `n Towers)";
+  /**
+   * The provided icon sizes
+   */
+  public final static int[] GAME_ICON_SIZES = {16, 32, 64};
 
-    /**
-     * Get the filepath of a game icon given its size
-     *
-     * @param IconSize The size of the game icon
-     */
-    public static String getGameIconFilePath(int IconSize) {
-        return "icon/icon_" + IconSize + ".png";
+  /**
+   * Indicator if release or development version of the game
+   */
+  public static final boolean DEVELOPER_MODE = true;
+  /**
+   * Font "cornerstone_70"
+   */
+  public static BitmapFont font70;
+  /**
+   * Font "cornerstone"
+   */
+  public static BitmapFont font;
+  /**
+   * Font "cornerstone_big"
+   */
+  public static BitmapFont fontBig;
+  /**
+   * Font "cornerstone_outline"
+   */
+  public static BitmapFont fontOutline;
+  /**
+   * Font "cornerstone_upper_case_big"
+   */
+  public static BitmapFont fontUpperCaseBig;
+
+  /**
+   * The game state manager that manages states, input handling, rendering
+   */
+  private GameStateManager gameStateManager;
+  /**
+   * libGDX SpriteBatch
+   */
+  private SpriteBatch spriteBatch;
+
+  /**
+   * Get the filepath of a game icon given its size
+   *
+   * @param IconSize The size of the game icon
+   */
+  public static String getGameIconFilePath(int IconSize) {
+    return "icon/icon_" + IconSize + ".png";
+  }
+
+  /**
+   * Get the filepath of a game font given its name
+   *
+   * @param FontName The name of the game font
+   */
+  public static String getGameFontFilePath(String FontName) {
+    return "fonts/font_" + FontName + ".fnt";
+  }
+
+  /**
+   * Get a current time stamp string for logging behaviour
+   */
+  public static String getCurrentTimeStampLogString() {
+    String timestamp = new Timestamp(new Date().getTime()).toString();
+    return "(" + timestamp + "000".substring(timestamp.length() - 20) + ") ";
+  }
+
+  @Override
+  public void create() {
+    if (DEVELOPER_MODE) {
+      Gdx.app.setLogLevel(Application.LOG_DEBUG);
+    } else {
+      Gdx.app.setLogLevel(Application.LOG_ERROR);
     }
-	/**
-	 * Returns if this is an release or development
-	 */
-	public static final boolean DEVELOPER_MODE = false;
 
-	public static BitmapFont font70;
-	public static BitmapFont font;
-	public static BitmapFont fontBig;
-	public static BitmapFont fontOutline;
-	public static BitmapFont fontUpperCaseBig;
-	public static int level;
+    // Load fonts
+    Gdx.app.log("main:create", getCurrentTimeStampLogString() + "load fonts");
+    font = new BitmapFont(Gdx.files.internal(getGameFontFilePath("cornerstone")));
+    font.setUseIntegerPositions(false);
+    font70 = new BitmapFont(Gdx.files.internal(getGameFontFilePath("cornerstone_70")));
+    font70.setUseIntegerPositions(false);
+    fontBig = new BitmapFont(Gdx.files.internal(getGameFontFilePath("cornerstone_big")));
+    fontBig.setUseIntegerPositions(false);
+    fontOutline = new BitmapFont(Gdx.files.internal(getGameFontFilePath("cornerstone_outline")));
+    fontOutline.setUseIntegerPositions(false);
+    fontUpperCaseBig = new BitmapFont(
+        Gdx.files.internal(getGameFontFilePath("cornerstone_upper_case_big")));
+    fontUpperCaseBig.setUseIntegerPositions(false);
 
-	private GameStateManager gameStateManager;
-	private SpriteBatch spriteBatch;
+    // Create sprite batch
+    Gdx.app.log("main:create", getCurrentTimeStampLogString() + "create sprite batch");
+    spriteBatch = new SpriteBatch();
+    // Create game state manager
+    Gdx.app.log("main:create", getCurrentTimeStampLogString() + "create game state manager");
+    gameStateManager = new GameStateManager();
 
-	@Override
-	public void create() {
-		font = new BitmapFont(Gdx.files.internal("fonts/font_cornerstone.fnt"));
-		font.setUseIntegerPositions(false);
-		font70 = new BitmapFont(Gdx.files.internal("fonts/font_cornerstone_70.fnt"));
-		font70.setUseIntegerPositions(false);
-		fontBig = new BitmapFont(Gdx.files.internal("fonts/font_cornerstone_big.fnt"));
-		fontBig.setUseIntegerPositions(false);
-		fontOutline = new BitmapFont(Gdx.files.internal("fonts/font_cornerstone_outline.fnt"));
-		fontOutline.setUseIntegerPositions(false);
-		fontUpperCaseBig = new BitmapFont(Gdx.files.internal("fonts/font_cornerstone_upper_case_big.fnt"));
-		fontUpperCaseBig.setUseIntegerPositions(false);
+    // Switch to the menu state
+    Gdx.app.log("main:create", getCurrentTimeStampLogString() + "switch to menu state");
+    gameStateManager.pushState(new MenuState(gameStateManager));
+  }
 
-		spriteBatch = new SpriteBatch();
-		gameStateManager = new GameStateManager();
+  @Override
+  public void dispose() {
+    // Dispose all loaded fonts
+    BitmapFont[] fonts = new BitmapFont[]{font, font70, fontBig, fontUpperCaseBig};
+    for (BitmapFont x : fonts) {
+      if (x != null) {
+        x.dispose();
+      }
+    }
+    // Dispose sprite batch
+    if (spriteBatch != null) {
+      spriteBatch.dispose();
+    }
+  }
 
-		// starting level
-		level = 1;
+  @Override
+  public void render() {
+    // Clear canvas with black color
+    Gdx.gl.glClearColor(0, 0, 0, 1);
+    Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		// start in the menu
-		gameStateManager.pushState(new MenuState(gameStateManager));
-	}
+    // Update game state (deltaTime gives the time in seconds between render times)
+    gameStateManager.update(Gdx.graphics.getDeltaTime());
 
-	@Override
-	public void dispose() {
-		font.dispose();
-		font70.dispose();
-		fontBig.dispose();
-		fontUpperCaseBig.dispose();
-		spriteBatch.dispose();
-	}
+    // Render the current state
+    gameStateManager.render(spriteBatch);
+  }
 
-	@Override
-	public void render() {
-		// wipes the screen clear with a black color
-		Gdx.gl.glClearColor(0, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		// update state (deltaTime gives the time between render times)
-		gameStateManager.update(Gdx.graphics.getDeltaTime());
-		// render the current state
-		gameStateManager.render(spriteBatch);
-	}
+  @Override
+  public void resize(int width, int height) {
+    Gdx.app.log("main:resize",
+        getCurrentTimeStampLogString() + "the game was resized to " + width + "x" + height);
 
-	@Override
-	public void resize(int width, int height) {
-		final Vector2 size = Scaling.fit.apply(GAME_WIDTH, GAME_HEIGHT, width, height);
-		final int viewportX = (int) (width - size.x) / 2;
-		final int viewportY = (int) (height - size.y) / 2;
-		final int viewportWidth = (int) size.x;
-		final int viewportHeight = (int) size.y;
-		Gdx.gl.glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
-	}
+    // On window resize calculate a new viewport so that the game is always displayed with the
+    // original aspect ratio
+    final Vector2 viewportSize = Scaling.fit.apply(GAME_WIDTH, GAME_HEIGHT, width, height);
+    final int viewportX = (int) (width - viewportSize.x) / 2;
+    final int viewportY = (int) (height - viewportSize.y) / 2;
+    final int viewportWidth = (int) viewportSize.x;
+    final int viewportHeight = (int) viewportSize.y;
+    Gdx.gl.glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
 
-	@Override
-	public void pause() {
-		gameStateManager.pause();
-	}
+    Gdx.app.log("main:resize",
+        getCurrentTimeStampLogString() + "the new viewport is " + viewportWidth + "x"
+            + viewportHeight);
+  }
 
-	@Override
-	public void resume() {
-		gameStateManager.resume();
-	}
+  @Override
+  public void pause() {
+    Gdx.app.log("main:pause", getCurrentTimeStampLogString() + "the game was paused");
+    gameStateManager.pause();
+  }
+
+  @Override
+  public void resume() {
+    Gdx.app.log("main:resume", getCurrentTimeStampLogString() + "the game was resumed");
+    gameStateManager.resume();
+  }
 }

@@ -168,7 +168,7 @@ public class GameOverState extends GameState implements ControllerMenuCallbackIn
 			if (menuButton.isActive()) {
 				switch (menuButton.getId()) {
 				case PLAY_AGAIN_ID:
-					gameStateManager.setGameState(new LoadingState(gameStateManager, MainGame.level));
+					gameStateManager.setGameState(new LoadingState(gameStateManager, this.level));
 					break;
 				case HIGHSCORE_ID:
 					gameStateManager.setGameState(new HighscoreListState(gameStateManager));

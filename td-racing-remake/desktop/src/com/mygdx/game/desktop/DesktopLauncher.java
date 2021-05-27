@@ -10,15 +10,11 @@ public class DesktopLauncher {
   public static void main(String[] arg) {
     LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 
-    // set window width and height
+    // Set custom window properties
     config.height = MainGame.GAME_HEIGHT;
     config.width = MainGame.GAME_WIDTH;
-
-    // set window title
     config.title = MainGame.GAME_NAME;
     config.fullscreen = false;
-
-    // set window icon
     for (int size : MainGame.GAME_ICON_SIZES) {
       config.addIcon(MainGame.getGameIconFilePath(size), Files.FileType.Internal);
     }

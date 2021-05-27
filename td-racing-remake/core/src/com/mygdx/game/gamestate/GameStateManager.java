@@ -52,7 +52,7 @@ public class GameStateManager {
 	 * Update everything (input and then updates)
 	 *
 	 * @param deltaTime
-	 *            (time between last frame and this)
+	 *            (time between last frame and this in seconds)
 	 */
 	public void update(final float deltaTime) {
 		gameStateStack.peek().handleInput();
