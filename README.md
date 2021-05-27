@@ -10,7 +10,7 @@ A remake of the original https://github.com/AnonymerNiklasistanonym/LudumDare41-
 
 To setup the project the *[libGDX PROJECT SETUP](https://libgdx.com/dev/project-generation/)* application was used with the following settings:
 
-![Screenshot of the libGDX PROJECT SETUP configuration](screenshots/libgdx_setup.png)
+![Screenshot of the libGDX PROJECT SETUP configuration where the Sub Projects 'Desktop', 'Android' and 'Html' are selected and the Extensions 'Controllers' and 'Box2d'](screenshots/libgdx_setup.png)
 
 ### Importing the project into the Android Studio IDE
 
