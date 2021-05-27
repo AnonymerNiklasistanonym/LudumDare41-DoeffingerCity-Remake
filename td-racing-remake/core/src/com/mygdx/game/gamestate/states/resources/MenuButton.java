@@ -7,7 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.game.MainGame;
-import com.mygdx.game.gamestate.GameStateMethods;
+import com.mygdx.game.gamestate.GameStateManager;
 
 public abstract class MenuButton implements Disposable {
 
@@ -35,7 +35,8 @@ public abstract class MenuButton implements Disposable {
 		this.scale = scale;
 
 		MainGame.fontBig.getData().setScale(this.scale);
-		this.position = GameStateMethods.calculateCenteredTextPositon(MainGame.fontBig, this.content, xPosition * 2,
+		this.position = GameStateManager
+				.calculateCenteredTextPosition(MainGame.fontBig, this.content, xPosition * 2,
 				yPosition * 2);
 	}
 

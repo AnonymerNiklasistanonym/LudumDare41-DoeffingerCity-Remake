@@ -12,7 +12,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
-import com.mygdx.game.gamestate.GameStateMethods;
 import com.mygdx.game.gamestate.states.resources.HighscoreCharacterButton;
 import com.mygdx.game.listener.controller.ControllerHelperMenu;
 import com.mygdx.game.listener.controller.ControllerMenuCallbackInterface;
@@ -66,10 +65,10 @@ public class HighscoreNameState extends GameState implements ControllerMenuCallb
 		MainGame.fontUpperCaseBig.getData().setScale(0.65f);
 		MainGame.fontUpperCaseBig.setUseIntegerPositions(false);
 		this.highscoreText = "YOU REACHED THE TOP 10!";
-		this.highscoreTextPosition = GameStateMethods.calculateCenteredTextPositon(MainGame.fontUpperCaseBig,
+		this.highscoreTextPosition = GameStateManager.calculateCenteredTextPosition(MainGame.fontUpperCaseBig,
 				highscoreText, MainGame.GAME_WIDTH, (float)MainGame.GAME_HEIGHT / 3 * 5);
 		this.scoreText = "" + score;
-		this.scoreTextPosition = GameStateMethods.calculateCenteredTextPositon(MainGame.fontUpperCaseBig, scoreText,
+		this.scoreTextPosition = GameStateManager.calculateCenteredTextPosition(MainGame.fontUpperCaseBig, scoreText,
 				MainGame.GAME_WIDTH, (float)MainGame.GAME_HEIGHT / 3);
 
 		final char[] name = preferencesManager.getName();
@@ -88,7 +87,7 @@ public class HighscoreNameState extends GameState implements ControllerMenuCallb
 
 	@Override
 	protected void handleInput() {
-		GameStateMethods.toggleFullScreen(true);
+		GameStateManager.toggleFullScreen(true);
 
 		if (Gdx.input.isKeyJustPressed(Keys.LEFT) || Gdx.input.isKeyJustPressed(Keys.A))
 			selectNextCharacterButton(false);
@@ -165,7 +164,7 @@ public class HighscoreNameState extends GameState implements ControllerMenuCallb
 		if (buttonId == ControllerWiki.BUTTON_A)
 			saveHighscoreAndGoToList();
 		if (buttonId == ControllerWiki.BUTTON_START)
-			GameStateMethods.toggleFullScreen();
+			GameStateManager.toggleFullScreen();
 	}
 
 	private void selectNextCharacterButton(boolean left) {

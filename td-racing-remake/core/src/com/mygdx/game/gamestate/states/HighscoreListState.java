@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
-import com.mygdx.game.gamestate.GameStateMethods;
 import com.mygdx.game.gamestate.states.resources.HighscoreButton;
 import com.mygdx.game.listener.controller.ControllerHelperMenu;
 import com.mygdx.game.listener.controller.ControllerMenuCallbackInterface;
@@ -66,7 +65,7 @@ public class HighscoreListState extends GameState implements ControllerMenuCallb
 
 	@Override
 	protected void handleInput() {
-		GameStateMethods.toggleFullScreen(true);
+		GameStateManager.toggleFullScreen(true);
 
 		// go back to the menu state
 		if (Gdx.input.justTouched() || (Gdx.input.isKeyJustPressed(Keys.ESCAPE) || Gdx.input.isCatchBackKey()))
@@ -132,7 +131,7 @@ public class HighscoreListState extends GameState implements ControllerMenuCallb
 		if (buttonId == ControllerWiki.BUTTON_A)
 			goBack();
 		if (buttonId == ControllerWiki.BUTTON_START)
-			GameStateMethods.toggleFullScreen();
+			GameStateManager.toggleFullScreen();
 	}
 /*
 	@Override

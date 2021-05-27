@@ -11,7 +11,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
-import com.mygdx.game.gamestate.GameStateMethods;
 import com.mygdx.game.listener.controller.ControllerHelperMenu;
 import com.mygdx.game.listener.controller.ControllerMenuCallbackInterface;
 import com.mygdx.game.listener.controller.ControllerWiki;
@@ -64,7 +63,7 @@ public class GameWonState extends GameState implements ControllerMenuCallbackInt
 
 	@Override
 	public void handleInput() {
-		GameStateMethods.toggleFullScreen(true);
+		GameStateManager.toggleFullScreen(true);
 
 		// If a button is touched do something or Space or Enter continue to next state
 		if (Gdx.input.justTouched()
@@ -119,7 +118,7 @@ public class GameWonState extends GameState implements ControllerMenuCallbackInt
 		if (buttonId == ControllerWiki.BUTTON_A)
 			goForward();
 		if (buttonId == ControllerWiki.BUTTON_START)
-			GameStateMethods.toggleFullScreen();
+			GameStateManager.toggleFullScreen();
 	}
 /*
 	@Override

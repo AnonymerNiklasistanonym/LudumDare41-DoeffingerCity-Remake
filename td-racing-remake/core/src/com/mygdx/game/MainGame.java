@@ -81,7 +81,34 @@ public class MainGame implements ApplicationListener {
    * @param fontName The name of the game font
    */
   public static String getGameFontFilePath(final String fontName) {
-    return "fonts/font_" + fontName + ".fnt";
+    return "font/font_" + fontName + ".fnt";
+  }
+
+  /**
+   * Get the filepath of a game button given its name
+   *
+   * @param buttonName The name of the game button
+   */
+  public static String getGameButtonFilePath(final String buttonName) {
+    return "button/button_" + buttonName + ".png";
+  }
+
+  /**
+   * Get the filepath of a game background given its name
+   *
+   * @param backgroundName The name of the game background
+   */
+  public static String getGameBackgroundFilePath(final String backgroundName) {
+    return "background/background_" + backgroundName + ".png";
+  }
+
+  /**
+   * Get the filepath of a game background given its name
+   *
+   * @param logoName The name of the game background
+   */
+  public static String getGameLogoFilePath(final String logoName) {
+    return "logo/logo_" + logoName + ".png";
   }
 
   /**

@@ -12,7 +12,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
-import com.mygdx.game.gamestate.GameStateMethods;
 import com.mygdx.game.gamestate.states.resources.MenuButton;
 import com.mygdx.game.gamestate.states.resources.MenuButtonBig;
 import com.mygdx.game.gamestate.states.resources.MenuButtonSmall;
@@ -70,7 +69,7 @@ public class GameOverState extends GameState implements ControllerMenuCallbackIn
 
 		// calculate text coordinates
 		this.loadingText = "GAME OVER";
-		this.loadingTextPosition = GameStateMethods.calculateCenteredTextPositon(MainGame.fontUpperCaseBig, loadingText,
+		this.loadingTextPosition = GameStateManager.calculateCenteredTextPosition(MainGame.fontUpperCaseBig, loadingText,
 				MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT / 5 * 8);
 
 		menuButtons = new MenuButton[] {
@@ -92,8 +91,8 @@ public class GameOverState extends GameState implements ControllerMenuCallbackIn
 
 	@Override
 	public void handleInput() {
-		GameStateMethods.toggleFullScreen(true);
-		touchPos.set(GameStateMethods.getMousePosition(camera));
+		GameStateManager.toggleFullScreen(true);
+		touchPos.set(GameStateManager.getMousePosition(camera));
 
 		// determine on which button the mouse cursor is and select this button
 		boolean oneIsSelected = false;
@@ -195,7 +194,7 @@ public class GameOverState extends GameState implements ControllerMenuCallbackIn
 		if (buttonId == ControllerWiki.BUTTON_A)
 			openSelectedMenuButton();
 		if (buttonId == ControllerWiki.BUTTON_START)
-			GameStateMethods.toggleFullScreen();
+			GameStateManager.toggleFullScreen();
 	}
 
 	private void selectNextButton(boolean below) {

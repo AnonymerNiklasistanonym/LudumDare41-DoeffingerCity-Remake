@@ -10,7 +10,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
-import com.mygdx.game.gamestate.GameStateMethods;
 import com.mygdx.game.gamestate.states.resources.MenuButton;
 import com.mygdx.game.gamestate.states.resources.MenuButtonBig;
 import com.mygdx.game.gamestate.states.resources.MenuButtonSmall;
@@ -42,12 +41,12 @@ public class MenuState extends GameState implements ControllerMenuCallbackInterf
 	public MenuState(GameStateManager gameStateManager) {
 		super(gameStateManager, STATE_NAME);
 
-		MenuButtonBig.textureActive = new Texture(Gdx.files.internal("buttons/button_menu_active.png"));
-		MenuButtonBig.textureNotActive = new Texture(Gdx.files.internal("buttons/button_menu_not_active.png"));
-		MenuButtonSmall.textureActive = new Texture(Gdx.files.internal("buttons/button_menu_active_small.png"));
-		MenuButtonSmall.textureNotActive = new Texture(Gdx.files.internal("buttons/button_menu_not_active_small.png"));
-		backgroundStars = new Texture(Gdx.files.internal("background/background_stars.png"));
-		title = new Texture(Gdx.files.internal("buttons/titel.png"));
+		MenuButtonBig.textureActive = new Texture(Gdx.files.internal(MainGame.getGameButtonFilePath("menu_active")));
+		MenuButtonBig.textureNotActive = new Texture(Gdx.files.internal(MainGame.getGameButtonFilePath("menu_not_active")));
+		MenuButtonSmall.textureActive = new Texture(Gdx.files.internal(MainGame.getGameButtonFilePath("menu_active_small")));
+		MenuButtonSmall.textureNotActive = new Texture(Gdx.files.internal(MainGame.getGameButtonFilePath("menu_not_active_small")));
+		backgroundStars = new Texture(Gdx.files.internal(MainGame.getGameBackgroundFilePath("stars")));
+		title = new Texture(Gdx.files.internal(MainGame.getGameLogoFilePath("tnt")));
 
 		touchPos = new Vector3();
 
@@ -67,10 +66,10 @@ public class MenuState extends GameState implements ControllerMenuCallbackInterf
 
 	@Override
 	public void handleInput() {
-		GameStateMethods.toggleFullScreen(true);
+		GameStateManager.toggleFullScreen(true);
 
 		// map touch position to the camera resolution
-		touchPos.set(GameStateMethods.getMousePosition(camera));
+		touchPos.set(GameStateManager.getMousePosition(camera));
 
 		// determine on which button the mouse cursor is and select this button
 		boolean oneIsSelected = false;
@@ -167,7 +166,7 @@ public class MenuState extends GameState implements ControllerMenuCallbackInterf
 		if (buttonId == ControllerWiki.BUTTON_A)
 			openSelectedMenuButton();
 		if (buttonId == ControllerWiki.BUTTON_START)
-			GameStateMethods.toggleFullScreen();
+			GameStateManager.toggleFullScreen();
 	}
 
 	private void selectNextButton(boolean below) {

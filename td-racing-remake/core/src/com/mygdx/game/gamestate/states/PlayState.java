@@ -22,7 +22,6 @@ import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
-import com.mygdx.game.gamestate.GameStateMethods;
 import com.mygdx.game.level.Level;
 import com.mygdx.game.level.LevelHandler;
 import com.mygdx.game.level.Wave;
@@ -112,10 +111,10 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		spriteSmoke = createScaledSprite("maps/smoke.png");
 
 		// set textures
-		TowerMenu.cannonButton = new Texture(Gdx.files.internal("buttons/cannonbutton.png"));
-		TowerMenu.laserButton = new Texture(Gdx.files.internal("buttons/laserbutton.png"));
-		TowerMenu.flameButton = new Texture(Gdx.files.internal("buttons/flamebutton.png"));
-		TowerMenu.sniperButton = new Texture(Gdx.files.internal("buttons/sniperbutton.png"));
+		TowerMenu.cannonButton = new Texture(Gdx.files.internal("button/cannonbutton.png"));
+		TowerMenu.laserButton = new Texture(Gdx.files.internal("button/laserbutton.png"));
+		TowerMenu.flameButton = new Texture(Gdx.files.internal("button/flamebutton.png"));
+		TowerMenu.sniperButton = new Texture(Gdx.files.internal("button/sniperbutton.png"));
 		MgTower.groundTower = new Texture(Gdx.files.internal("tower/tower_empty.png"));
 		MgTower.upperTower = new Texture(Gdx.files.internal("tower/tower_empty_upper.png"));
 		MgTower.towerFiring = new Texture(Gdx.files.internal("tower/tower_mg_firing.png"));
@@ -323,11 +322,11 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	@Override
 	protected void handleInput() {
-		GameStateMethods.toggleFullScreen(true);
-		mousePos = GameStateMethods.getMousePosition(camera);
+		GameStateManager.toggleFullScreen(true);
+		mousePos = GameStateManager.getMousePosition(camera);
 
 		// go back
-		if (Gdx.input.isCatchBackKey() || Gdx.input.isKeyJustPressed(Keys.ESCAPE))
+		if (Gdx.input.isCatchKey(Keys.BACK) || Gdx.input.isKeyJustPressed(Keys.ESCAPE))
 			goBack();
 
 		// control the car
@@ -743,7 +742,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 		// draw centered pause or custom wave text
 		if (pause || timeforwavetext > 0) {
-			final Vector2 wavePosition = GameStateMethods.calculateCenteredTextPositon(MainGame.font70,
+			final Vector2 wavePosition = GameStateManager.calculateCenteredTextPosition(MainGame.font70,
 					pause ? "PAUSE" : waveText, MainGame.GAME_WIDTH * PIXEL_TO_METER,
 					MainGame.GAME_HEIGHT * PIXEL_TO_METER);
 			MainGame.font70.draw(spriteBatch, pause ? "PAUSE" : waveText, wavePosition.x, wavePosition.y);
@@ -1156,7 +1155,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	@Override
 	public void controllerCallbackToggleFullScreen() {
-		GameStateMethods.toggleFullScreen();
+		GameStateManager.toggleFullScreen();
 	}
 
 	@Override

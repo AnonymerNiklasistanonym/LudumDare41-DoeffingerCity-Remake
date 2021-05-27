@@ -7,7 +7,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
-import com.mygdx.game.gamestate.GameStateMethods;
 
 public class LoadingState extends GameState {
 
@@ -35,7 +34,7 @@ public class LoadingState extends GameState {
 
 		// calculate text coordinates
 		this.loadingText = "LOADING";
-		this.loadingTextPosition = GameStateMethods.calculateCenteredTextPositon(MainGame.fontUpperCaseBig, loadingText,
+		this.loadingTextPosition = GameStateManager.calculateCenteredTextPosition(MainGame.fontUpperCaseBig, loadingText,
 				MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
 
 		// do not instantly go to the game but draw one frame

@@ -10,7 +10,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
-import com.mygdx.game.gamestate.GameStateMethods;
 import com.mygdx.game.listener.controller.ControllerHelperMenu;
 import com.mygdx.game.listener.controller.ControllerMenuCallbackInterface;
 import com.mygdx.game.listener.controller.ControllerWiki;
@@ -43,7 +42,7 @@ public class CreditState extends GameState implements ControllerMenuCallbackInte
 				"MUSIC BY SASCHA CZEPPEL" };
 
 		// calculate the text positions so that every line is centered
-		textContentPosition = GameStateMethods.calculateCenteredMultiLineTextPositions(MainGame.fontUpperCaseBig,
+		textContentPosition = GameStateManager.calculateCenteredMultiLineTextPositions(MainGame.fontUpperCaseBig,
 				textContent, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
 
 		// add controller listener
@@ -61,7 +60,7 @@ public class CreditState extends GameState implements ControllerMenuCallbackInte
 
 	@Override
 	protected void handleInput() {
-		GameStateMethods.toggleFullScreen(true);
+		GameStateManager.toggleFullScreen(true);
 
 		// on touch or escape or back go back to the menu
 		if (Gdx.input.justTouched() || (Gdx.input.isKeyJustPressed(Keys.ESCAPE) || Gdx.input.isCatchBackKey()))
@@ -110,7 +109,7 @@ public class CreditState extends GameState implements ControllerMenuCallbackInte
 			goBack();
 		// toggle full screen
 		if (buttonId == ControllerWiki.BUTTON_START)
-			GameStateMethods.toggleFullScreen();
+			GameStateManager.toggleFullScreen();
 	}
 /*
 	@Override

@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.MainGame;
-import com.mygdx.game.gamestate.GameStateMethods;
+import com.mygdx.game.gamestate.GameStateManager;
 
 public class HighscoreCharacterButton {
 
@@ -19,7 +19,8 @@ public class HighscoreCharacterButton {
 	public HighscoreCharacterButton(final char content, final int width) {
 		this.content = content;
 		MainGame.fontBig.getData().setScale(SCALE);
-		this.position = GameStateMethods.calculateCenteredTextPositon(MainGame.fontBig, "" + this.content, width,
+		this.position = GameStateManager
+				.calculateCenteredTextPosition(MainGame.fontBig, "" + this.content, width,
 				MainGame.GAME_HEIGHT);
 
 		this.x1 = this.position.x + 20f;
