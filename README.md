@@ -76,6 +76,71 @@ export_html: build_html
 
 You can either just run the command `make` in the directory to export a desktop and HTML version into a new `bin` directory or run `make TARGET` to only run a specific command (like for example `make clean` to clean all build files or `make export_desktop` to only export a desktop executable).
 
+**Infos to changes that were custom made:**
+
+- The whole project was tried to be run with the latest gradle and JAVA versions but with gradle 7+ onwards there were problems which is why the latest previous version of gradle is used and with JAVA versions above 8 there were problems too (the html sub project) which is why all mentions in `build.gradle` files were updated from `1_7` to only `1_8`
+- To get a release `.apk` file you need to update the `android.buildTypes` section in [`android/build.gradle`](td-racing-remake/android/build.gradle) to list a debug and release configuration where the release configuration has an additional `signingConfig` entry:
+
+  ```gradle
+    buildTypes {
+        debug {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+  ```
+  
+  Then you can add an `android.signingConfigs` section in which you either manually enter all the paths (not recommended) or replace them with system environment variables so that you can locally define the paths and keep them a secret which also means multiple configurations can exist on multiple devices without any code changes:
+
+  ```gradle
+    signingConfigs {
+        release {
+            storeFile file("$System.env.KEY_STORE_PATH")
+            storePassword = "$System.env.KEY_STORE_PASSWORD"
+            keyAlias = "$System.env.KEY_ALIAS"
+            keyPassword = "$System.env.KEY_ALIAS_PASSWORD"
+        }
+    }
+  ```
+  
+  You can now for example have a shell script somewhere with these environment variables (or save them as secret on your CI/CD platform) and just source (`source keyinfo.sh && ./gradlew android:assembleRelease`) this script before creating the android file:
+  
+  ```sh
+  export KEY_STORE_PATH="/your/key/store/path.jks"
+  export KEY_STORE_PASSWORD="YourKeyStorePassword"
+  export KEY_ALIAS="YourKeyName"
+  export KEY_ALIAS_PASSWORD="YourKeyPassword"
+  ```
+  
+  Here for example 2 new targets for the `Makefile` to easily automize this process:
+  
+  ```Makefile
+  build_android:
+	# I recommend saving the following necessary variables in a shell file as
+	# environment variables and the sourcing this file before executing this target
+	# [Because of the singing step this is excluded from the default make call]
+	@echo "----------------------------------------------------------------------------"
+	@echo "You need to set the following environment variables to sign the APK:"
+	@echo "KEY_STORE_PATH=$(KEY_STORE_PATH)"
+	@echo "KEY_STORE_PASSWORD=$(KEY_STORE_PASSWORD)"
+	@echo "KEY_ALIAS=$(KEY_ALIAS)"
+	@echo "KEY_ALIAS_PASSWORD=$(KEY_ALIAS_PASSWORD)"
+	@echo "----------------------------------------------------------------------------"
+	# Run the gradle command to build a signed executable (APK file)
+	./gradlew android:assembleRelease
+
+  build_android_debug:
+	# Run the gradle command to build a debug executable (APK file)
+	./gradlew android:assembleDebug
+  ```
+  
+- To create a custom Android Icon you open Android Studio in the `Android` perspective and make a right click on the `android/res` directory, then click `New`, `Image Asset` and create one - after that it could be that you need to edit the [`android/manifest/AndroidManifest.xml`](td-racing-remake/android/AndroidManifest.xml) file to update the line `android:icon="@drawable/ic_launcher"` with `@mipmap` (The name of the app can be changed by updating the [`android/values/strings.xml`](td-racing-remake/android/res/values/strings.xml) file)
+  
 ### Run the exported files
 
 **Linux:**
