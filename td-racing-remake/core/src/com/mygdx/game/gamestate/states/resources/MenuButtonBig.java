@@ -1,18 +1,18 @@
 package com.mygdx.game.gamestate.states.resources;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.mygdx.game.MainGame;
 
 public class MenuButtonBig extends MenuButton {
 
-	public static Texture textureActive;
-	public static Texture textureNotActive;
-
-	public MenuButtonBig(int id, float xPosition, float yPosition, String content, boolean activated) {
-		super(id, xPosition, yPosition, content, textureActive, textureNotActive, 1, activated);
+	public MenuButtonBig(String id, String text, Texture textureDefault, Texture textureSelected, float xPosition, float yPosition, boolean activated) {
+		super(id, text, new BitmapFont(Gdx.files.internal(MainGame.getGameFontFilePath("cornerstone_big"))), 1, textureDefault, textureSelected, xPosition, yPosition, activated);
 	}
 
-	public MenuButtonBig(int id, float xPosition, float yPosition, String content) {
-		super(id, xPosition, yPosition, content, textureActive, textureNotActive, 1);
+	public MenuButtonBig(String id, String text, Texture textureDefault, Texture textureSelected, float xPosition, float yPosition) {
+		super(id, text, new BitmapFont(Gdx.files.internal(MainGame.getGameFontFilePath("cornerstone_big"))), 1, textureDefault, textureSelected, xPosition, yPosition);
 	}
 
 	@Override

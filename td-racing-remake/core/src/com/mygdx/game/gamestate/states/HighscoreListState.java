@@ -31,7 +31,7 @@ public class HighscoreListState extends GameState implements ControllerMenuCallb
 		super(gameStateManager, STATE_NAME);
 
 		// load static texture for high score entry
-		HighscoreButton.texture = new Texture(Gdx.files.internal("buttons/button_highscore.png"));
+		HighscoreButton.texture = new Texture(Gdx.files.internal("button/button_highscore.png"));
 
 		// set camera to 1280x720
 		camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);

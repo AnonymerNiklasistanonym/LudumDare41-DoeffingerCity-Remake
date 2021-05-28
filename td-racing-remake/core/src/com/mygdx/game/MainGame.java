@@ -3,7 +3,9 @@ package com.mygdx.game;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -36,6 +38,21 @@ public class MainGame implements ApplicationListener {
    * Indicator if release or development version of the game
    */
   public static final boolean DEVELOPER_MODE = true;
+
+  /**
+   * The game state manager that manages states, input handling, rendering
+   */
+  private GameStateManager gameStateManager;
+  /**
+   * A batch/collection of draw calls for rendering with OpenGL
+   */
+  private SpriteBatch spriteBatch;
+  /**
+   * Loads and stores assets like textures, bitmap fonts, sounds, music, ...
+   */
+  private AssetManager assetManager;
+
+  // Remove fonts later when asset manager works begin
   /**
    * Font "cornerstone_70"
    */
@@ -56,15 +73,7 @@ public class MainGame implements ApplicationListener {
    * Font "cornerstone_upper_case_big"
    */
   public static BitmapFont fontUpperCaseBig;
-
-  /**
-   * The game state manager that manages states, input handling, rendering
-   */
-  private GameStateManager gameStateManager;
-  /**
-   * A batch/collection of draw calls for rendering with OpenGL
-   */
-  private SpriteBatch spriteBatch;
+  // Remove fonts later when asset manager works end
 
   /**
    * Get the filepath of a game icon given its size
@@ -127,7 +136,13 @@ public class MainGame implements ApplicationListener {
       Gdx.app.setLogLevel(Application.LOG_ERROR);
     }
 
-    // Load fonts
+    // Create sprite batch
+    Gdx.app.log("main:create", getCurrentTimeStampLogString() + "create sprite batch");
+    spriteBatch = new SpriteBatch();
+    // Create asset manager
+    assetManager = new AssetManager();
+
+    // Load fonts (remove when asset manager works)
     Gdx.app.log("main:create", getCurrentTimeStampLogString() + "load fonts");
     font = new BitmapFont(Gdx.files.internal(getGameFontFilePath("cornerstone")));
     font.setUseIntegerPositions(false);
@@ -141,12 +156,9 @@ public class MainGame implements ApplicationListener {
         Gdx.files.internal(getGameFontFilePath("cornerstone_upper_case_big")));
     fontUpperCaseBig.setUseIntegerPositions(false);
 
-    // Create sprite batch
-    Gdx.app.log("main:create", getCurrentTimeStampLogString() + "create sprite batch");
-    spriteBatch = new SpriteBatch();
     // Create game state manager
     Gdx.app.log("main:create", getCurrentTimeStampLogString() + "create game state manager");
-    gameStateManager = new GameStateManager();
+    gameStateManager = new GameStateManager(assetManager);
 
     // Switch to the menu state
     Gdx.app.log("main:create", getCurrentTimeStampLogString() + "switch to menu state");
@@ -155,16 +167,13 @@ public class MainGame implements ApplicationListener {
 
   @Override
   public void dispose() {
-    // Dispose all loaded fonts
-    BitmapFont[] fonts = new BitmapFont[]{font, font70, fontBig, fontUpperCaseBig};
-    for (BitmapFont x : fonts) {
-      if (x != null) {
-        x.dispose();
-      }
-    }
     // Dispose sprite batch
     if (spriteBatch != null) {
       spriteBatch.dispose();
+    }
+    // Dispose loaded assets
+    if (assetManager != null) {
+      assetManager.dispose();
     }
   }
 

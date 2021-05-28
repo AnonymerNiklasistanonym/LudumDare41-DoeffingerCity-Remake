@@ -13,7 +13,6 @@ import com.mygdx.game.MainGame;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
 import com.mygdx.game.gamestate.states.resources.MenuButton;
-import com.mygdx.game.gamestate.states.resources.MenuButtonBig;
 import com.mygdx.game.gamestate.states.resources.MenuButtonSmall;
 import com.mygdx.game.listener.controller.ControllerHelperMenu;
 import com.mygdx.game.listener.controller.ControllerMenuCallbackInterface;
@@ -25,10 +24,10 @@ public class GameOverState extends GameState implements ControllerMenuCallbackIn
 
 	private final Texture backgroundGameOver;
 
-	private final static int PLAY_AGAIN_ID = 0;
-	private final static int PLAY_LEVEL_AGAIN_ID = 1;
-	private final static int HIGHSCORE_ID = 2;
-	private final static int ABOUT_ID = 3;
+	private final static String PLAY_AGAIN_ID = "PLAY_AGAIN_ID";
+	private final static String PLAY_LEVEL_AGAIN_ID = "PLAY_LEVEL_AGAIN_ID";
+	private final static String HIGHSCORE_ID = "HIGHSCORE_ID";
+	private final static String ABOUT_ID = "ABOUT_ID";
 
 	private static final String STATE_NAME = "Game Over";
 
@@ -57,11 +56,15 @@ public class GameOverState extends GameState implements ControllerMenuCallbackIn
 		camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
 
 		// load button textures
-		MenuButtonBig.textureActive = new Texture(Gdx.files.internal("buttons/button_menu_active.png"));
-		MenuButtonBig.textureNotActive = new Texture(Gdx.files.internal("buttons/button_menu_not_active.png"));
-		MenuButtonSmall.textureActive = new Texture(Gdx.files.internal("buttons/button_menu_active_small.png"));
-		MenuButtonSmall.textureNotActive = new Texture(Gdx.files.internal("buttons/button_menu_not_active_small.png"));
-		backgroundGameOver = new Texture(Gdx.files.internal("background/background_game_over.png"));
+		Texture textureMenuButtonBigSelected = new Texture(
+				Gdx.files.internal(MainGame.getGameButtonFilePath("menu_active")));
+		Texture textureMenuButtonBigDefault = new Texture(
+				Gdx.files.internal(MainGame.getGameButtonFilePath("menu_not_active")));
+		Texture textureMenuButtonSmallSelected = new Texture(
+				Gdx.files.internal(MainGame.getGameButtonFilePath("menu_active_small")));
+		Texture textureMenuButtonSmallDefault = new Texture(
+				Gdx.files.internal(MainGame.getGameButtonFilePath("menu_not_active_small")));
+		backgroundGameOver = new Texture(Gdx.files.internal(MainGame.getGameBackgroundFilePath("game_over")));
 
 		touchPos = new Vector3();
 
@@ -70,16 +73,16 @@ public class GameOverState extends GameState implements ControllerMenuCallbackIn
 		// calculate text coordinates
 		this.loadingText = "GAME OVER";
 		this.loadingTextPosition = GameStateManager.calculateCenteredTextPosition(MainGame.fontUpperCaseBig, loadingText,
-				MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT / 5 * 8);
+				MainGame.GAME_WIDTH, (float) MainGame.GAME_HEIGHT / 5 * 8);
 
 		menuButtons = new MenuButton[] {
-				new MenuButtonSmall(PLAY_AGAIN_ID, MainGame.GAME_WIDTH / 4, MainGame.GAME_HEIGHT / 6 * 3, "RESTART",
+				new MenuButtonSmall(PLAY_AGAIN_ID, "RESTART", textureMenuButtonSmallDefault,textureMenuButtonSmallSelected, (float) MainGame.GAME_WIDTH / 4, (float) MainGame.GAME_HEIGHT / 6 * 3,
 						true),
-				new MenuButtonSmall(PLAY_LEVEL_AGAIN_ID, MainGame.GAME_WIDTH - MainGame.GAME_WIDTH / 4,
-						MainGame.GAME_HEIGHT / 6 * 3, "...LEVEL"),
-				new MenuButtonSmall(HIGHSCORE_ID, MainGame.GAME_WIDTH / 4, MainGame.GAME_HEIGHT / 6 * 1, "HIGHSCORES"),
-				new MenuButtonSmall(ABOUT_ID, MainGame.GAME_WIDTH - MainGame.GAME_WIDTH / 4,
-						MainGame.GAME_HEIGHT / 6 * 1, "ABOUT") };
+				new MenuButtonSmall(PLAY_LEVEL_AGAIN_ID, "...LEVEL", textureMenuButtonSmallDefault,textureMenuButtonSmallSelected, MainGame.GAME_WIDTH - (float) MainGame.GAME_WIDTH / 4,
+						(float) MainGame.GAME_HEIGHT / 6 * 3),
+				new MenuButtonSmall(HIGHSCORE_ID, "HIGHSCORES", textureMenuButtonSmallDefault,textureMenuButtonSmallSelected, (float) MainGame.GAME_WIDTH / 4, (float) MainGame.GAME_HEIGHT / 6 * 1),
+				new MenuButtonSmall(ABOUT_ID, "ABOUT", textureMenuButtonSmallDefault,textureMenuButtonSmallSelected, MainGame.GAME_WIDTH - (float) MainGame.GAME_WIDTH / 4,
+						(float) MainGame.GAME_HEIGHT / 6 * 1) };
 
 		// controller setup
 		controllerHelperMenu = new ControllerHelperMenu(this);
@@ -102,7 +105,7 @@ public class GameOverState extends GameState implements ControllerMenuCallbackIn
 		}
 		if (oneIsSelected) {
 			for (final MenuButton menuButton : menuButtons)
-				menuButton.setActive(menuButton.contains(touchPos));
+				menuButton.setSelected(menuButton.contains(touchPos));
 		}
 
 		// If a button is touched do something or Space or Enter is pressed execute the
@@ -110,7 +113,7 @@ public class GameOverState extends GameState implements ControllerMenuCallbackIn
 		if (Gdx.input.justTouched()
 				|| (Gdx.input.isKeyJustPressed(Keys.ENTER) || Gdx.input.isKeyJustPressed(Keys.SPACE))) {
 			for (final MenuButton menuButton : menuButtons) {
-				if (menuButton.isActive()) {
+				if (menuButton.isSelected()) {
 					switch (menuButton.getId()) {
 					case PLAY_AGAIN_ID:
 						gameStateManager.setGameState(new LoadingState(gameStateManager, 1));
@@ -156,15 +159,11 @@ public class GameOverState extends GameState implements ControllerMenuCallbackIn
 	public void dispose() {
 		Controllers.removeListener(controllerHelperMenu);
 		backgroundGameOver.dispose();
-		MenuButtonBig.textureActive.dispose();
-		MenuButtonBig.textureNotActive.dispose();
-		MenuButtonSmall.textureActive.dispose();
-		MenuButtonSmall.textureNotActive.dispose();
 	}
 
 	private void openSelectedMenuButton() {
 		for (final MenuButton menuButton : menuButtons) {
-			if (menuButton.isActive()) {
+			if (menuButton.isSelected()) {
 				switch (menuButton.getId()) {
 				case PLAY_AGAIN_ID:
 					gameStateManager.setGameState(new LoadingState(gameStateManager, this.level));
@@ -199,12 +198,12 @@ public class GameOverState extends GameState implements ControllerMenuCallbackIn
 
 	private void selectNextButton(boolean below) {
 		for (int i = 0; i < menuButtons.length; i++) {
-			if (menuButtons[i].isActive()) {
-				menuButtons[i].setActive(false);
+			if (menuButtons[i].isSelected()) {
+				menuButtons[i].setSelected(false);
 				if (below)
-					menuButtons[(i + 1) % menuButtons.length].setActive(true);
+					menuButtons[(i + 1) % menuButtons.length].setSelected(true);
 				else
-					menuButtons[(i - 1 + menuButtons.length) % menuButtons.length].setActive(true);
+					menuButtons[(i - 1 + menuButtons.length) % menuButtons.length].setSelected(true);
 				return;
 			}
 		}

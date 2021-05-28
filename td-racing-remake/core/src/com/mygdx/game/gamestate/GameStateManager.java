@@ -2,6 +2,7 @@ package com.mygdx.game.gamestate;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -25,14 +26,28 @@ public class GameStateManager {
    * Stack of GameStates
    */
   private final Stack<GameState> gameStateStack;
+  /**
+   * Loads and stores assets like textures, bitmap fonts, sounds, music, ...
+   */
+  private final AssetManager assetManager;
 
   /**
    * Constructor that creates a new GameState stack
    */
-  public GameStateManager() {
+  public GameStateManager(AssetManager assetManager) {
     Gdx.app.log("game_state_manager:constructor", MainGame.getCurrentTimeStampLogString());
     this.gameStateStack = new Stack<>();
+    this.assetManager = assetManager;
   }
+
+  /**
+   * Get global asset manager
+   */
+  public AssetManager getAssetManager() {
+    Gdx.app.log("game_state_manager:getAssetManager", MainGame.getCurrentTimeStampLogString());
+    return this.assetManager;
+  }
+
 
   /**
    * Toggle full screen
