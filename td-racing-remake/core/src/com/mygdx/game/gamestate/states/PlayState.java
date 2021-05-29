@@ -58,10 +58,14 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	private final static String STATE_NAME = "Play";
 
+	// TODO Make that and the physics implementation variable from this value so that the fps can
+	// TODO be set to other values like for example 240
+	public static int foregroundFps = 60;
+
 	// Identify collision entities
 	public final static short PLAYER_BOX = 0x1; // 0001
 	public final static short ENEMY_BOX = 0x1 << 1; // 0010 or 0x2 in hex
-	public final static float TIME_STEP = 1 / 60f; // time for physics step
+	public final static float TIME_STEP = (float) 1 / foregroundFps; // time for physics step
 	public final static float PIXEL_TO_METER = 0.05f;
 	public final static float METER_TO_PIXEL = 20f;
 
@@ -97,6 +101,8 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	public PlayState(final GameStateManager gameStateManager, final int levelNumber) {
 		super(gameStateManager, STATE_NAME);
+
+		Gdx.graphics.setForegroundFPS(foregroundFps);
 
 		// scale used font correctly
 		MainGame.font70.getData().setScale(0.10f);
