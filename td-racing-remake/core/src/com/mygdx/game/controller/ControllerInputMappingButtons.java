@@ -1,5 +1,8 @@
 package com.mygdx.game.controller;
 
+/**
+ * A set of generic controller buttons onto which all controllers buttons are being mapped
+ */
 public enum ControllerInputMappingButtons {
   BUTTON_X,
   BUTTON_Y,

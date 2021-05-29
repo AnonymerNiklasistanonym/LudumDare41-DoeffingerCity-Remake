@@ -1,7 +1,5 @@
 package com.mygdx.game.controller;
 
-import com.badlogic.gdx.math.Vector3;
-
 /**
  * Callback interface for controller inputs in the menu state
  */
@@ -40,7 +38,7 @@ public interface IControllerCallbackMenuState {
   /**
    * Exit the application because a back button was pressed
    */
-  void controllerCallbackClickExitButton();
+  void controllerCallbackClickBackButton();
 
   /**
    * Toggle full screen
