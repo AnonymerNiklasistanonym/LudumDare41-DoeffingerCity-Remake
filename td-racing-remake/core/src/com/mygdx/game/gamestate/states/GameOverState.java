@@ -2,10 +2,12 @@ package com.mygdx.game.gamestate.states;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
 //import com.badlogic.gdx.controllers.PovDirection;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -75,13 +77,19 @@ public class GameOverState extends GameState implements ControllerMenuCallbackIn
 		this.loadingTextPosition = GameStateManager.calculateCenteredTextPosition(MainGame.fontUpperCaseBig, loadingText,
 				MainGame.GAME_WIDTH, (float) MainGame.GAME_HEIGHT / 5 * 8);
 
+		AssetManager assetManager = gameStateManager.getAssetManager();
+		assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_FONT, BitmapFont.class);
+		assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_DEFAULT, Texture.class);
+		assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED, Texture.class);
+		assetManager.finishLoading();
+
 		menuButtons = new MenuButton[] {
-				new MenuButtonSmall(PLAY_AGAIN_ID, "RESTART", textureMenuButtonSmallDefault,textureMenuButtonSmallSelected, (float) MainGame.GAME_WIDTH / 4, (float) MainGame.GAME_HEIGHT / 6 * 3,
+				new MenuButtonSmall(PLAY_AGAIN_ID, "RESTART", assetManager, (float) MainGame.GAME_WIDTH / 4, (float) MainGame.GAME_HEIGHT / 6 * 3,
 						true),
-				new MenuButtonSmall(PLAY_LEVEL_AGAIN_ID, "...LEVEL", textureMenuButtonSmallDefault,textureMenuButtonSmallSelected, MainGame.GAME_WIDTH - (float) MainGame.GAME_WIDTH / 4,
+				new MenuButtonSmall(PLAY_LEVEL_AGAIN_ID, "...LEVEL", assetManager, MainGame.GAME_WIDTH - (float) MainGame.GAME_WIDTH / 4,
 						(float) MainGame.GAME_HEIGHT / 6 * 3),
-				new MenuButtonSmall(HIGHSCORE_ID, "HIGHSCORES", textureMenuButtonSmallDefault,textureMenuButtonSmallSelected, (float) MainGame.GAME_WIDTH / 4, (float) MainGame.GAME_HEIGHT / 6 * 1),
-				new MenuButtonSmall(ABOUT_ID, "ABOUT", textureMenuButtonSmallDefault,textureMenuButtonSmallSelected, MainGame.GAME_WIDTH - (float) MainGame.GAME_WIDTH / 4,
+				new MenuButtonSmall(HIGHSCORE_ID, "HIGHSCORES", assetManager, (float) MainGame.GAME_WIDTH / 4, (float) MainGame.GAME_HEIGHT / 6 * 1),
+				new MenuButtonSmall(ABOUT_ID, "ABOUT", assetManager, MainGame.GAME_WIDTH - (float) MainGame.GAME_WIDTH / 4,
 						(float) MainGame.GAME_HEIGHT / 6 * 1) };
 
 		// controller setup

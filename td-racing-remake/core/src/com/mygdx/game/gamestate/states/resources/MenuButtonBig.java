@@ -1,23 +1,34 @@
 package com.mygdx.game.gamestate.states.resources;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.assets.AssetManager;
 import com.mygdx.game.MainGame;
 
 public class MenuButtonBig extends MenuButton {
 
-	public MenuButtonBig(String id, String text, Texture textureDefault, Texture textureSelected, float xPosition, float yPosition, boolean activated) {
-		super(id, text, new BitmapFont(Gdx.files.internal(MainGame.getGameFontFilePath("cornerstone_big"))), 1, textureDefault, textureSelected, xPosition, yPosition, activated);
-	}
+  public static final String ASSET_MANAGER_ID_FONT = MainGame
+      .getGameFontFilePath("cornerstone_big");
+  public static final String ASSET_MANAGER_ID_TEXTURE_DEFAULT = MainGame
+      .getGameButtonFilePath("menu_not_active");
+  public static final String ASSET_MANAGER_ID_TEXTURE_SELECTED = MainGame
+      .getGameButtonFilePath("menu_active");
 
-	public MenuButtonBig(String id, String text, Texture textureDefault, Texture textureSelected, float xPosition, float yPosition) {
-		super(id, text, new BitmapFont(Gdx.files.internal(MainGame.getGameFontFilePath("cornerstone_big"))), 1, textureDefault, textureSelected, xPosition, yPosition);
-	}
+  private static final float fontScale = 1;
 
-	@Override
-	public void dispose() {
-		super.disposeMedia();
-	}
+  public MenuButtonBig(final String id, final String text, final AssetManager assetManager,
+      final float xPosition, final float yPosition, final boolean activated) {
+    super(id, text, assetManager, ASSET_MANAGER_ID_FONT, fontScale,
+        ASSET_MANAGER_ID_TEXTURE_DEFAULT, ASSET_MANAGER_ID_TEXTURE_SELECTED, xPosition, yPosition,
+        activated);
+  }
+
+  public MenuButtonBig(final String id, final String text, final AssetManager assetManager,
+      final float xPosition, final float yPosition) {
+    this(id, text, assetManager, xPosition, yPosition, false);
+  }
+
+  @Override
+  public void dispose() {
+    super.disposeMedia();
+  }
 
 }

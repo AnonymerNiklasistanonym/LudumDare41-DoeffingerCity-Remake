@@ -1,22 +1,34 @@
 package com.mygdx.game.gamestate.states.resources;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.assets.AssetManager;
 import com.mygdx.game.MainGame;
 
 public class MenuButtonSmall extends MenuButton {
 
-	public MenuButtonSmall(String id, String text, Texture textureDefault, Texture textureSelected, float xPosition, float yPosition, boolean activated) {
-		super(id, text, new BitmapFont(Gdx.files.internal(MainGame.getGameFontFilePath("cornerstone_big"))), 0.8f, textureDefault, textureSelected, xPosition, yPosition, activated);
-	}
+  public static final String ASSET_MANAGER_ID_FONT = MainGame
+      .getGameFontFilePath("cornerstone_big");
+  public static final String ASSET_MANAGER_ID_TEXTURE_DEFAULT = MainGame
+      .getGameButtonFilePath("menu_not_active_small");
+  public static final String ASSET_MANAGER_ID_TEXTURE_SELECTED = MainGame
+      .getGameButtonFilePath("menu_active_small");
 
-	public MenuButtonSmall(String id, String text, Texture textureDefault, Texture textureSelected, float xPosition, float yPosition) {
-		super(id, text, new BitmapFont(Gdx.files.internal(MainGame.getGameFontFilePath("cornerstone_big"))), 0.8f, textureDefault, textureSelected, xPosition, yPosition);
-	}
+  private static final float fontScale = 0.8f;
 
-	@Override
-	public void dispose() {
-		super.disposeMedia();
-	}
+  public MenuButtonSmall(final String id, final String text, final AssetManager assetManager,
+      final float xPosition, final float yPosition, final boolean activated) {
+    super(id, text, assetManager, ASSET_MANAGER_ID_FONT, fontScale,
+        ASSET_MANAGER_ID_TEXTURE_DEFAULT, ASSET_MANAGER_ID_TEXTURE_SELECTED, xPosition, yPosition,
+        activated);
+  }
+
+  public MenuButtonSmall(final String id, final String text, final AssetManager assetManager,
+      final float xPosition, final float yPosition) {
+    this(id, text, assetManager, xPosition, yPosition, false);
+  }
+
+  @Override
+  public void dispose() {
+    super.disposeMedia();
+  }
+
 }

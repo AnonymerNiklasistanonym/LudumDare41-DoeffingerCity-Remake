@@ -6,6 +6,7 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.MainGame;
@@ -42,11 +43,6 @@ public class MenuState extends GameState implements IControllerCallbackMenuState
    */
   private static final String STATE_NAME = "Menu";
   /**
-   * The menu button grid where all buttons are sorted as they are displayed on the screen: `{ {
-   * Button1Row1, Button2Row2 }, { Button1Row2 }, { Button1Row3, Button2Row3 } }`
-   */
-  private MenuButton[][] menuButtons;
-  /**
    * Controller callback class that gets this class in its constructor which implements some
    * callback methods and can then be added as a controller listener which can then call the
    * interface implemented methods in this class on corresponding controller input
@@ -61,6 +57,11 @@ public class MenuState extends GameState implements IControllerCallbackMenuState
    * dispose not needed resource any more after they were unloaded)
    */
   private final AssetManager assetManager;
+  /**
+   * The menu button grid where all buttons are sorted as they are displayed on the screen: `{ {
+   * Button1Row1, Button2Row2 }, { Button1Row2 }, { Button1Row3, Button2Row3 } }`
+   */
+  private MenuButton[][] menuButtons;
   /**
    * Variable for the texture of the stars background
    */
@@ -135,10 +136,12 @@ public class MenuState extends GameState implements IControllerCallbackMenuState
     // Get asset manager from the game state manager
     this.assetManager = gameStateManager.getAssetManager();
     // Load assets that are not necessary to be available just yet
-    assetManager.load(MainGame.getGameButtonFilePath("menu_active"), Texture.class);
-    assetManager.load(MainGame.getGameButtonFilePath("menu_not_active"), Texture.class);
-    assetManager.load(MainGame.getGameButtonFilePath("menu_active_small"), Texture.class);
-    assetManager.load(MainGame.getGameButtonFilePath("menu_not_active_small"), Texture.class);
+    assetManager.load(MenuButtonBig.ASSET_MANAGER_ID_FONT, BitmapFont.class);
+    assetManager.load(MenuButtonBig.ASSET_MANAGER_ID_TEXTURE_DEFAULT, Texture.class);
+    assetManager.load(MenuButtonBig.ASSET_MANAGER_ID_TEXTURE_SELECTED, Texture.class);
+    assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_FONT, BitmapFont.class);
+    assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_DEFAULT, Texture.class);
+    assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED, Texture.class);
     assetManager.load(MainGame.getGameBackgroundFilePath("stars"), Texture.class);
     assetManager.load(MainGame.getGameLogoFilePath("tnt"), Texture.class);
 
@@ -300,29 +303,17 @@ public class MenuState extends GameState implements IControllerCallbackMenuState
         backgroundStars = assetManager.get(MainGame.getGameBackgroundFilePath("stars"));
         logoTnt = assetManager.get(MainGame.getGameLogoFilePath("tnt"));
 
-        // Get loaded assets necessary to create the buttons
-        Texture textureMenuButtonBigSelected = assetManager
-            .get(MainGame.getGameButtonFilePath("menu_active"));
-        Texture textureMenuButtonBigDefault = assetManager
-            .get(MainGame.getGameButtonFilePath("menu_not_active"));
-        Texture textureMenuButtonSmallSelected = assetManager
-            .get(MainGame.getGameButtonFilePath("menu_not_active_small"));
-        Texture textureMenuButtonSmallDefault = assetManager
-            .get(MainGame.getGameButtonFilePath("menu_active_small"));
-
         // Create menu buttons
         menuButtons = new MenuButton[][]{
             {
-                new MenuButtonBig(START_ID, "START", textureMenuButtonBigDefault,
-                    textureMenuButtonBigSelected, (float) MainGame.GAME_WIDTH / 2,
+                new MenuButtonBig(START_ID, "START", assetManager, (float) MainGame.GAME_WIDTH / 2,
                     (float) MainGame.GAME_HEIGHT / 6 * 2.8f, true)
             },
             {
-                new MenuButtonSmall(ABOUT_ID, "ABOUT", textureMenuButtonSmallDefault,
-                    textureMenuButtonSmallSelected, (float) MainGame.GAME_WIDTH / 4,
+                new MenuButtonSmall(ABOUT_ID, "ABOUT", assetManager,
+                    (float) MainGame.GAME_WIDTH / 4,
                     (float) MainGame.GAME_HEIGHT / 6 * 1),
-                new MenuButtonSmall(HIGHSCORE_ID, "HIGHSCORES", textureMenuButtonSmallDefault,
-                    textureMenuButtonSmallSelected,
+                new MenuButtonSmall(HIGHSCORE_ID, "HIGHSCORES", assetManager,
                     (float) MainGame.GAME_WIDTH / 2 + (float) MainGame.GAME_WIDTH / 4,
                     (float) MainGame.GAME_HEIGHT / 6 * 1)
             }
@@ -371,10 +362,12 @@ public class MenuState extends GameState implements IControllerCallbackMenuState
     for (final String loadedAsset : assetManager.getAssetNames()) {
       Gdx.app.debug("menu_state:dispose", "- " + loadedAsset);
     }
-    assetManager.unload(MainGame.getGameButtonFilePath("menu_active"));
-    assetManager.unload(MainGame.getGameButtonFilePath("menu_not_active"));
-    assetManager.unload(MainGame.getGameButtonFilePath("menu_active_small"));
-    assetManager.unload(MainGame.getGameButtonFilePath("menu_not_active_small"));
+    assetManager.unload(MenuButtonBig.ASSET_MANAGER_ID_FONT);
+    assetManager.unload(MenuButtonBig.ASSET_MANAGER_ID_TEXTURE_DEFAULT);
+    assetManager.unload(MenuButtonBig.ASSET_MANAGER_ID_TEXTURE_SELECTED);
+    assetManager.unload(MenuButtonSmall.ASSET_MANAGER_ID_FONT);
+    assetManager.unload(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_DEFAULT);
+    assetManager.unload(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED);
     assetManager.unload(MainGame.getGameBackgroundFilePath("stars"));
     assetManager.unload(MainGame.getGameLogoFilePath("tnt"));
     Gdx.app.debug("menu_state:dispose", "Loaded assets after unloading are:");
@@ -410,10 +403,13 @@ public class MenuState extends GameState implements IControllerCallbackMenuState
    */
   private void openSelectedMenuButton() {
     Gdx.app.debug("menu_state:openSelectedMenuButton", MainGame.getCurrentTimeStampLogString());
-    for (final MenuButton[] menuButtonLine : menuButtons)
-      for (final MenuButton menuButton : menuButtonLine)
-        if (menuButton.isSelected())
+    for (final MenuButton[] menuButtonLine : menuButtons) {
+      for (final MenuButton menuButton : menuButtonLine) {
+        if (menuButton.isSelected()) {
           openMenuButtonById(menuButton.getId());
+        }
+      }
+    }
   }
 
   @Override
