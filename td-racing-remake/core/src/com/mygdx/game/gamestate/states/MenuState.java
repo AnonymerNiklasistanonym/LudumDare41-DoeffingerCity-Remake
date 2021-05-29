@@ -4,10 +4,13 @@ import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.MainGame;
+import com.mygdx.game.controller.ControllerCallbackMenuState;
+import com.mygdx.game.controller.IControllerCallbackMenuState;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
 import com.mygdx.game.gamestate.states.resources.MenuButton;
@@ -15,11 +18,8 @@ import com.mygdx.game.gamestate.states.resources.MenuButtonBig;
 import com.mygdx.game.gamestate.states.resources.MenuButtonSmall;
 import com.mygdx.game.helper.HelperMenu;
 import com.mygdx.game.helper.HelperMenuButtonNavigation;
-import com.mygdx.game.helper.HelperUtil;
-import com.mygdx.game.listener.controller.ControllerMenuCallbackInterface;
-import com.mygdx.game.listener.controller.ControllerWiki;
 
-public class MenuState extends GameState implements ControllerMenuCallbackInterface {
+public class MenuState extends GameState implements IControllerCallbackMenuState {
 
   private final static String START_ID = "START_ID";
   private final static String HIGHSCORE_ID = "HIGHSCORE_ID";
@@ -29,8 +29,9 @@ public class MenuState extends GameState implements ControllerMenuCallbackInterf
   private Texture backgroundStars;
   private Texture title;
   private boolean assetsLoaded = false;
+  private boolean paused = false;
   private float assetsLoadedLastProgress = -1;
-  // private final ControllerHelperMenu controllerHelperMenu;
+  private final ControllerCallbackMenuState controllerCallbackMenuState;
   private final Vector3 cursorPosition;
 
   private String lastSelectedButtonId = null;
@@ -39,6 +40,14 @@ public class MenuState extends GameState implements ControllerMenuCallbackInterf
   private float stickTimeHelper;
   private float controllerTimeHelper;
   private final AssetManager assetManager;
+  private boolean controllerDownKeyWasPressed = false;
+  private boolean controllerUpKeyWasPressed = false;
+  private boolean controllerLeftKeyWasPressed = false;
+  private boolean controllerRightKeyWasPressed = false;
+  private boolean controllerSelectKeyWasPressed = false;
+  private boolean controllerStartKeyWasPressed = false;
+  private boolean controllerExitKeyWasPressed = false;
+  private boolean controllerFullScreenToggleKeyPressed = false;
 
   public MenuState(GameStateManager gameStateManager) {
     super(gameStateManager, STATE_NAME);
@@ -86,19 +95,24 @@ public class MenuState extends GameState implements ControllerMenuCallbackInterf
         }
     };
 
-    /*
-    controllerHelperMenu = new ControllerHelperMenu(this);
-    Controllers.addListener(controllerHelperMenu);
-    blockStickInput = false;
-    stickTimeHelper = 0;
-     */
+    // Register controller callback so that controller input can be managed
+    controllerCallbackMenuState = new ControllerCallbackMenuState(this);
+    Controllers.addListener(controllerCallbackMenuState);
   }
 
   @Override
   public void handleInput() {
+    if (paused) {
+      // When the game is paused don't handle anything
+      return;
+    }
+
     if (Gdx.app.getType() == ApplicationType.Desktop) {
-      // Toggle full screen when full screen key is pressed
-      GameStateManager.toggleFullScreen(true);
+      // Toggle full screen when full screen keys are pressed
+      if (controllerFullScreenToggleKeyPressed || Gdx.input.isKeyJustPressed(Keys.F11)) {
+        controllerFullScreenToggleKeyPressed = false;
+        GameStateManager.toggleFullScreen();
+      }
     }
 
     // Update the cursor position
@@ -142,74 +156,45 @@ public class MenuState extends GameState implements ControllerMenuCallbackInterf
 
     // TODO Controller input (select the next button when left right button or pad is pressed)
     if (!buttonCurrentlySelectedByCursor) {
-      // TODO
+      if (controllerDownKeyWasPressed) {
+        controllerDownKeyWasPressed = false;
+        lastSelectedButtonId = HelperMenu
+            .selectNextButton(menuButtons, HelperMenuButtonNavigation.DOWN, lastSelectedButtonId);
+      }
+      if (controllerUpKeyWasPressed) {
+        controllerUpKeyWasPressed = false;
+        lastSelectedButtonId = HelperMenu.selectNextButton(menuButtons, HelperMenuButtonNavigation.UP, lastSelectedButtonId);
+      }
+      if (controllerLeftKeyWasPressed) {
+        controllerLeftKeyWasPressed = false;
+        lastSelectedButtonId = HelperMenu.selectNextButton(menuButtons, HelperMenuButtonNavigation.LEFT, lastSelectedButtonId);
+      }
+      if (controllerRightKeyWasPressed) {
+        controllerRightKeyWasPressed = false;
+        lastSelectedButtonId = HelperMenu.selectNextButton(menuButtons, HelperMenuButtonNavigation.RIGHT, lastSelectedButtonId);
+      }
+    } else {
+      controllerDownKeyWasPressed = false;
+      controllerUpKeyWasPressed = false;
+      controllerLeftKeyWasPressed = false;
+      controllerRightKeyWasPressed = false;
     }
 
 
-    // If a button is touched do something or Space or Enter is pressed execute the
-    // action for the selected button
-    if (Gdx.input.justTouched()
-        || (Gdx.input.isKeyJustPressed(Keys.ENTER) || Gdx.input.isKeyJustPressed(Keys.SPACE))) {
+    // If a button is touched or the space or enter key is currently pressed or a controller select
+    // key is currently pressed execute the action for the selected menu button
+    if ((buttonCurrentlySelectedByCursor && Gdx.input.justTouched()) || Gdx.input
+        .isKeyJustPressed(Keys.ENTER) || Gdx.input.isKeyJustPressed(Keys.SPACE)
+        || controllerSelectKeyWasPressed) {
+      controllerSelectKeyWasPressed = false;
       openSelectedMenuButton();
     }
 
     // if escape or back is pressed quit
-    if (Gdx.input.isCatchBackKey() || Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
+    if (Gdx.input.isCatchKey(Keys.BACK) || Gdx.input.isKeyJustPressed(Keys.ESCAPE) || controllerExitKeyWasPressed) {
+      controllerExitKeyWasPressed = false;
       Gdx.app.exit();
     }
-
-    // TODO Controller input
-  }
-
-  private void selectNextButton(final int key) {
-    if (key == Keys.DOWN) {
-      outerloop:
-      for (int i = 0; i < menuButtons.length; i++) {
-        for (int j = 0; j < menuButtons[i].length; j++) {
-          // If the menu button that is selected was found
-          if (menuButtons[i][j].isSelected()) {
-            // Deselect it
-            menuButtons[i][j].setSelected(false);
-            // And select the button in the row below (or if its the last row the row top above)
-            final int menuButtonRowBelowIndex = HelperUtil
-                .moduloWithPositiveReturnValues(i + 1, menuButtons.length);
-            final int menuButtonIndexInRowBelow = HelperUtil
-                .moduloWithPositiveReturnValues(j, menuButtons[menuButtonRowBelowIndex].length);
-            menuButtons[menuButtonRowBelowIndex][menuButtonIndexInRowBelow].setSelected(true);
-            break outerloop;
-          }
-        }
-      }
-    }
-    if (key == Keys.UP) {
-      outerloop:
-      for (int i = 0; i < menuButtons.length; i++) {
-        for (int j = 0; j < menuButtons[i].length; j++) {
-          // If the menu button that is selected was found
-          if (menuButtons[i][j].isSelected()) {
-            // Deselect it
-            menuButtons[i][j].setSelected(false);
-            // And select the button in the row above (or if its the first row the row down below)
-            final int menuButtonRowAboveIndex = HelperUtil
-                .moduloWithPositiveReturnValues(i - 1, menuButtons.length);
-            final int menuButtonIndexInRowAbove = HelperUtil
-                .moduloWithPositiveReturnValues(j, menuButtons[menuButtonRowAboveIndex].length);
-            menuButtons[menuButtonRowAboveIndex][menuButtonIndexInRowAbove].setSelected(true);
-            break outerloop;
-          }
-        }
-      }
-    }
-    /*
-    if (Gdx.input.isKeyJustPressed(Keys.RIGHT))
-      selectNextButton(Keys.RIGHT);
-    if (Gdx.input.isKeyJustPressed(Keys.UP))
-      selectNextButton(Keys.UP);
-    if (Gdx.input.isKeyJustPressed(Keys.LEFT))
-      selectNextButton(Keys.LEFT);
-    if (Gdx.input.isKeyJustPressed(Keys.TAB))
-      selectNextButton(Keys.TAB);
-     */
   }
 
   @Override
@@ -220,10 +205,14 @@ public class MenuState extends GameState implements ControllerMenuCallbackInterf
 
   @Override
   public void render(final SpriteBatch spriteBatch) {
+    if (paused) {
+      // When the game is paused don't render anything
+      return;
+    }
     if(this.assetManager.update()) {
       if (!assetsLoaded) {
         float progress = this.assetManager.getProgress() * 100;
-        Gdx.app.log("menu_state:render", "assets are loading - progress is at " + progress + "%");
+        Gdx.app.log("menu_state:render", MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at " + progress + "%");
         assetsLoaded = true;
         backgroundStars = assetManager.get(MainGame.getGameBackgroundFilePath("stars"));
         title = assetManager.get(MainGame.getGameLogoFilePath("tnt"));
@@ -246,7 +235,7 @@ public class MenuState extends GameState implements ControllerMenuCallbackInterf
       float progress = this.assetManager.getProgress() * 100;
       if (progress != assetsLoadedLastProgress) {
         assetsLoadedLastProgress = progress;
-        Gdx.app.log("menu_state:render", "assets are loading - progress is at " + progress + "%");
+        Gdx.app.log("menu_state:render", MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at " + progress + "%");
       }
     }
   }
@@ -297,7 +286,7 @@ public class MenuState extends GameState implements ControllerMenuCallbackInterf
       }
     }
   }
-
+  /*
   @Override
   public void controllerCallbackBackPressed() {
     if (controllerTimeHelper < 0.2) {
@@ -321,7 +310,7 @@ public class MenuState extends GameState implements ControllerMenuCallbackInterf
     }
   }
 
-  /*
+
     @Override
     public void controllerCallbackDPadButtonPressed(PovDirection direction) {
       // select next button
@@ -331,7 +320,7 @@ public class MenuState extends GameState implements ControllerMenuCallbackInterf
         selectNextButton(false);
 
     }
-  */
+
   @Override
   public void controllerCallbackStickMoved(final boolean xAxis, final float value) {
     // select next button
@@ -344,16 +333,66 @@ public class MenuState extends GameState implements ControllerMenuCallbackInterf
       blockStickInput = true;
     }
   }
-
+  */
   @Override
   public void pause() {
     // Nothing to do
-
+    paused = true;
+    Gdx.app.debug("menu_state:pause", MainGame.getCurrentTimeStampLogString() + "pause");
   }
 
   @Override
   public void resume() {
     // Nothing to do
+    paused = false;
+    Gdx.app.debug("menu_state:resume", MainGame.getCurrentTimeStampLogString() + "resume");
   }
 
+  @Override
+  public void controllerCallbackSelectLeftMenuButton() {
+    Gdx.app.debug("menu_state:controllerCallbackSelectLeftMenuButton", MainGame.getCurrentTimeStampLogString());
+    controllerLeftKeyWasPressed = true;
+  }
+
+  @Override
+  public void controllerCallbackSelectRightMenuButton() {
+    Gdx.app.debug("menu_state:controllerCallbackSelectRightMenuButton", MainGame.getCurrentTimeStampLogString());
+    controllerRightKeyWasPressed = true;
+  }
+
+  @Override
+  public void controllerCallbackSelectAboveMenuButton() {
+    Gdx.app.debug("menu_state:controllerCallbackSelectAboveMenuButton", MainGame.getCurrentTimeStampLogString());
+    controllerUpKeyWasPressed = true;
+  }
+
+  @Override
+  public void controllerCallbackSelectBelowMenuButton() {
+    Gdx.app.debug("menu_state:controllerCallbackSelectBelowMenuButton", MainGame.getCurrentTimeStampLogString());
+    controllerDownKeyWasPressed = true;
+  }
+
+  @Override
+  public void controllerCallbackClickStartMenuButton() {
+    Gdx.app.debug("menu_state:controllerCallbackClickStartMenuButton", MainGame.getCurrentTimeStampLogString());
+    controllerStartKeyWasPressed = true;
+  }
+
+  @Override
+  public void controllerCallbackClickMenuButton() {
+    Gdx.app.debug("menu_state:controllerCallbackClickMenuButton", MainGame.getCurrentTimeStampLogString());
+    controllerSelectKeyWasPressed = true;
+  }
+
+  @Override
+  public void controllerCallbackClickExitButton() {
+    Gdx.app.debug("menu_state:controllerCallbackClickExitButton", MainGame.getCurrentTimeStampLogString());
+    controllerExitKeyWasPressed = true;
+  }
+
+  @Override
+  public void controllerCallbackToggleFullScreen() {
+    Gdx.app.debug("menu_state:controllerCallbackToggleFullScreen", MainGame.getCurrentTimeStampLogString());
+    controllerFullScreenToggleKeyPressed = true;
+  }
 }

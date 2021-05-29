@@ -6,7 +6,8 @@ import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
-public class ControllerHelper implements ControllerListener {
+public class
+ControllerHelper implements ControllerListener {
 
 	private float rightLeftTrigger;
 	private Vector2 leftPad;
