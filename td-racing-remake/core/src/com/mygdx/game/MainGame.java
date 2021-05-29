@@ -139,11 +139,16 @@ public class MainGame implements ApplicationListener {
 
   @Override
   public void create() {
+    // If in developer mode proved additional logging output, otherwise only errors
     if (DEVELOPER_MODE) {
       Gdx.app.setLogLevel(Application.LOG_DEBUG);
     } else {
       Gdx.app.setLogLevel(Application.LOG_ERROR);
     }
+
+    // Catch the back key on Android devices so that the application does not just close
+    // TODO This crashes the application
+    // Gdx.input.setCatchKey(Input.Keys.BACK, true);
 
     // Create sprite batch
     Gdx.app.log("main:create", getCurrentTimeStampLogString() + "create sprite batch");
