@@ -9,8 +9,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.MainGame;
-import com.mygdx.game.controller.ControllerCallbackMenuState;
-import com.mygdx.game.controller.IControllerCallbackMenuState;
+import com.mygdx.game.controller.menu.ControllerCallbackMenuState;
+import com.mygdx.game.controller.menu.IControllerCallbackMenuState;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
 import com.mygdx.game.gamestate.states.resources.MenuButton;
@@ -45,7 +45,7 @@ public class MenuState extends GameState implements IControllerCallbackMenuState
    * The menu button grid where all buttons are sorted as they are displayed on the screen: `{ {
    * Button1Row1, Button2Row2 }, { Button1Row2 }, { Button1Row3, Button2Row3 } }`
    */
-  private final MenuButton[][] menuButtons;
+  private MenuButton[][] menuButtons;
   /**
    * Controller callback class that gets this class in its constructor which implements some
    * callback methods and can then be added as a controller listener which can then call the
@@ -134,44 +134,13 @@ public class MenuState extends GameState implements IControllerCallbackMenuState
 
     // Get asset manager from the game state manager
     this.assetManager = gameStateManager.getAssetManager();
-    // Load resources that are necessary to create the buttons
+    // Load assets that are not necessary to be available just yet
     assetManager.load(MainGame.getGameButtonFilePath("menu_active"), Texture.class);
     assetManager.load(MainGame.getGameButtonFilePath("menu_not_active"), Texture.class);
     assetManager.load(MainGame.getGameButtonFilePath("menu_active_small"), Texture.class);
     assetManager.load(MainGame.getGameButtonFilePath("menu_not_active_small"), Texture.class);
-    // Wait until the textures necessary to create the buttons are loaded
-    assetManager.finishLoading();
-    // Get loaded assets necessary to create the buttons
-    Texture textureMenuButtonBigSelected = assetManager
-        .get(MainGame.getGameButtonFilePath("menu_active"));
-    Texture textureMenuButtonBigDefault = assetManager
-        .get(MainGame.getGameButtonFilePath("menu_not_active"));
-    Texture textureMenuButtonSmallSelected = assetManager
-        .get(MainGame.getGameButtonFilePath("menu_not_active_small"));
-    Texture textureMenuButtonSmallDefault = assetManager
-        .get(MainGame.getGameButtonFilePath("menu_active_small"));
-
-    // Load other assets that are not necessary to be available just yet
     assetManager.load(MainGame.getGameBackgroundFilePath("stars"), Texture.class);
     assetManager.load(MainGame.getGameLogoFilePath("tnt"), Texture.class);
-
-    // Create menu buttons
-    menuButtons = new MenuButton[][]{
-        {
-            new MenuButtonBig(START_ID, "START", textureMenuButtonBigDefault,
-                textureMenuButtonBigSelected, (float) MainGame.GAME_WIDTH / 2,
-                (float) MainGame.GAME_HEIGHT / 6 * 2.8f, true)
-        },
-        {
-            new MenuButtonSmall(ABOUT_ID, "ABOUT", textureMenuButtonSmallDefault,
-                textureMenuButtonSmallSelected, (float) MainGame.GAME_WIDTH / 4,
-                (float) MainGame.GAME_HEIGHT / 6 * 1),
-            new MenuButtonSmall(HIGHSCORE_ID, "HIGHSCORES", textureMenuButtonSmallDefault,
-                textureMenuButtonSmallSelected,
-                (float) MainGame.GAME_WIDTH / 2 + (float) MainGame.GAME_WIDTH / 4,
-                (float) MainGame.GAME_HEIGHT / 6 * 1)
-        }
-    };
 
     // Register controller callback so that controller input can be managed
     controllerCallbackMenuState = new ControllerCallbackMenuState(this);
@@ -196,96 +165,110 @@ public class MenuState extends GameState implements IControllerCallbackMenuState
     // Update the cursor position
     cursorPosition.set(GameStateManager.getMousePosition(camera));
 
-    // Mouse input (select the button on which the mouse is currently located)
-    boolean buttonCurrentlySelectedByCursor = false;
-    outerloop:
-    for (final MenuButton[] menuButtonLine : menuButtons) {
-      for (final MenuButton menuButton : menuButtonLine) {
-        if (menuButton.contains(cursorPosition)) {
-          buttonCurrentlySelectedByCursor = true;
-          break outerloop;
-        }
-      }
-    }
-    // If a cursor is currently selecting a menu button update the selected menu buttons
-    // else leave the last selected button selected
-    if (buttonCurrentlySelectedByCursor) {
+    // Be sure to only allow navigating the menu buttons if they are initialized
+    if (menuButtons != null) {
+      // Mouse input (select the button on which the mouse is currently located)
+      boolean buttonCurrentlySelectedByCursor = false;
+      outerloop:
       for (final MenuButton[] menuButtonLine : menuButtons) {
         for (final MenuButton menuButton : menuButtonLine) {
-          if (menuButton.isSelected() && !menuButton.contains(cursorPosition)) {
-            lastSelectedMenuButtonId = menuButton.getId();
+          if (menuButton.contains(cursorPosition)) {
+            buttonCurrentlySelectedByCursor = true;
+            break outerloop;
           }
-          menuButton.setSelected(menuButton.contains(cursorPosition));
         }
       }
-    }
+      // If a cursor is currently selecting a menu button update the selected menu buttons
+      // else leave the last selected button selected
+      if (buttonCurrentlySelectedByCursor) {
+        for (final MenuButton[] menuButtonLine : menuButtons) {
+          for (final MenuButton menuButton : menuButtonLine) {
+            if (menuButton.isSelected() && !menuButton.contains(cursorPosition)) {
+              lastSelectedMenuButtonId = menuButton.getId();
+            }
+            menuButton.setSelected(menuButton.contains(cursorPosition));
+          }
+        }
+      }
 
-    // Keyboard input
-    if (!buttonCurrentlySelectedByCursor) {
-      if (Gdx.input.isKeyJustPressed(Keys.DOWN)) {
-        lastSelectedMenuButtonId = HelperMenu
-            .selectNextButton(menuButtons, HelperMenuButtonNavigation.DOWN,
-                lastSelectedMenuButtonId);
+      // Keyboard input
+      if (!buttonCurrentlySelectedByCursor) {
+        if (Gdx.input.isKeyJustPressed(Keys.DOWN)) {
+          lastSelectedMenuButtonId = HelperMenu
+              .selectNextButton(menuButtons, HelperMenuButtonNavigation.DOWN,
+                  lastSelectedMenuButtonId);
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.RIGHT) || Gdx.input.isKeyJustPressed(Keys.TAB)) {
+          lastSelectedMenuButtonId = HelperMenu
+              .selectNextButton(menuButtons, HelperMenuButtonNavigation.RIGHT,
+                  lastSelectedMenuButtonId);
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.UP)) {
+          lastSelectedMenuButtonId = HelperMenu
+              .selectNextButton(menuButtons, HelperMenuButtonNavigation.UP,
+                  lastSelectedMenuButtonId);
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.LEFT)) {
+          lastSelectedMenuButtonId = HelperMenu
+              .selectNextButton(menuButtons, HelperMenuButtonNavigation.LEFT,
+                  lastSelectedMenuButtonId);
+        }
       }
-      if (Gdx.input.isKeyJustPressed(Keys.RIGHT) || Gdx.input.isKeyJustPressed(Keys.TAB)) {
-        lastSelectedMenuButtonId = HelperMenu
-            .selectNextButton(menuButtons, HelperMenuButtonNavigation.RIGHT,
-                lastSelectedMenuButtonId);
-      }
-      if (Gdx.input.isKeyJustPressed(Keys.UP)) {
-        lastSelectedMenuButtonId = HelperMenu
-            .selectNextButton(menuButtons, HelperMenuButtonNavigation.UP, lastSelectedMenuButtonId);
-      }
-      if (Gdx.input.isKeyJustPressed(Keys.LEFT)) {
-        lastSelectedMenuButtonId = HelperMenu
-            .selectNextButton(menuButtons, HelperMenuButtonNavigation.LEFT,
-                lastSelectedMenuButtonId);
-      }
-    }
 
-    // Controller input
-    if (!buttonCurrentlySelectedByCursor) {
-      if (controllerDownKeyWasPressed) {
+      // Controller input
+      if (!buttonCurrentlySelectedByCursor) {
+        if (controllerDownKeyWasPressed) {
+          controllerDownKeyWasPressed = false;
+          lastSelectedMenuButtonId = HelperMenu
+              .selectNextButton(menuButtons, HelperMenuButtonNavigation.DOWN,
+                  lastSelectedMenuButtonId);
+        }
+        if (controllerUpKeyWasPressed) {
+          controllerUpKeyWasPressed = false;
+          lastSelectedMenuButtonId = HelperMenu
+              .selectNextButton(menuButtons, HelperMenuButtonNavigation.UP,
+                  lastSelectedMenuButtonId);
+        }
+        if (controllerLeftKeyWasPressed) {
+          controllerLeftKeyWasPressed = false;
+          lastSelectedMenuButtonId = HelperMenu
+              .selectNextButton(menuButtons, HelperMenuButtonNavigation.LEFT,
+                  lastSelectedMenuButtonId);
+        }
+        if (controllerRightKeyWasPressed) {
+          controllerRightKeyWasPressed = false;
+          lastSelectedMenuButtonId = HelperMenu
+              .selectNextButton(menuButtons, HelperMenuButtonNavigation.RIGHT,
+                  lastSelectedMenuButtonId);
+        }
+      } else {
         controllerDownKeyWasPressed = false;
-        lastSelectedMenuButtonId = HelperMenu
-            .selectNextButton(menuButtons, HelperMenuButtonNavigation.DOWN,
-                lastSelectedMenuButtonId);
-      }
-      if (controllerUpKeyWasPressed) {
         controllerUpKeyWasPressed = false;
-        lastSelectedMenuButtonId = HelperMenu
-            .selectNextButton(menuButtons, HelperMenuButtonNavigation.UP, lastSelectedMenuButtonId);
-      }
-      if (controllerLeftKeyWasPressed) {
         controllerLeftKeyWasPressed = false;
-        lastSelectedMenuButtonId = HelperMenu
-            .selectNextButton(menuButtons, HelperMenuButtonNavigation.LEFT,
-                lastSelectedMenuButtonId);
-      }
-      if (controllerRightKeyWasPressed) {
         controllerRightKeyWasPressed = false;
-        lastSelectedMenuButtonId = HelperMenu
-            .selectNextButton(menuButtons, HelperMenuButtonNavigation.RIGHT,
-                lastSelectedMenuButtonId);
+        controllerStartKeyWasPressed = false;
+        controllerSelectKeyWasPressed = false;
+      }
+      if (controllerStartKeyWasPressed) {
+        controllerStartKeyWasPressed = false;
+        openMenuButtonById(START_ID);
+      }
+
+      // If a button is touched or the space or enter key is currently pressed or a controller select
+      // key is currently pressed execute the action for the selected menu button
+      if ((buttonCurrentlySelectedByCursor && Gdx.input.justTouched()) || Gdx.input
+          .isKeyJustPressed(Keys.ENTER) || Gdx.input.isKeyJustPressed(Keys.SPACE)
+          || controllerSelectKeyWasPressed) {
+        controllerSelectKeyWasPressed = false;
+        openSelectedMenuButton();
       }
     } else {
       controllerDownKeyWasPressed = false;
       controllerUpKeyWasPressed = false;
       controllerLeftKeyWasPressed = false;
       controllerRightKeyWasPressed = false;
-    }
-    if (controllerStartKeyWasPressed) {
       controllerStartKeyWasPressed = false;
-      openMenuButtonById(START_ID);
-    }
-
-    // If a button is touched or the space or enter key is currently pressed or a controller select
-    // key is currently pressed execute the action for the selected menu button
-    if ((buttonCurrentlySelectedByCursor && Gdx.input.justTouched()) || Gdx.input
-        .isKeyJustPressed(Keys.ENTER) || Gdx.input.isKeyJustPressed(Keys.SPACE)
-        || controllerSelectKeyWasPressed) {
       controllerSelectKeyWasPressed = false;
-      openSelectedMenuButton();
     }
 
     // If escape or back is pressed quit
@@ -316,6 +299,34 @@ public class MenuState extends GameState implements IControllerCallbackMenuState
         assetsLoaded = true;
         backgroundStars = assetManager.get(MainGame.getGameBackgroundFilePath("stars"));
         logoTnt = assetManager.get(MainGame.getGameLogoFilePath("tnt"));
+
+        // Get loaded assets necessary to create the buttons
+        Texture textureMenuButtonBigSelected = assetManager
+            .get(MainGame.getGameButtonFilePath("menu_active"));
+        Texture textureMenuButtonBigDefault = assetManager
+            .get(MainGame.getGameButtonFilePath("menu_not_active"));
+        Texture textureMenuButtonSmallSelected = assetManager
+            .get(MainGame.getGameButtonFilePath("menu_not_active_small"));
+        Texture textureMenuButtonSmallDefault = assetManager
+            .get(MainGame.getGameButtonFilePath("menu_active_small"));
+
+        // Create menu buttons
+        menuButtons = new MenuButton[][]{
+            {
+                new MenuButtonBig(START_ID, "START", textureMenuButtonBigDefault,
+                    textureMenuButtonBigSelected, (float) MainGame.GAME_WIDTH / 2,
+                    (float) MainGame.GAME_HEIGHT / 6 * 2.8f, true)
+            },
+            {
+                new MenuButtonSmall(ABOUT_ID, "ABOUT", textureMenuButtonSmallDefault,
+                    textureMenuButtonSmallSelected, (float) MainGame.GAME_WIDTH / 4,
+                    (float) MainGame.GAME_HEIGHT / 6 * 1),
+                new MenuButtonSmall(HIGHSCORE_ID, "HIGHSCORES", textureMenuButtonSmallDefault,
+                    textureMenuButtonSmallSelected,
+                    (float) MainGame.GAME_WIDTH / 2 + (float) MainGame.GAME_WIDTH / 4,
+                    (float) MainGame.GAME_HEIGHT / 6 * 1)
+            }
+        };
       }
       // Render menu
       spriteBatch.setProjectionMatrix(camera.combined);
@@ -370,7 +381,6 @@ public class MenuState extends GameState implements IControllerCallbackMenuState
     for (final String loadedAsset : assetManager.getAssetNames()) {
       Gdx.app.debug("menu_state:dispose", "- " + loadedAsset);
     }
-
   }
 
   /**
@@ -408,16 +418,14 @@ public class MenuState extends GameState implements IControllerCallbackMenuState
 
   @Override
   public void pause() {
-    // Nothing to do
-    paused = true;
     Gdx.app.debug("menu_state:pause", MainGame.getCurrentTimeStampLogString() + "pause");
+    paused = true;
   }
 
   @Override
   public void resume() {
-    // Nothing to do
-    paused = false;
     Gdx.app.debug("menu_state:resume", MainGame.getCurrentTimeStampLogString() + "resume");
+    paused = false;
   }
 
   @Override

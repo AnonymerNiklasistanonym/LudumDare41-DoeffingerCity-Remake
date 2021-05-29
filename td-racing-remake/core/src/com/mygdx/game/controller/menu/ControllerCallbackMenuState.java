@@ -1,9 +1,10 @@
-package com.mygdx.game.controller;
+package com.mygdx.game.controller.menu;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.mygdx.game.MainGame;
+import com.mygdx.game.controller.ControllerInputMapping;
 
 /**
  * Controller listener for the menu (game) state. Any class that implements the interface

@@ -128,6 +128,15 @@ public class MainGame implements ApplicationListener {
     return "(" + timestamp + "000".substring(timestamp.length() - 20) + ") ";
   }
 
+  /**
+   * Get the filepath of a game music given its name
+   *
+   * @param musicName The name of the game music
+   */
+  public static String getGameMusicFilePath(final String musicName) {
+    return "music/music_" + musicName + ".mp3";
+  }
+
   @Override
   public void create() {
     if (DEVELOPER_MODE) {

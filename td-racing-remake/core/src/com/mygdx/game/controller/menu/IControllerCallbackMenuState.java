@@ -1,4 +1,4 @@
-package com.mygdx.game.controller;
+package com.mygdx.game.controller.menu;
 
 /**
  * Callback interface for controller inputs in the menu state
