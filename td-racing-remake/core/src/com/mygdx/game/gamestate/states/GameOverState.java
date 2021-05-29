@@ -15,6 +15,7 @@ import com.mygdx.game.MainGame;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
 import com.mygdx.game.gamestate.states.resources.MenuButton;
+import com.mygdx.game.gamestate.states.resources.MenuButtonBig;
 import com.mygdx.game.gamestate.states.resources.MenuButtonSmall;
 import com.mygdx.game.listener.controller.ControllerHelperMenu;
 import com.mygdx.game.listener.controller.ControllerMenuCallbackInterface;
@@ -37,6 +38,11 @@ public class GameOverState extends GameState implements ControllerMenuCallbackIn
 
 	private String loadingText;
 
+	/**
+	 * The text font
+	 */
+	private final BitmapFont fontText;
+
 	private Vector2 loadingTextPosition;
 
 	private boolean blockStickInput = false;
@@ -46,42 +52,40 @@ public class GameOverState extends GameState implements ControllerMenuCallbackIn
 
 	private final int level;
 
+	/**
+	 * The global asset manager to load and get resources (it uses reference counting to easily
+	 * dispose not needed resource any more after they were unloaded)
+	 */
+	private final AssetManager assetManager;
+
 	public GameOverState(final GameStateManager gameStateManager, final int level) {
 		super(gameStateManager, STATE_NAME);
+
+		this.assetManager = gameStateManager.getAssetManager();
+		this.assetManager.load(MainGame.getGameFontFilePath("cornerstone_upper_case_big"), BitmapFont.class);
+		this.assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_FONT, BitmapFont.class);
+		this.assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_DEFAULT, Texture.class);
+		this.assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED, Texture.class);
+		this.assetManager.load(MainGame.getGameBackgroundFilePath("game_over"), Texture.class);
+		this.assetManager.finishLoading();
 
 		this.level = level;
 
 		// set font scale to the correct size and disable to use integers for scaling
-		MainGame.fontUpperCaseBig.getData().setScale(1);
+		fontText = this.assetManager.get(MainGame.getGameFontFilePath("cornerstone_upper_case_big"));
+		fontText.getData().setScale(1);
 
 		// set camera to a scenery of 1280x720
 		camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
 
-		// load button textures
-		Texture textureMenuButtonBigSelected = new Texture(
-				Gdx.files.internal(MainGame.getGameButtonFilePath("menu_active")));
-		Texture textureMenuButtonBigDefault = new Texture(
-				Gdx.files.internal(MainGame.getGameButtonFilePath("menu_not_active")));
-		Texture textureMenuButtonSmallSelected = new Texture(
-				Gdx.files.internal(MainGame.getGameButtonFilePath("menu_active_small")));
-		Texture textureMenuButtonSmallDefault = new Texture(
-				Gdx.files.internal(MainGame.getGameButtonFilePath("menu_not_active_small")));
-		backgroundGameOver = new Texture(Gdx.files.internal(MainGame.getGameBackgroundFilePath("game_over")));
-
 		touchPos = new Vector3();
-
-		camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
 
 		// calculate text coordinates
 		this.loadingText = "GAME OVER";
-		this.loadingTextPosition = GameStateManager.calculateCenteredTextPosition(MainGame.fontUpperCaseBig, loadingText,
+		this.loadingTextPosition = GameStateManager.calculateCenteredTextPosition(fontText, loadingText,
 				MainGame.GAME_WIDTH, (float) MainGame.GAME_HEIGHT / 5 * 8);
 
-		AssetManager assetManager = gameStateManager.getAssetManager();
-		assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_FONT, BitmapFont.class);
-		assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_DEFAULT, Texture.class);
-		assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED, Texture.class);
-		assetManager.finishLoading();
+		backgroundGameOver = this.assetManager.get(MainGame.getGameBackgroundFilePath("game_over"));
 
 		menuButtons = new MenuButton[] {
 				new MenuButtonSmall(PLAY_AGAIN_ID, "RESTART", assetManager, (float) MainGame.GAME_WIDTH / 4, (float) MainGame.GAME_HEIGHT / 6 * 3,
@@ -159,7 +163,8 @@ public class GameOverState extends GameState implements ControllerMenuCallbackIn
 		spriteBatch.draw(backgroundGameOver, 0, 0);
 		for (final MenuButton menuButton : menuButtons)
 			menuButton.draw(spriteBatch);
-		MainGame.fontUpperCaseBig.draw(spriteBatch, loadingText, loadingTextPosition.x, loadingTextPosition.y);
+		fontText.getData().setScale(1);
+		fontText.draw(spriteBatch, loadingText, loadingTextPosition.x, loadingTextPosition.y);
 		spriteBatch.end();
 	}
 
@@ -167,6 +172,22 @@ public class GameOverState extends GameState implements ControllerMenuCallbackIn
 	public void dispose() {
 		Controllers.removeListener(controllerHelperMenu);
 		backgroundGameOver.dispose();
+		fontText.dispose();
+
+		// Reduce the reference to used resources in this state (when no object is referencing the
+		// resource any more it is automatically disposed by the global asset manager)
+		Gdx.app.debug("menu_state:dispose", "Loaded assets before unloading are:");
+		for (final String loadedAsset : assetManager.getAssetNames()) {
+			Gdx.app.debug("menu_state:dispose", "- " + loadedAsset);
+		}
+		assetManager.unload(MenuButtonSmall.ASSET_MANAGER_ID_FONT);
+		assetManager.unload(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_DEFAULT);
+		assetManager.unload(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED);
+		assetManager.unload(MainGame.getGameBackgroundFilePath("game_over"));
+		Gdx.app.debug("menu_state:dispose", "Loaded assets after unloading are:");
+		for (final String loadedAsset : assetManager.getAssetNames()) {
+			Gdx.app.debug("menu_state:dispose", "- " + loadedAsset);
+		}
 	}
 
 	private void openSelectedMenuButton() {
