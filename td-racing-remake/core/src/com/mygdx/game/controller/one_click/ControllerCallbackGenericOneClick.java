@@ -1,4 +1,4 @@
-package com.mygdx.game.controller.credit;
+package com.mygdx.game.controller.one_click;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.controllers.Controller;
@@ -13,11 +13,12 @@ import com.mygdx.game.controller.ControllerInputMapping;
  * implemented methods of the interface. This class needs to be added as controller listener and
  * removed again on closing of the game state.
  */
-public class ControllerCallbackCreditState implements ControllerListener {
+public class ControllerCallbackGenericOneClick implements ControllerListener {
 
-  private final IControllerCallbackCreditState controllerCallbackClass;
+  private final IControllerCallbackGenericOneClick controllerCallbackClass;
 
-  public ControllerCallbackCreditState(IControllerCallbackCreditState controllerCallbackClass) {
+  public ControllerCallbackGenericOneClick(
+      IControllerCallbackGenericOneClick controllerCallbackClass) {
     Gdx.app.debug("controller_callback_credit_state:constructor",
         MainGame.getCurrentTimeStampLogString());
     this.controllerCallbackClass = controllerCallbackClass;

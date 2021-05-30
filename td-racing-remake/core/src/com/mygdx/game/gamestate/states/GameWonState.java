@@ -1,145 +1,207 @@
 package com.mygdx.game.gamestate.states;
 
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
-//import com.badlogic.gdx.controllers.PovDirection;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.MainGame;
+import com.mygdx.game.controller.one_click.ControllerCallbackGenericOneClick;
+import com.mygdx.game.controller.one_click.IControllerCallbackGenericOneClick;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
-import com.mygdx.game.listener.controller.ControllerHelperMenu;
-import com.mygdx.game.listener.controller.ControllerMenuCallbackInterface;
-import com.mygdx.game.listener.controller.ControllerWiki;
-import com.mygdx.game.unsorted.PreferencesManager;
 
-public class GameWonState extends GameState implements ControllerMenuCallbackInterface {
+/**
+ * Creates the game over state which renders the a menu and handles keyboard, touch and controller
+ * input
+ */
+public class GameWonState extends GameState implements IControllerCallbackGenericOneClick {
 
-	private static final String STATE_NAME = "Game Won";
+  /**
+   * The game state name for this game state
+   */
+  private static final String STATE_NAME = "GameWon";
+  /**
+   * Controller callback class that gets this class in its constructor which implements some
+   * callback methods and can then be added as a controller listener which can then call the
+   * interface implemented methods in this class on corresponding controller input
+   */
+  private final ControllerCallbackGenericOneClick controllerCallbackGenericOneClick;
+  /**
+   * The global asset manager to load and get resources (it uses reference counting to easily
+   * dispose not needed resource any more after they were unloaded)
+   */
+  private final AssetManager assetManager;
+  /**
+   * Variable tzo keep track of the achieved score
+   */
+  private final int score;
+  /**
+   * Variable for the texture of the game won background
+   */
+  private Texture backgroundGameWon;
+  /**
+   * Variable for the sound victory of the game won background
+   */
+  private Sound soundVictory;
+  /**
+   * Indicator if all assets are already loaded
+   */
+  private boolean assetsLoaded = false;
+  /**
+   * Indicator if the application is currently paused
+   */
+  private boolean paused = false;
+  /**
+   * Progress tracker for asset loading that contains the last progress loading percentage (0-1.0)
+   */
+  private float assetsLoadedLastProgress = -1;
+  /**
+   * Tracker if any controller key was pressed (besides the full screen toggle keys)
+   */
+  private boolean controllerAnyKeyWasPressed = false;
+  /**
+   * Tracker if a controller full screen toggle key was pressed
+   */
+  private boolean controllerFullScreenToggleKeyPressed = false;
 
-	private final Texture backgroundGameWon;
-	private final Sound victorySound;
+  /**
+   * Constructor that creates the game won (state)
+   *
+   * @param gameStateManager The global game state manager
+   */
+  public GameWonState(GameStateManager gameStateManager, final int score) {
+    super(gameStateManager, STATE_NAME);
+    this.score = score;
 
-	private float controllerTimeHelper;
-	private final ControllerListener controllerHelperMenu;
+    // Initialize game camera/canvas
+    camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
 
-	private final PreferencesManager preferencesManager;
+    // Get asset manager from the game state manager
+    assetManager = gameStateManager.getAssetManager();
+    // Load assets that are not necessary to be available just yet
+    assetManager.load(MainGame.getGameBackgroundFilePath("game_won"), Texture.class);
+    assetManager.load(MainGame.getGameSoundFilePath("victory"), Sound.class);
+    // Register controller callback so that controller input can be managed
+    controllerCallbackGenericOneClick = new ControllerCallbackGenericOneClick(this);
+    Controllers.addListener(controllerCallbackGenericOneClick);
+  }
 
-	private final int score;
-	private final int level;
+  @Override
+  public void handleInput() {
+    if (paused || !assetsLoaded) {
+      // When the game is paused or still loading assets don't handle anything
+      return;
+    }
 
-	public GameWonState(final GameStateManager gameStateManager, final int score, final int level) {
-		super(gameStateManager, STATE_NAME);
+    if (Gdx.app.getType() == ApplicationType.Desktop) {
+      // Toggle full screen when full screen keys are pressed
+      if (controllerFullScreenToggleKeyPressed || Gdx.input.isKeyJustPressed(Keys.F11)) {
+        controllerFullScreenToggleKeyPressed = false;
+        GameStateManager.toggleFullScreen();
+      }
+    }
 
-		// save score
-		this.score = score;
-		this.level = level;
+    // If a button is touched or the space or enter key is currently pressed or any controller
+    // key is currently pressed go to the highscore list which then redirects to the credits
+    if (Gdx.input.justTouched() || Gdx.input.isKeyJustPressed(Keys.ENTER) || Gdx.input
+        .isKeyJustPressed(Keys.SPACE) || Gdx.input.isKeyJustPressed(Keys.ESCAPE)
+        || controllerAnyKeyWasPressed || Gdx.input.isCatchKey(Keys.BACK)) {
+      gameStateManager.setGameState(new HighscoreNameState(gameStateManager, score, true));
+    }
+  }
 
-		// set font scale
-		MainGame.fontUpperCaseBig.getData().setScale(1);
+  @Override
+  public void update(final float deltaTime) {
+    // Not necessary to do anything
+  }
 
-		// set camera to a scenery of 1280x720
-		camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
+  @Override
+  public void render(final SpriteBatch spriteBatch) {
+    if (paused) {
+      // When the game is paused don't render anything
+      return;
+    }
+    if (assetManager.update()) {
+      if (!assetsLoaded) {
+        float progress = assetManager.getProgress() * 100;
+        Gdx.app.debug("game_won_state:render",
+            MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
+                + progress + "%");
+        assetsLoaded = true;
+        backgroundGameWon = assetManager.get(MainGame.getGameBackgroundFilePath("game_won"));
+        soundVictory = assetManager.get(MainGame.getGameSoundFilePath("victory"));
+        if (gameStateManager.getPreferencesManager().getSoundEfectsOn()) {
+          soundVictory.play();
+        }
+      }
+      // Render menu
+      spriteBatch.setProjectionMatrix(camera.combined);
+      spriteBatch.begin();
 
-		// load background texture
-		backgroundGameWon = new Texture(Gdx.files.internal("fullscreens/victorycard.png"));
+      spriteBatch.draw(backgroundGameWon, 0, 0);
 
-		// controller setup
-		controllerHelperMenu = new ControllerHelperMenu(this);
-		Controllers.addListener(controllerHelperMenu);
-		controllerTimeHelper = 0;
+      spriteBatch.end();
+    } else {
+      // display loading information
+      float progress = assetManager.getProgress() * 100;
+      if (progress != assetsLoadedLastProgress) {
+        assetsLoadedLastProgress = progress;
+        Gdx.app.debug("game_won_state:render",
+            MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
+                + progress + "%");
+      }
+    }
+  }
 
-		// get preferences manager
-		preferencesManager = new PreferencesManager();
+  @Override
+  public void dispose() {
+    // Remove controller listener
+    Controllers.removeListener(controllerCallbackGenericOneClick);
+    backgroundGameWon.dispose();
+    soundVictory.dispose();
 
-		// play sound
-		victorySound = Gdx.audio.newSound(Gdx.files.internal("sounds/level_victory.wav"));
-		if (new PreferencesManager().getSoundEfectsOn())
-			victorySound.play();
-	}
+    // Reduce the reference to used resources in this state (when no object is referencing the
+    // resource any more it is automatically disposed by the global asset manager)
+    Gdx.app.debug("game_won_state:dispose", "Loaded assets before unloading are:");
+    for (final String loadedAsset : assetManager.getAssetNames()) {
+      Gdx.app.debug("game_won_state:dispose", "- " + loadedAsset);
+    }
+    assetManager.unload(MainGame.getGameBackgroundFilePath("game_won"));
+    assetManager.unload(MainGame.getGameSoundFilePath("victory"));
+    Gdx.app.debug("game_won_state:dispose", "Loaded assets after unloading are:");
+    for (final String loadedAsset : assetManager.getAssetNames()) {
+      Gdx.app.debug("game_won_state:dispose", "- " + loadedAsset);
+    }
+  }
 
-	@Override
-	public void handleInput() {
-		GameStateManager.toggleFullScreen(true);
+  @Override
+  public void pause() {
+    Gdx.app.debug("game_won_state:pause", MainGame.getCurrentTimeStampLogString() + "pause");
+    paused = true;
+  }
 
-		// If a button is touched do something or Space or Enter continue to next state
-		if (Gdx.input.justTouched()
-				|| (Gdx.input.isKeyJustPressed(Keys.ENTER) || Gdx.input.isKeyJustPressed(Keys.SPACE)))
-			goForward();
+  @Override
+  public void resume() {
+    Gdx.app.debug("game_won_state:resume", MainGame.getCurrentTimeStampLogString() + "resume");
+    paused = false;
+  }
 
-		// if escape or back is pressed quit
-		if (Gdx.input.isCatchBackKey() || Gdx.input.isKeyJustPressed(Keys.ESCAPE))
-			goBack();
-	}
 
-	private void goBack() {
-		gameStateManager.setGameState(new MenuState(gameStateManager));
-	}
+  @Override
+  public void controllerCallbackClickAnyButton() {
+    Gdx.app.debug("game_won_state:controllerCallbackClickAnyButton",
+        MainGame.getCurrentTimeStampLogString());
+    controllerAnyKeyWasPressed = true;
+  }
 
-	private void goForward() {
-		if (preferencesManager.scoreIsInTop5(score))
-			gameStateManager.setGameState(new HighscoreNameState(gameStateManager, score, level, true));
-		else
-			gameStateManager.setGameState(new CreditState(gameStateManager));
-	}
-
-	@Override
-	public void update(final float deltaTime) {
-		controllerTimeHelper += deltaTime;
-	}
-
-	@Override
-	public void render(final SpriteBatch spriteBatch) {
-		spriteBatch.setProjectionMatrix(camera.combined);
-		spriteBatch.begin();
-		spriteBatch.draw(backgroundGameWon, 0, 0);
-		spriteBatch.end();
-	}
-
-	@Override
-	public void dispose() {
-		Controllers.removeListener(controllerHelperMenu);
-		backgroundGameWon.dispose();
-		victorySound.dispose();
-	}
-
-	@Override
-	public void controllerCallbackBackPressed() {
-		goBack();
-	}
-
-	@Override
-	public void controllerCallbackButtonPressed(final int buttonId) {
-		if (controllerTimeHelper < 0.2)
-			return;
-		if (buttonId == ControllerWiki.BUTTON_A)
-			goForward();
-		if (buttonId == ControllerWiki.BUTTON_START)
-			GameStateManager.toggleFullScreen();
-	}
-/*
-	@Override
-	public void controllerCallbackDPadButtonPressed(final PovDirection direction) {
-		// Do nothing
-	}
-*/
-	@Override
-	public void controllerCallbackStickMoved(final boolean xAxis, final float value) {
-		// Do nothing
-	}
-
-	@Override
-	public void pause() {
-		// Nothing to do
-
-	}
-
-	@Override
-	public void resume() {
-		// Nothing to do
-	}
-
+  @Override
+  public void controllerCallbackToggleFullScreen() {
+    Gdx.app.debug("game_won_state:controllerCallbackToggleFullScreen",
+        MainGame.getCurrentTimeStampLogString());
+    controllerFullScreenToggleKeyPressed = true;
+  }
 }

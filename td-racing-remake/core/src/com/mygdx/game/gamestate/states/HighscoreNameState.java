@@ -85,6 +85,10 @@ public class HighscoreNameState extends GameState implements ControllerMenuCallb
 		controllerTimeHelper = 0;
 	}
 
+	public HighscoreNameState(GameStateManager gameStateManager, final int score, final boolean goToCreditStage) {
+		this(gameStateManager, score, 0, goToCreditStage);
+	}
+
 	@Override
 	protected void handleInput() {
 		GameStateManager.toggleFullScreen(true);

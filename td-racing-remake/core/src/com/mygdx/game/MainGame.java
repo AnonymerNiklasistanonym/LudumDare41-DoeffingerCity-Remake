@@ -141,6 +141,15 @@ public class MainGame implements ApplicationListener {
     return "music/music_" + musicName + ".mp3";
   }
 
+  /**
+   * Get the filepath of a game sound given its name
+   *
+   * @param soundName The name of the game sound
+   */
+  public static String getGameSoundFilePath(final String soundName) {
+    return "sound/sound_" + soundName + ".wav";
+  }
+
   @Override
   public void create() {
     // If in developer mode proved additional logging output, otherwise only errors

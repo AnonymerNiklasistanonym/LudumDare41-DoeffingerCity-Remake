@@ -141,9 +141,10 @@ public class GameOverState extends GameState implements IControllerCallbackGener
   private boolean controllerFullScreenToggleKeyPressed = false;
 
   /**
-   * Constructor that creates the main menu (state)
+   * Constructor that creates the game over (state)
    *
    * @param gameStateManager The global game state manager
+   * @param level            The current level in the game
    */
   public GameOverState(GameStateManager gameStateManager, int level) {
     super(gameStateManager, STATE_NAME);

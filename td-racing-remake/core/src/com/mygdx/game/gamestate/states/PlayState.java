@@ -160,7 +160,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		splatt = Gdx.audio.newSound(Gdx.files.internal("sounds/splatt.wav"));
 		soundmoney = Gdx.audio.newSound(Gdx.files.internal("sounds/cash.wav"));
 		carSoundStart = Gdx.audio.newSound(Gdx.files.internal("sounds/sound_car_engine_start.mp3"));
-		victorySound = Gdx.audio.newSound(Gdx.files.internal("sounds/level_victory.wav"));
+		victorySound = Gdx.audio.newSound(Gdx.files.internal("sound/sound_victory.wav"));
 		soundDamage = Gdx.audio.newSound(Gdx.files.internal("sounds/trailerdamage.wav"));
 		// Sets this camera to an orthographic projection, centered at (viewportWidth/2,
 		// viewportHeight/2), with the y-axis pointing up or down.
@@ -1091,7 +1091,8 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	 * Game was won
 	 */
 	private void victoryGame() {
-		gameStateManager.setGameState(new GameWonState(gameStateManager, scoreBoard.getScore(), scoreBoard.getLevel()));
+		// TODO Highscore integration with
+		gameStateManager.setGameState(new GameWonState(gameStateManager, scoreBoard.getScore()));
 	}
 
 	/**
