@@ -1,4 +1,4 @@
-package com.mygdx.game.controller.menu;
+package com.mygdx.game.controller.menu_button_grid;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.controllers.Controller;
@@ -13,11 +13,12 @@ import com.mygdx.game.controller.ControllerInputMapping;
  * implemented methods of the interface. This class needs to be added as controller listener and
  * removed again on closing of the game state.
  */
-public class ControllerCallbackMenuState implements ControllerListener {
+public class ControllerCallbackGenericMenuButtonGrid implements ControllerListener {
 
-  private final IControllerCallbackMenuState controllerCallbackClass;
+  private final IControllerCallbackGenericMenuButtonGrid controllerCallbackClass;
 
-  public ControllerCallbackMenuState(IControllerCallbackMenuState controllerCallbackClass) {
+  public ControllerCallbackGenericMenuButtonGrid(
+      IControllerCallbackGenericMenuButtonGrid controllerCallbackClass) {
     Gdx.app.debug("controller_callback_menu_state:constructor",
         MainGame.getCurrentTimeStampLogString());
     this.controllerCallbackClass = controllerCallbackClass;

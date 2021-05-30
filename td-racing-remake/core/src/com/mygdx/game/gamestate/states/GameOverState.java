@@ -1,274 +1,515 @@
 package com.mygdx.game.gamestate.states;
 
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
-//import com.badlogic.gdx.controllers.PovDirection;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.MainGame;
+import com.mygdx.game.controller.menu_button_grid.ControllerCallbackGenericMenuButtonGrid;
+import com.mygdx.game.controller.menu_button_grid.IControllerCallbackGenericMenuButtonGrid;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
 import com.mygdx.game.gamestate.states.resources.MenuButton;
-import com.mygdx.game.gamestate.states.resources.MenuButtonBig;
 import com.mygdx.game.gamestate.states.resources.MenuButtonSmall;
-import com.mygdx.game.listener.controller.ControllerHelperMenu;
-import com.mygdx.game.listener.controller.ControllerMenuCallbackInterface;
-import com.mygdx.game.listener.controller.ControllerWiki;
+import com.mygdx.game.helper.HelperMenu;
+import com.mygdx.game.helper.HelperMenuButtonNavigation;
 
-public class GameOverState extends GameState implements ControllerMenuCallbackInterface {
+/**
+ * Creates the game over state which renders the a menu and handles keyboard, touch and controller
+ * input
+ */
+public class GameOverState extends GameState implements IControllerCallbackGenericMenuButtonGrid {
 
-	private final MenuButton[] menuButtons;
+  /**
+   * The menu button ID for (re)starting the game
+   */
+  private final static String PLAY_AGAIN_ID = "PLAY_AGAIN_ID";
+  /**
+   * The menu button ID for (re)starting the current level of the game
+   */
+  private final static String PLAY_LEVEL_AGAIN_ID = "PLAY_LEVEL_AGAIN_ID";
+  /**
+   * The menu button ID for opening the highscore list page
+   */
+  private final static String HIGHSCORE_ID = "HIGHSCORE_ID";
+  /**
+   * The menu button ID for opening the about page
+   */
+  private final static String ABOUT_ID = "ABOUT_ID";
 
-	private final Texture backgroundGameOver;
+  /**
+   * The game state name for this game state
+   */
+  private static final String STATE_NAME = "GameOver";
+  /**
+   * Controller callback class that gets this class in its constructor which implements some
+   * callback methods and can then be added as a controller listener which can then call the
+   * interface implemented methods in this class on corresponding controller input
+   */
+  private final ControllerCallbackGenericMenuButtonGrid controllerCallbackGenericMenuButtonGrid;
+  /**
+   * The current cursor position
+   */
+  private final Vector3 cursorPosition;
+  /**
+   * The global asset manager to load and get resources (it uses reference counting to easily
+   * dispose not needed resource any more after they were unloaded)
+   */
+  private final AssetManager assetManager;
+  /**
+   * The current level of the game right before death
+   */
+  private final int level;
+  /**
+   * The game over text
+   */
+  private final String gameOverText = "GAME OVER";
+  /**
+   * The game over text font scale
+   */
+  private final float gameOverFontScale = 1;
+  /**
+   * The menu button grid where all buttons are sorted as they are displayed on the screen: `{ {
+   * Button1Row1, Button2Row2 }, { Button1Row2 }, { Button1Row3, Button2Row3 } }`
+   */
+  private MenuButton[][] menuButtons;
+  /**
+   * Variable for the texture of the game over background
+   */
+  private Texture backgroundGameOver;
+  /**
+   * Indicator if all assets are already loaded
+   */
+  private boolean assetsLoaded = false;
+  /**
+   * Indicator if the application is currently paused
+   */
+  private boolean paused = false;
+  /**
+   * Progress tracker for asset loading that contains the last progress loading percentage (0-1.0)
+   */
+  private float assetsLoadedLastProgress = -1;
+  /**
+   * Tracker for the menu button id that was selected before the current one
+   */
+  private String lastSelectedMenuButtonId = PLAY_AGAIN_ID;
+  /**
+   * The game over text font
+   */
+  private BitmapFont gameOverFont;
+  /**
+   * The game over text position
+   */
+  private Vector2 gameOverTextPosition;
+  /**
+   * Tracker if a controller down key was pressed
+   */
+  private boolean controllerDownKeyWasPressed = false;
+  /**
+   * Tracker if a controller up key was pressed
+   */
+  private boolean controllerUpKeyWasPressed = false;
+  /**
+   * Tracker if a controller left key was pressed
+   */
+  private boolean controllerLeftKeyWasPressed = false;
+  /**
+   * Tracker if a controller right key was pressed
+   */
+  private boolean controllerRightKeyWasPressed = false;
+  /**
+   * Tracker if a controller selection key was pressed
+   */
+  private boolean controllerSelectKeyWasPressed = false;
+  /**
+   * Tracker if a controller start key was pressed
+   */
+  private boolean controllerStartKeyWasPressed = false;
+  /**
+   * Tracker if a controller back key was pressed
+   */
+  private boolean controllerBackKeyWasPressed = false;
+  /**
+   * Tracker if a controller full screen toggle key was pressed
+   */
+  private boolean controllerFullScreenToggleKeyPressed = false;
 
-	private final static String PLAY_AGAIN_ID = "PLAY_AGAIN_ID";
-	private final static String PLAY_LEVEL_AGAIN_ID = "PLAY_LEVEL_AGAIN_ID";
-	private final static String HIGHSCORE_ID = "HIGHSCORE_ID";
-	private final static String ABOUT_ID = "ABOUT_ID";
+  /**
+   * Constructor that creates the main menu (state)
+   *
+   * @param gameStateManager The global game state manager
+   */
+  public GameOverState(GameStateManager gameStateManager, int level) {
+    super(gameStateManager, STATE_NAME);
 
-	private static final String STATE_NAME = "Game Over";
+    // Save the current level
+    this.level = level;
 
-	private final Vector3 touchPos;
+    // Initialize game camera/canvas
+    camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
 
-	private String loadingText;
+    // Initialize variable for the cursor position
+    cursorPosition = new Vector3();
 
-	/**
-	 * The text font
-	 */
-	private final BitmapFont fontText;
+    // Get asset manager from the game state manager
+    this.assetManager = gameStateManager.getAssetManager();
+    // Load assets that are not necessary to be available just yet
+    this.assetManager
+        .load(MainGame.getGameFontFilePath("cornerstone_upper_case_big"), BitmapFont.class);
+    this.assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_FONT, BitmapFont.class);
+    this.assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_DEFAULT, Texture.class);
+    this.assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED, Texture.class);
+    this.assetManager.load(MainGame.getGameBackgroundFilePath("game_over"), Texture.class);
 
-	private Vector2 loadingTextPosition;
+    // Register controller callback so that controller input can be managed
+    controllerCallbackGenericMenuButtonGrid = new ControllerCallbackGenericMenuButtonGrid(this);
+    Controllers.addListener(controllerCallbackGenericMenuButtonGrid);
+  }
 
-	private boolean blockStickInput = false;
-	private float stickTimeHelper;
-	private float controllerTimeHelper;
-	private final ControllerListener controllerHelperMenu;
+  @Override
+  public void handleInput() {
+    if (paused) {
+      // When the game is paused don't handle anything
+      return;
+    }
 
-	private final int level;
+    if (Gdx.app.getType() == ApplicationType.Desktop) {
+      // Toggle full screen when full screen keys are pressed
+      if (controllerFullScreenToggleKeyPressed || Gdx.input.isKeyJustPressed(Keys.F11)) {
+        controllerFullScreenToggleKeyPressed = false;
+        GameStateManager.toggleFullScreen();
+      }
+    }
 
-	/**
-	 * The global asset manager to load and get resources (it uses reference counting to easily
-	 * dispose not needed resource any more after they were unloaded)
-	 */
-	private final AssetManager assetManager;
+    // Update the cursor position
+    cursorPosition.set(GameStateManager.getMousePosition(camera));
 
-	public GameOverState(final GameStateManager gameStateManager, final int level) {
-		super(gameStateManager, STATE_NAME);
+    // Be sure to only allow navigating the menu buttons if they are initialized
+    if (menuButtons != null) {
+      // Mouse input (select the button on which the mouse is currently located)
+      boolean buttonCurrentlySelectedByCursor = false;
+      outerloop:
+      for (final MenuButton[] menuButtonLine : menuButtons) {
+        for (final MenuButton menuButton : menuButtonLine) {
+          if (menuButton.contains(cursorPosition)) {
+            buttonCurrentlySelectedByCursor = true;
+            break outerloop;
+          }
+        }
+      }
+      // If a cursor is currently selecting a menu button update the selected menu buttons
+      // else leave the last selected button selected
+      if (buttonCurrentlySelectedByCursor) {
+        for (final MenuButton[] menuButtonLine : menuButtons) {
+          for (final MenuButton menuButton : menuButtonLine) {
+            if (menuButton.isSelected() && !menuButton.contains(cursorPosition)) {
+              lastSelectedMenuButtonId = menuButton.getId();
+            }
+            menuButton.setSelected(menuButton.contains(cursorPosition));
+          }
+        }
+      }
 
-		this.assetManager = gameStateManager.getAssetManager();
-		this.assetManager.load(MainGame.getGameFontFilePath("cornerstone_upper_case_big"), BitmapFont.class);
-		this.assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_FONT, BitmapFont.class);
-		this.assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_DEFAULT, Texture.class);
-		this.assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED, Texture.class);
-		this.assetManager.load(MainGame.getGameBackgroundFilePath("game_over"), Texture.class);
-		this.assetManager.finishLoading();
+      // Keyboard input
+      if (!buttonCurrentlySelectedByCursor) {
+        if (Gdx.input.isKeyJustPressed(Keys.DOWN)) {
+          lastSelectedMenuButtonId = HelperMenu
+              .selectNextButton(menuButtons, HelperMenuButtonNavigation.DOWN,
+                  lastSelectedMenuButtonId);
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.RIGHT) || Gdx.input.isKeyJustPressed(Keys.TAB)) {
+          lastSelectedMenuButtonId = HelperMenu
+              .selectNextButton(menuButtons, HelperMenuButtonNavigation.RIGHT,
+                  lastSelectedMenuButtonId);
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.UP)) {
+          lastSelectedMenuButtonId = HelperMenu
+              .selectNextButton(menuButtons, HelperMenuButtonNavigation.UP,
+                  lastSelectedMenuButtonId);
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.LEFT)) {
+          lastSelectedMenuButtonId = HelperMenu
+              .selectNextButton(menuButtons, HelperMenuButtonNavigation.LEFT,
+                  lastSelectedMenuButtonId);
+        }
+      }
 
-		this.level = level;
+      // Controller input
+      if (!buttonCurrentlySelectedByCursor) {
+        if (controllerDownKeyWasPressed) {
+          controllerDownKeyWasPressed = false;
+          lastSelectedMenuButtonId = HelperMenu
+              .selectNextButton(menuButtons, HelperMenuButtonNavigation.DOWN,
+                  lastSelectedMenuButtonId);
+        }
+        if (controllerUpKeyWasPressed) {
+          controllerUpKeyWasPressed = false;
+          lastSelectedMenuButtonId = HelperMenu
+              .selectNextButton(menuButtons, HelperMenuButtonNavigation.UP,
+                  lastSelectedMenuButtonId);
+        }
+        if (controllerLeftKeyWasPressed) {
+          controllerLeftKeyWasPressed = false;
+          lastSelectedMenuButtonId = HelperMenu
+              .selectNextButton(menuButtons, HelperMenuButtonNavigation.LEFT,
+                  lastSelectedMenuButtonId);
+        }
+        if (controllerRightKeyWasPressed) {
+          controllerRightKeyWasPressed = false;
+          lastSelectedMenuButtonId = HelperMenu
+              .selectNextButton(menuButtons, HelperMenuButtonNavigation.RIGHT,
+                  lastSelectedMenuButtonId);
+        }
+      } else {
+        controllerDownKeyWasPressed = false;
+        controllerUpKeyWasPressed = false;
+        controllerLeftKeyWasPressed = false;
+        controllerRightKeyWasPressed = false;
+        controllerStartKeyWasPressed = false;
+        controllerSelectKeyWasPressed = false;
+      }
+      if (controllerStartKeyWasPressed) {
+        controllerStartKeyWasPressed = false;
+        openMenuButtonById(PLAY_AGAIN_ID);
+      }
 
-		// set font scale to the correct size and disable to use integers for scaling
-		fontText = this.assetManager.get(MainGame.getGameFontFilePath("cornerstone_upper_case_big"));
-		fontText.getData().setScale(1);
+      // If a button is touched or the space or enter key is currently pressed or a controller select
+      // key is currently pressed execute the action for the selected menu button
+      if ((buttonCurrentlySelectedByCursor && Gdx.input.justTouched()) || Gdx.input
+          .isKeyJustPressed(Keys.ENTER) || Gdx.input.isKeyJustPressed(Keys.SPACE)
+          || controllerSelectKeyWasPressed) {
+        controllerSelectKeyWasPressed = false;
+        openSelectedMenuButton();
+      }
+    } else {
+      controllerDownKeyWasPressed = false;
+      controllerUpKeyWasPressed = false;
+      controllerLeftKeyWasPressed = false;
+      controllerRightKeyWasPressed = false;
+      controllerStartKeyWasPressed = false;
+      controllerSelectKeyWasPressed = false;
+    }
 
-		// set camera to a scenery of 1280x720
-		camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
+    // If escape or back is pressed quit
+    if (Gdx.input.isCatchKey(Keys.BACK) || Gdx.input.isKeyJustPressed(Keys.ESCAPE)
+        || controllerBackKeyWasPressed) {
+      controllerBackKeyWasPressed = false;
+      gameStateManager.setGameState(new CreditState(gameStateManager));
+    }
+  }
 
-		touchPos = new Vector3();
+  @Override
+  public void update(final float deltaTime) {
+    // Not necessary to do anything
+  }
 
-		// calculate text coordinates
-		this.loadingText = "GAME OVER";
-		this.loadingTextPosition = GameStateManager.calculateCenteredTextPosition(fontText, loadingText,
-				MainGame.GAME_WIDTH, (float) MainGame.GAME_HEIGHT / 5 * 8);
+  @Override
+  public void render(final SpriteBatch spriteBatch) {
+    if (paused) {
+      // When the game is paused don't render anything
+      return;
+    }
+    if (assetManager.update()) {
+      if (!assetsLoaded) {
+        float progress = assetManager.getProgress() * 100;
+        Gdx.app.debug("game_over_state:render",
+            MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
+                + progress + "%");
+        assetsLoaded = true;
+        backgroundGameOver = assetManager.get(MainGame.getGameBackgroundFilePath("game_over"));
 
-		backgroundGameOver = this.assetManager.get(MainGame.getGameBackgroundFilePath("game_over"));
+        // Create menu buttons
+        menuButtons = new MenuButton[][]{
+            {
+                new MenuButtonSmall(PLAY_AGAIN_ID, "RESTART", assetManager,
+                    (float) MainGame.GAME_WIDTH / 4, (float) MainGame.GAME_HEIGHT / 6 * 3,
+                    true),
+                new MenuButtonSmall(PLAY_LEVEL_AGAIN_ID, "...LEVEL", assetManager,
+                    MainGame.GAME_WIDTH - (float) MainGame.GAME_WIDTH / 4,
+                    (float) MainGame.GAME_HEIGHT / 6 * 3),
+            },
+            {
+                new MenuButtonSmall(HIGHSCORE_ID, "HIGHSCORES", assetManager,
+                    (float) MainGame.GAME_WIDTH / 4, (float) MainGame.GAME_HEIGHT / 6 * 1),
+                new MenuButtonSmall(ABOUT_ID, "ABOUT", assetManager,
+                    MainGame.GAME_WIDTH - (float) MainGame.GAME_WIDTH / 4,
+                    (float) MainGame.GAME_HEIGHT / 6 * 1)
+            }
+        };
 
-		menuButtons = new MenuButton[] {
-				new MenuButtonSmall(PLAY_AGAIN_ID, "RESTART", assetManager, (float) MainGame.GAME_WIDTH / 4, (float) MainGame.GAME_HEIGHT / 6 * 3,
-						true),
-				new MenuButtonSmall(PLAY_LEVEL_AGAIN_ID, "...LEVEL", assetManager, MainGame.GAME_WIDTH - (float) MainGame.GAME_WIDTH / 4,
-						(float) MainGame.GAME_HEIGHT / 6 * 3),
-				new MenuButtonSmall(HIGHSCORE_ID, "HIGHSCORES", assetManager, (float) MainGame.GAME_WIDTH / 4, (float) MainGame.GAME_HEIGHT / 6 * 1),
-				new MenuButtonSmall(ABOUT_ID, "ABOUT", assetManager, MainGame.GAME_WIDTH - (float) MainGame.GAME_WIDTH / 4,
-						(float) MainGame.GAME_HEIGHT / 6 * 1) };
+        gameOverFont = assetManager.get(MainGame.getGameFontFilePath("cornerstone_upper_case_big"));
+        gameOverFont.getData().setScale(gameOverFontScale);
+        gameOverTextPosition = GameStateManager.calculateCenteredTextPosition(gameOverFont,
+            gameOverText,
+            MainGame.GAME_WIDTH, (float) MainGame.GAME_HEIGHT / 5 * 8);
 
-		// controller setup
-		controllerHelperMenu = new ControllerHelperMenu(this);
-		Controllers.addListener(controllerHelperMenu);
-		blockStickInput = false;
-		stickTimeHelper = 0;
-		controllerTimeHelper = 0;
-	}
+      }
+      // Render menu
+      spriteBatch.setProjectionMatrix(camera.combined);
+      spriteBatch.begin();
 
-	@Override
-	public void handleInput() {
-		GameStateManager.toggleFullScreen(true);
-		touchPos.set(GameStateManager.getMousePosition(camera));
+      spriteBatch.draw(backgroundGameOver, 0, 0);
+      for (final MenuButton[] menuButtonLine : menuButtons) {
+        for (final MenuButton menuButton : menuButtonLine) {
+          menuButton.draw(spriteBatch);
+        }
+      }
 
-		// determine on which button the mouse cursor is and select this button
-		boolean oneIsSelected = false;
-		for (final MenuButton menuButton : menuButtons) {
-			if (menuButton.contains(touchPos))
-				oneIsSelected = true;
-		}
-		if (oneIsSelected) {
-			for (final MenuButton menuButton : menuButtons)
-				menuButton.setSelected(menuButton.contains(touchPos));
-		}
+      gameOverFont.getData().setScale(1);
+      gameOverFont.draw(spriteBatch, gameOverText, gameOverTextPosition.x, gameOverTextPosition.y);
 
-		// If a button is touched do something or Space or Enter is pressed execute the
-		// action for the selected button
-		if (Gdx.input.justTouched()
-				|| (Gdx.input.isKeyJustPressed(Keys.ENTER) || Gdx.input.isKeyJustPressed(Keys.SPACE))) {
-			for (final MenuButton menuButton : menuButtons) {
-				if (menuButton.isSelected()) {
-					switch (menuButton.getId()) {
-					case PLAY_AGAIN_ID:
-						gameStateManager.setGameState(new LoadingState(gameStateManager, 1));
-						break;
-					case PLAY_LEVEL_AGAIN_ID:
-						gameStateManager.setGameState(new LoadingState(gameStateManager, level));
-						break;
-					case HIGHSCORE_ID:
-						gameStateManager.setGameState(new HighscoreListState(gameStateManager));
-						break;
-					case ABOUT_ID:
-						gameStateManager.setGameState(new CreditState(gameStateManager));
-						break;
-					}
-				}
-			}
-		}
+      spriteBatch.end();
+    } else {
+      // display loading information
+      float progress = this.assetManager.getProgress() * 100;
+      if (progress != assetsLoadedLastProgress) {
+        assetsLoadedLastProgress = progress;
+        Gdx.app.debug("game_over_state:render",
+            MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
+                + progress + "%");
+      }
+    }
+  }
 
-		// if escape or back is pressed quit
-		if (Gdx.input.isCatchBackKey() || Gdx.input.isKeyJustPressed(Keys.ESCAPE))
-			Gdx.app.exit();
-	}
+  @Override
+  public void dispose() {
+    // Remove controller listener
+    Controllers.removeListener(controllerCallbackGenericMenuButtonGrid);
 
-	@Override
-	public void update(final float deltaTime) {
-		controllerTimeHelper += deltaTime;
-		stickTimeHelper += deltaTime;
-	}
+    // Dispose all menu buttons
+    for (final MenuButton[] menuButtonLine : menuButtons) {
+      for (final MenuButton menuButton : menuButtonLine) {
+        menuButton.dispose();
+      }
+    }
 
-	@Override
-	public void render(final SpriteBatch spriteBatch) {
-		spriteBatch.setProjectionMatrix(camera.combined);
-		spriteBatch.begin();
+    // Reduce the reference to used resources in this state (when no object is referencing the
+    // resource any more it is automatically disposed by the global asset manager)
+    Gdx.app.debug("game_over_state:dispose", "Loaded assets before unloading are:");
+    for (final String loadedAsset : assetManager.getAssetNames()) {
+      Gdx.app.debug("game_over_state:dispose", "- " + loadedAsset);
+    }
+    assetManager.unload(MenuButtonSmall.ASSET_MANAGER_ID_FONT);
+    assetManager.unload(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_DEFAULT);
+    assetManager.unload(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED);
+    assetManager.unload(MainGame.getGameBackgroundFilePath("game_over"));
+    Gdx.app.debug("game_over_state:dispose", "Loaded assets after unloading are:");
+    for (final String loadedAsset : assetManager.getAssetNames()) {
+      Gdx.app.debug("game_over_state:dispose", "- " + loadedAsset);
+    }
+  }
 
-		spriteBatch.draw(backgroundGameOver, 0, 0);
-		for (final MenuButton menuButton : menuButtons)
-			menuButton.draw(spriteBatch);
-		fontText.getData().setScale(1);
-		fontText.draw(spriteBatch, loadingText, loadingTextPosition.x, loadingTextPosition.y);
-		spriteBatch.end();
-	}
+  /**
+   * Open/CLick the a menu button by its ID
+   */
+  private void openMenuButtonById(final String menuButtonId) {
+    Gdx.app.debug("game_over_state:openMenuButtonById",
+        MainGame.getCurrentTimeStampLogString() + "\"" + menuButtonId + "\"");
+    switch (menuButtonId) {
+      case PLAY_AGAIN_ID:
+        gameStateManager.setGameState(new LoadingState(gameStateManager, 1));
+        break;
+      case PLAY_LEVEL_AGAIN_ID:
+        gameStateManager.setGameState(new LoadingState(gameStateManager, level));
+        break;
+      case HIGHSCORE_ID:
+        gameStateManager.setGameState(new HighscoreListState(gameStateManager));
+        break;
+      case ABOUT_ID:
+        gameStateManager.setGameState(new CreditState(gameStateManager));
+        break;
+      default:
+        Gdx.app.error("game_over_state:openMenuButtonById",
+            MainGame.getCurrentTimeStampLogString() + "Unknown button id \"" + menuButtonId + "\"");
+    }
+  }
 
-	@Override
-	public void dispose() {
-		Controllers.removeListener(controllerHelperMenu);
-		backgroundGameOver.dispose();
-		fontText.dispose();
+  /**
+   * Open/CLick the currently selected menu button
+   */
+  private void openSelectedMenuButton() {
+    Gdx.app
+        .debug("game_over_state:openSelectedMenuButton", MainGame.getCurrentTimeStampLogString());
+    for (final MenuButton[] menuButtonLine : menuButtons) {
+      for (final MenuButton menuButton : menuButtonLine) {
+        if (menuButton.isSelected()) {
+          openMenuButtonById(menuButton.getId());
+        }
+      }
+    }
+  }
 
-		// Reduce the reference to used resources in this state (when no object is referencing the
-		// resource any more it is automatically disposed by the global asset manager)
-		Gdx.app.debug("menu_state:dispose", "Loaded assets before unloading are:");
-		for (final String loadedAsset : assetManager.getAssetNames()) {
-			Gdx.app.debug("menu_state:dispose", "- " + loadedAsset);
-		}
-		assetManager.unload(MenuButtonSmall.ASSET_MANAGER_ID_FONT);
-		assetManager.unload(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_DEFAULT);
-		assetManager.unload(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED);
-		assetManager.unload(MainGame.getGameBackgroundFilePath("game_over"));
-		Gdx.app.debug("menu_state:dispose", "Loaded assets after unloading are:");
-		for (final String loadedAsset : assetManager.getAssetNames()) {
-			Gdx.app.debug("menu_state:dispose", "- " + loadedAsset);
-		}
-	}
+  @Override
+  public void pause() {
+    Gdx.app.debug("game_over_state:pause", MainGame.getCurrentTimeStampLogString() + "pause");
+    paused = true;
+  }
 
-	private void openSelectedMenuButton() {
-		for (final MenuButton menuButton : menuButtons) {
-			if (menuButton.isSelected()) {
-				switch (menuButton.getId()) {
-				case PLAY_AGAIN_ID:
-					gameStateManager.setGameState(new LoadingState(gameStateManager, this.level));
-					break;
-				case HIGHSCORE_ID:
-					gameStateManager.setGameState(new HighscoreListState(gameStateManager));
-					break;
-				case ABOUT_ID:
-					gameStateManager.setGameState(new CreditState(gameStateManager));
-					break;
-				}
-			}
-		}
-	}
+  @Override
+  public void resume() {
+    Gdx.app.debug("game_over_state:resume", MainGame.getCurrentTimeStampLogString() + "resume");
+    paused = false;
+  }
 
-	@Override
-	public void controllerCallbackBackPressed() {
-		// exit application
-		Gdx.app.exit();
-	}
+  @Override
+  public void controllerCallbackSelectLeftMenuButton() {
+    Gdx.app.debug("game_over_state:controllerCallbackSelectLeftMenuButton",
+        MainGame.getCurrentTimeStampLogString());
+    controllerLeftKeyWasPressed = true;
+  }
 
-	@Override
-	public void controllerCallbackButtonPressed(int buttonId) {
-		if (controllerTimeHelper < 0.2)
-			return;
-		// open selected button
-		if (buttonId == ControllerWiki.BUTTON_A)
-			openSelectedMenuButton();
-		if (buttonId == ControllerWiki.BUTTON_START)
-			GameStateManager.toggleFullScreen();
-	}
+  @Override
+  public void controllerCallbackSelectRightMenuButton() {
+    Gdx.app.debug("game_over_state:controllerCallbackSelectRightMenuButton",
+        MainGame.getCurrentTimeStampLogString());
+    controllerRightKeyWasPressed = true;
+  }
 
-	private void selectNextButton(boolean below) {
-		for (int i = 0; i < menuButtons.length; i++) {
-			if (menuButtons[i].isSelected()) {
-				menuButtons[i].setSelected(false);
-				if (below)
-					menuButtons[(i + 1) % menuButtons.length].setSelected(true);
-				else
-					menuButtons[(i - 1 + menuButtons.length) % menuButtons.length].setSelected(true);
-				return;
-			}
-		}
-	}
-/*
-	@Override
-	public void controllerCallbackDPadButtonPressed(PovDirection direction) {
-		// select next button
-		if (direction == ControllerWiki.BUTTON_DPAD_DOWN || direction == ControllerWiki.BUTTON_DPAD_RIGHT)
-			selectNextButton(true);
-		if (direction == ControllerWiki.BUTTON_DPAD_UP || direction == ControllerWiki.BUTTON_DPAD_LEFT)
-			selectNextButton(false);
+  @Override
+  public void controllerCallbackSelectAboveMenuButton() {
+    Gdx.app.debug("game_over_state:controllerCallbackSelectAboveMenuButton",
+        MainGame.getCurrentTimeStampLogString());
+    controllerUpKeyWasPressed = true;
+  }
 
-	}
-*/
-	@Override
-	public void controllerCallbackStickMoved(final boolean xAxis, final float value) {
-		// select next button
-		if (blockStickInput && stickTimeHelper >= 0.3)
-			blockStickInput = false;
-		if (!blockStickInput && (value > 0.3 || value < -0.3)) {
-			selectNextButton(value > 0.3);
-			stickTimeHelper = 0;
-			blockStickInput = true;
-		}
-	}
+  @Override
+  public void controllerCallbackSelectBelowMenuButton() {
+    Gdx.app.debug("game_over_state:controllerCallbackSelectBelowMenuButton",
+        MainGame.getCurrentTimeStampLogString());
+    controllerDownKeyWasPressed = true;
+  }
 
-	@Override
-	public void pause() {
-		// Nothing to do
+  @Override
+  public void controllerCallbackClickStartMenuButton() {
+    Gdx.app.debug("game_over_state:controllerCallbackClickStartMenuButton",
+        MainGame.getCurrentTimeStampLogString());
+    controllerStartKeyWasPressed = true;
+  }
 
-	}
+  @Override
+  public void controllerCallbackClickMenuButton() {
+    Gdx.app.debug("game_over_state:controllerCallbackClickMenuButton",
+        MainGame.getCurrentTimeStampLogString());
+    controllerSelectKeyWasPressed = true;
+  }
 
-	@Override
-	public void resume() {
-		// Nothing to do
-	}
+  @Override
+  public void controllerCallbackClickBackButton() {
+    Gdx.app.debug("game_over_state:controllerCallbackClickBackButton",
+        MainGame.getCurrentTimeStampLogString());
+    controllerBackKeyWasPressed = true;
+  }
 
+  @Override
+  public void controllerCallbackToggleFullScreen() {
+    Gdx.app.debug("game_over_state:controllerCallbackToggleFullScreen",
+        MainGame.getCurrentTimeStampLogString());
+    controllerFullScreenToggleKeyPressed = true;
+  }
 }

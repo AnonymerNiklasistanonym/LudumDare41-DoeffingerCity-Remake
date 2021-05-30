@@ -10,8 +10,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.MainGame;
-import com.mygdx.game.controller.menu.ControllerCallbackMenuState;
-import com.mygdx.game.controller.menu.IControllerCallbackMenuState;
+import com.mygdx.game.controller.menu_button_grid.ControllerCallbackGenericMenuButtonGrid;
+import com.mygdx.game.controller.menu_button_grid.IControllerCallbackGenericMenuButtonGrid;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
 import com.mygdx.game.gamestate.states.resources.MenuButton;
@@ -24,7 +24,7 @@ import com.mygdx.game.helper.HelperMenuButtonNavigation;
  * Creates the main menu state which renders the main menu and handles keyboard, touch and
  * controller input
  */
-public class MenuState extends GameState implements IControllerCallbackMenuState {
+public class MenuState extends GameState implements IControllerCallbackGenericMenuButtonGrid {
 
   /**
    * The menu button ID for starting the game
@@ -47,7 +47,7 @@ public class MenuState extends GameState implements IControllerCallbackMenuState
    * callback methods and can then be added as a controller listener which can then call the
    * interface implemented methods in this class on corresponding controller input
    */
-  private final ControllerCallbackMenuState controllerCallbackMenuState;
+  private final ControllerCallbackGenericMenuButtonGrid controllerCallbackGenericMenuButtonGrid;
   /**
    * The current cursor position
    */
@@ -146,8 +146,8 @@ public class MenuState extends GameState implements IControllerCallbackMenuState
     assetManager.load(MainGame.getGameLogoFilePath("tnt"), Texture.class);
 
     // Register controller callback so that controller input can be managed
-    controllerCallbackMenuState = new ControllerCallbackMenuState(this);
-    Controllers.addListener(controllerCallbackMenuState);
+    controllerCallbackGenericMenuButtonGrid = new ControllerCallbackGenericMenuButtonGrid(this);
+    Controllers.addListener(controllerCallbackGenericMenuButtonGrid);
   }
 
   @Override
@@ -347,7 +347,7 @@ public class MenuState extends GameState implements IControllerCallbackMenuState
   @Override
   public void dispose() {
     // Remove controller listener
-    Controllers.removeListener(controllerCallbackMenuState);
+    Controllers.removeListener(controllerCallbackGenericMenuButtonGrid);
 
     // Dispose all menu buttons
     for (final MenuButton[] menuButtonLine : menuButtons) {

@@ -1,9 +1,9 @@
-package com.mygdx.game.controller.menu;
+package com.mygdx.game.controller.menu_button_grid;
 
 /**
  * Callback interface for controller inputs in the menu state
  */
-public interface IControllerCallbackMenuState {
+public interface IControllerCallbackGenericMenuButtonGrid {
 
   /**
    * Select left menu button
