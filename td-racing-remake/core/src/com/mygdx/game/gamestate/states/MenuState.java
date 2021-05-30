@@ -134,7 +134,7 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
     cursorPosition = new Vector3();
 
     // Get asset manager from the game state manager
-    this.assetManager = gameStateManager.getAssetManager();
+    assetManager = gameStateManager.getAssetManager();
     // Load assets that are not necessary to be available just yet
     assetManager.load(MenuButtonBig.ASSET_MANAGER_ID_FONT, BitmapFont.class);
     assetManager.load(MenuButtonBig.ASSET_MANAGER_ID_TEXTURE_DEFAULT, Texture.class);

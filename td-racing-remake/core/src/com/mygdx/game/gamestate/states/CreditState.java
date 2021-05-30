@@ -74,7 +74,7 @@ public class CreditState extends GameState implements IControllerCallbackCreditS
 		camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
 
 		// Get asset manager from the game state manager
-		this.assetManager = gameStateManager.getAssetManager();
+		assetManager = gameStateManager.getAssetManager();
 		// Load assets that are not necessary to be available just yet
 		assetManager.load(MainGame.getGameMusicFilePath("theme"), Music.class);
 		assetManager.load(MainGame.getGameFontFilePath("cornerstone_upper_case_big"), BitmapFont.class);
@@ -117,9 +117,9 @@ public class CreditState extends GameState implements IControllerCallbackCreditS
 			// When the game is paused don't render anything
 			return;
 		}
-		if (this.assetManager.update()) {
+		if (assetManager.update()) {
 			if (!assetsLoaded) {
-				float progress = this.assetManager.getProgress() * 100;
+				float progress = assetManager.getProgress() * 100;
 				Gdx.app.debug("credit_state:render",
 						MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
 								+ progress + "%");
@@ -150,7 +150,7 @@ public class CreditState extends GameState implements IControllerCallbackCreditS
 			spriteBatch.end();
 		} else {
 			// display loading information
-			float progress = this.assetManager.getProgress() * 100;
+			float progress = assetManager.getProgress() * 100;
 			if (progress != assetsLoadedLastProgress) {
 				assetsLoadedLastProgress = progress;
 				Gdx.app.debug("credit_state:render",

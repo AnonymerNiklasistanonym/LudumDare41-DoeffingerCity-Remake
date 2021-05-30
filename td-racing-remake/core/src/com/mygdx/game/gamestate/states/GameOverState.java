@@ -158,14 +158,13 @@ public class GameOverState extends GameState implements IControllerCallbackGener
     cursorPosition = new Vector3();
 
     // Get asset manager from the game state manager
-    this.assetManager = gameStateManager.getAssetManager();
+    assetManager = gameStateManager.getAssetManager();
     // Load assets that are not necessary to be available just yet
-    this.assetManager
-        .load(MainGame.getGameFontFilePath("cornerstone_upper_case_big"), BitmapFont.class);
-    this.assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_FONT, BitmapFont.class);
-    this.assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_DEFAULT, Texture.class);
-    this.assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED, Texture.class);
-    this.assetManager.load(MainGame.getGameBackgroundFilePath("game_over"), Texture.class);
+    assetManager.load(MainGame.getGameFontFilePath("cornerstone_upper_case_big"), BitmapFont.class);
+    assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_FONT, BitmapFont.class);
+    assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_DEFAULT, Texture.class);
+    assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED, Texture.class);
+    assetManager.load(MainGame.getGameBackgroundFilePath("game_over"), Texture.class);
 
     // Register controller callback so that controller input can be managed
     controllerCallbackGenericMenuButtonGrid = new ControllerCallbackGenericMenuButtonGrid(this);
@@ -367,7 +366,7 @@ public class GameOverState extends GameState implements IControllerCallbackGener
       spriteBatch.end();
     } else {
       // display loading information
-      float progress = this.assetManager.getProgress() * 100;
+      float progress = assetManager.getProgress() * 100;
       if (progress != assetsLoadedLastProgress) {
         assetsLoadedLastProgress = progress;
         Gdx.app.debug("game_over_state:render",
@@ -395,6 +394,7 @@ public class GameOverState extends GameState implements IControllerCallbackGener
     for (final String loadedAsset : assetManager.getAssetNames()) {
       Gdx.app.debug("game_over_state:dispose", "- " + loadedAsset);
     }
+    assetManager.unload(MainGame.getGameFontFilePath("cornerstone_upper_case_big"));
     assetManager.unload(MenuButtonSmall.ASSET_MANAGER_ID_FONT);
     assetManager.unload(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_DEFAULT);
     assetManager.unload(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED);
