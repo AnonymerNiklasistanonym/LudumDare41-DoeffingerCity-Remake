@@ -191,7 +191,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		Controllers.addListener(controllerHelper);
 		preferencesManager = new PreferencesManager();
 		preferencesManager.checkHighscore();
-		preferencesManager.setupIfFirstStart();
+		// preferencesManager.setupIfFirstStart();
 		enemies = new Array<Enemy>();
 		towers = new Array<Tower>();
 		collis = new CollisionListener(this);

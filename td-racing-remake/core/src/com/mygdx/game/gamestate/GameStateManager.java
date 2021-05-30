@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.MainGame;
+import com.mygdx.game.preferences.PreferencesManager;
 import java.util.Stack;
 
 /**
@@ -30,14 +31,19 @@ public class GameStateManager {
    * Loads and stores assets like textures, bitmap fonts, sounds, music, ...
    */
   private final AssetManager assetManager;
+  /**
+   * Manages application wide options and preferences
+   */
+  private PreferencesManager preferencesManager;
 
   /**
    * Constructor that creates a new GameState stack
    */
-  public GameStateManager(AssetManager assetManager) {
+  public GameStateManager(final AssetManager assetManager, final PreferencesManager preferencesManager) {
     Gdx.app.log("game_state_manager:constructor", MainGame.getCurrentTimeStampLogString());
     this.gameStateStack = new Stack<>();
     this.assetManager = assetManager;
+    this.preferencesManager = preferencesManager;
   }
 
   /**
@@ -45,9 +51,16 @@ public class GameStateManager {
    */
   public AssetManager getAssetManager() {
     Gdx.app.log("game_state_manager:getAssetManager", MainGame.getCurrentTimeStampLogString());
-    return this.assetManager;
+    return assetManager;
   }
 
+  /**
+   * Get global preferences manager
+   */
+  public PreferencesManager getPreferencesManager() {
+    Gdx.app.log("game_state_manager:getPreferencesManager", MainGame.getCurrentTimeStampLogString());
+    return preferencesManager;
+  }
 
   /**
    * Toggle full screen
@@ -61,6 +74,7 @@ public class GameStateManager {
    */
   public static void toggleFullScreen(final boolean useStandardizedKey) {
     if (!useStandardizedKey || Gdx.input.isKeyJustPressed(standardizedFullScreenToggleKey)) {
+      new PreferencesManager().setFullscreen(!Gdx.graphics.isFullscreen());
       if (Gdx.graphics.isFullscreen()) {
         Gdx.graphics.setWindowedMode(MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
       } else {
@@ -135,8 +149,8 @@ public class GameStateManager {
   public void setGameState(final GameState gameState) {
     Gdx.app.log("game_state_manager:setGameState",
         MainGame.getCurrentTimeStampLogString() + gameState.stateName);
-    this.popGameState();
-    this.pushState(gameState);
+    popGameState();
+    pushState(gameState);
   }
 
   /**

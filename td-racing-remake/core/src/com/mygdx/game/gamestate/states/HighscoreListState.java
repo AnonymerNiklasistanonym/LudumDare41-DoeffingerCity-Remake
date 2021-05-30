@@ -75,7 +75,7 @@ public class HighscoreListState extends GameState implements ControllerMenuCallb
 
 			// clear high score list
 			if (Gdx.input.isKeyJustPressed(Keys.C)) {
-				preferencesManager.clearHighscore();
+				preferencesManager.resetHighscore();
 				loadHighScoreList();
 			}
 

@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Scaling;
 import com.mygdx.game.gamestate.GameStateManager;
 import com.mygdx.game.gamestate.states.MenuState;
+import com.mygdx.game.preferences.PreferencesManager;
 import java.sql.Timestamp;
 import java.util.Date;
 
@@ -50,6 +51,10 @@ public class MainGame implements ApplicationListener {
    * Loads and stores assets like textures, bitmap fonts, sounds, music, ...
    */
   private AssetManager assetManager;
+  /**
+   * Manages application wide options and preferences
+   */
+  private PreferencesManager preferencesManager;
 
   // Remove fonts later when asset manager works begin
   /**
@@ -149,14 +154,23 @@ public class MainGame implements ApplicationListener {
     // TODO This crashes the application
     // Gdx.input.setCatchKey(Input.Keys.BACK, true);
 
+    // Create preferences manager
+    preferencesManager = new PreferencesManager();
+    // Activate fullscreen if activated
+    if (preferencesManager.getFullscreen()) {
+      Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+    } else {
+      Gdx.graphics.setWindowedMode(GAME_WIDTH, GAME_HEIGHT);
+    }
+
     // Create sprite batch
-    Gdx.app.log("main:create", getCurrentTimeStampLogString() + "create sprite batch");
+    Gdx.app.debug("main:create", getCurrentTimeStampLogString() + "create sprite batch");
     spriteBatch = new SpriteBatch();
     // Create asset manager
     assetManager = new AssetManager();
 
     // Load fonts (remove when asset manager works)
-    Gdx.app.log("main:create", getCurrentTimeStampLogString() + "load fonts");
+    Gdx.app.debug("main:create", getCurrentTimeStampLogString() + "load fonts");
     font = new BitmapFont(Gdx.files.internal(getGameFontFilePath("cornerstone")));
     font.setUseIntegerPositions(false);
     font70 = new BitmapFont(Gdx.files.internal(getGameFontFilePath("cornerstone_70")));
@@ -170,11 +184,11 @@ public class MainGame implements ApplicationListener {
     fontUpperCaseBig.setUseIntegerPositions(false);
 
     // Create game state manager
-    Gdx.app.log("main:create", getCurrentTimeStampLogString() + "create game state manager");
-    gameStateManager = new GameStateManager(assetManager);
+    Gdx.app.debug("main:create", getCurrentTimeStampLogString() + "create game state manager");
+    gameStateManager = new GameStateManager(assetManager, preferencesManager);
 
     // Switch to the menu state
-    Gdx.app.log("main:create", getCurrentTimeStampLogString() + "switch to menu state");
+    Gdx.app.debug("main:create", getCurrentTimeStampLogString() + "switch to menu state");
     gameStateManager.pushState(new MenuState(gameStateManager));
   }
 
@@ -206,7 +220,7 @@ public class MainGame implements ApplicationListener {
 
   @Override
   public void resize(final int width, final int height) {
-    Gdx.app.log("main:resize",
+    Gdx.app.debug("main:resize",
         getCurrentTimeStampLogString() + "the game was resized to " + width + "x" + height);
 
     // On window resize calculate a new viewport so that the game is always displayed with the
@@ -218,20 +232,20 @@ public class MainGame implements ApplicationListener {
     final int viewportHeight = (int) viewportSize.y;
     Gdx.gl.glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
 
-    Gdx.app.log("main:resize",
+    Gdx.app.debug("main:resize",
         getCurrentTimeStampLogString() + "the new viewport is " + viewportWidth + "x"
             + viewportHeight);
   }
 
   @Override
   public void pause() {
-    Gdx.app.log("main:pause", getCurrentTimeStampLogString() + "the game was paused");
+    Gdx.app.debug("main:pause", getCurrentTimeStampLogString() + "the game was paused");
     gameStateManager.pause();
   }
 
   @Override
   public void resume() {
-    Gdx.app.log("main:resume", getCurrentTimeStampLogString() + "the game was resumed");
+    Gdx.app.debug("main:resume", getCurrentTimeStampLogString() + "the game was resumed");
     gameStateManager.resume();
   }
 }

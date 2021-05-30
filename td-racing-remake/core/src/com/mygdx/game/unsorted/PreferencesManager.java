@@ -2,11 +2,26 @@ package com.mygdx.game.unsorted;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
+import com.mygdx.game.MainGame;
 
+/**
+ * Class that manages application wide settings/preferences
+ */
 public class PreferencesManager {
 
-	public class HighscoreEntry {
-		public final int score;
+	/**
+	 * Structure for an highscore entry
+	 */
+	public static class HighscoreEntry {
+
+		/**
+		 * The score value
+		 */
+		private final int score;
+		/**
+		 * The name of the person that set the score
+		 */
+		private final String name;
 
 		public int getScore() {
 			return score;
@@ -16,12 +31,15 @@ public class PreferencesManager {
 			return name;
 		}
 
-		public final String name;
-
 		public String toString() {
 			return score + " by " + name;
 		}
 
+		/**
+		 * Constructor for creating a new Highscore Entry
+		 * @param score The score value
+		 * @param name The name of the person that set the score
+		 */
 		HighscoreEntry(final int score, final String name) {
 			this.score = score;
 			this.name = name;
@@ -38,23 +56,44 @@ public class PreferencesManager {
 
 	private static final int NUMBER_HIGHSCORE_ENTRIES = 5;
 
+	/**
+	 * A Preference instance is a libGDX object that manages preferences with a hash map implementation that holds values that can be accessed via an unique string
+	 */
 	private final Preferences prefs;
 
-	public void setupIfFirstStart() {
-		if (!prefs.getBoolean(ALREADY_LAUNCHED)) {
-			System.out.println("First launch detected");
-			prefs.putBoolean(ALREADY_LAUNCHED, true).flush();
-			saveName("NOBODY");
+	public PreferencesManager() {
+		Gdx.app.debug("preferences_manager:constructor", MainGame.getCurrentTimeStampLogString());
+
+		// Get the preferences object and load hash map
+		prefs = Gdx.app.getPreferences(PREFERENCES_NAME);
+
+		reset();
+
+		// Setup preferences object with default values in case this is the first launch
+		if (!getAlreadyLaunched()) {
+			Gdx.app.debug("preferences_manager:constructor", MainGame.getCurrentTimeStampLogString() + "first launch detected");
+			// Set that the game was already launched (for the next start)
+			setAlreadyLaunched(true);
+			// Set user name
+			setHighscoreName("NOBODY");
+			// Set music to on
 			setMusicOn(true);
+			// Set sound effects to on
 			setSoundEffectsOn(true);
+			// Reset highscore list (which creates default entries)
+			resetHighscore();
 		}
 	}
 
-	public PreferencesManager() {
-		prefs = Gdx.app.getPreferences(PREFERENCES_NAME);
+	public boolean getAlreadyLaunched() {
+		return prefs.getBoolean(ALREADY_LAUNCHED, false);
 	}
 
-	public void saveName(final String name) {
+	public void setAlreadyLaunched(final boolean alreadyLaunched) {
+		prefs.putBoolean(ALREADY_LAUNCHED, alreadyLaunched).flush();
+	}
+
+	public void setHighscoreName(final String name) {
 		prefs.putString(LAST_NAME, name).flush();
 	}
 
@@ -73,7 +112,10 @@ public class PreferencesManager {
 		prefs.flush();
 	}
 
-	public void clearHighscore() {
+	/**
+	 * Clear highscore list by setting every value to 0 and the scorer name to NOBODY
+	 */
+	public void resetHighscore() {
 		for (int i = 0; i < NUMBER_HIGHSCORE_ENTRIES; i++)
 			prefs.putString(HIGHSCORE_NAME + i, "NOBODY").putInteger(HIGHSCORE_SCORE + i, 0);
 		prefs.flush();
@@ -83,6 +125,13 @@ public class PreferencesManager {
 		for (int i = 0; i < NUMBER_HIGHSCORE_ENTRIES; i++)
 			prefs.putString(HIGHSCORE_NAME + i, names[i]).putInteger(HIGHSCORE_SCORE + i, scores[i]);
 		prefs.flush();
+	}
+
+	/**
+	 * Reset all preferences
+	 */
+	public void reset() {
+		prefs.clear();
 	}
 
 	public HighscoreEntry[] retrieveHighscore() {
@@ -101,15 +150,15 @@ public class PreferencesManager {
 	}
 
 	public boolean getMusicOn() {
-		return prefs.getBoolean(SOUND_EFFECTS);
+		return prefs.getBoolean(SOUND_EFFECTS, true);
 	}
 
 	public boolean getSoundEfectsOn() {
-		return prefs.getBoolean(MUSIC);
+		return prefs.getBoolean(MUSIC, true);
 	}
 
 	public void saveHighscore(String name, int score) {
-		saveName(name);
+		setHighscoreName(name);
 		final HighscoreEntry[] entries = retrieveHighscore();
 		for (int i = 0; i < entries.length; i++) {
 			if (entries[i].getScore() < score) {

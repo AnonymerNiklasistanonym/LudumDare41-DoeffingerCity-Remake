@@ -126,7 +126,7 @@ public class CreditState extends GameState implements IControllerCallbackCreditS
 				assetsLoaded = true;
 				musicBackground = assetManager.get(MainGame.getGameMusicFilePath("theme"));
 				musicBackground.setLooping(true);
-				new PreferencesManager().setupIfFirstStart();
+				// new PreferencesManager().setupIfFirstStart();
 				if (new PreferencesManager().getMusicOn())
 					musicBackground.play();
 
