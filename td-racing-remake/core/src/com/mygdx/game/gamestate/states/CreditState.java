@@ -19,19 +19,14 @@ import com.mygdx.game.unsorted.PreferencesManager;
 public class CreditState extends GameState implements IControllerCallbackGenericOneClick {
 
   private static final String STATE_NAME = "Credits";
-  private final String[] textCredits = new String[]{"THIS GAME WAS MADE BY", "DANIEL CZEPPEL",
+  private static final String[] textCredits = new String[]{"THIS GAME WAS MADE BY", "DANIEL CZEPPEL",
       "NIKLAS MIKELER", "PATRICK ULMER", "",
       "MUSIC BY SASCHA CZEPPEL"};
-  private final ControllerCallbackGenericOneClick controllerCallbackGenericOneClick;
-  /**
-   * The global asset manager to load and get resources (it uses reference counting to easily
-   * dispose not needed resource any more after they were unloaded)
-   */
-  private final AssetManager assetManager;
   /**
    * Variable for the font scale of the credits text
    */
-  private final float fontScaleCredits = 0.5f;
+  private static final float fontScaleCredits = 0.5f;
+  private final ControllerCallbackGenericOneClick controllerCallbackGenericOneClick;
   private Vector2[] textContentPosition;
   /**
    * Variable for the texture of the stars background
@@ -41,34 +36,6 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
    * Variable for the font of the credits text
    */
   private BitmapFont fontCredits;
-  /**
-   * Indicator if all assets are already loaded
-   */
-  private boolean assetsLoaded = false;
-  /**
-   * Indicator if the application is currently paused
-   */
-  private boolean paused = false;
-  /**
-   * Progress tracker for asset loading that contains the last progress loading percentage (0-1.0)
-   */
-  private float assetsLoadedLastProgress = -1;
-  /**
-   * Tracker if a controller back key was pressed
-   */
-  private boolean controllerAnyKeyWasPressed = false;
-  /**
-   * Tracker if a controller full screen toggle key was pressed
-   */
-  private boolean controllerFullScreenToggleKeyPressed = false;
-  /**
-   * Tracker if a controller music toggle key was pressed
-   */
-  private boolean controllerToggleMusicPressed = false;
-  /**
-   * Tracker if a controller sound effects toggle key was pressed
-   */
-  private boolean controllerToggleSoundEffectsPressed = false;
 
   public CreditState(final GameStateManager gameStateManager) {
     super(gameStateManager, STATE_NAME);
@@ -76,8 +43,6 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
     // Initialize game camera/canvas
     camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
 
-    // Get asset manager from the game state manager
-    assetManager = gameStateManager.getAssetManager();
     // Load assets that are not necessary to be available just yet
     assetManager.load(MainGame.getGameMusicFilePath("theme"), Music.class);
     assetManager.load(MainGame.getGameFontFilePath("cornerstone_upper_case_big"), BitmapFont.class);
@@ -96,8 +61,8 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
 
     if (Gdx.app.getType() == ApplicationType.Desktop) {
       // Toggle full screen when full screen keys are pressed
-      if (controllerFullScreenToggleKeyPressed || Gdx.input.isKeyJustPressed(Keys.F11)) {
-        controllerFullScreenToggleKeyPressed = false;
+      if (controllerToggleFullScreenPressed || Gdx.input.isKeyJustPressed(Keys.F11)) {
+        controllerToggleFullScreenPressed = false;
         GameStateManager.toggleFullScreen();
       }
     }
@@ -224,7 +189,7 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
   public void controllerCallbackToggleFullScreen() {
     Gdx.app.debug("credit_state:controllerCallbackToggleFullScreen",
         MainGame.getCurrentTimeStampLogString());
-    controllerFullScreenToggleKeyPressed = true;
+    controllerToggleFullScreenPressed = true;
   }
 
   @Override

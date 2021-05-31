@@ -16,5 +16,4 @@ public interface IControllerCallbackGenericGlobalButtons {
    * Toggle sound effects on/off
    */
   void controllerCallbackToggleSoundEffects();
-
 }

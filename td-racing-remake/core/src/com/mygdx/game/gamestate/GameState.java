@@ -1,15 +1,19 @@
 package com.mygdx.game.gamestate;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.MainGame;
+import com.mygdx.game.controller.ControllerCallbackVariables;
+import com.mygdx.game.preferences.PreferencesManager;
 
 /**
  * Abstract class that contains methods that every GameState class needs to implement to seamlessly
  * work with the GameStateManager class
  */
-public abstract class GameState {
+public abstract class GameState extends ControllerCallbackVariables {
 
 	/**
 	 * The name of the game state
@@ -23,6 +27,33 @@ public abstract class GameState {
    * Game state manager
    */
   protected final GameStateManager gameStateManager;
+  /**
+   * The global asset manager to load and get resources (it uses reference counting to easily
+   * dispose not needed resource any more after they were unloaded)
+   */
+  protected final AssetManager assetManager;
+  /**
+   * Preferences manager
+   */
+  protected final PreferencesManager preferencesManager;
+
+  /**
+   * Indicator if all assets are already loaded
+   */
+  protected boolean assetsLoaded = false;
+  /**
+   * Indicator if the application is currently paused
+   */
+  protected boolean paused = false;
+  /**
+   * Progress tracker for asset loading that contains the last progress loading percentage (0-1.0)
+   */
+  protected float assetsLoadedLastProgress = -1;
+
+  /**
+   * The current cursor position
+   */
+  protected final Vector3 cursorPosition;
 
   /**
    * Constructor
@@ -36,6 +67,13 @@ public abstract class GameState {
 		this.stateName = stateName;
     this.gameStateManager = gameStateManager;
     this.camera = new OrthographicCamera();
+
+    // Get the asset and preferences manager from the game state manager
+    assetManager = this.gameStateManager.getAssetManager();
+    preferencesManager = this.gameStateManager.getPreferencesManager();
+
+    // Initialize variable for the cursor position
+    cursorPosition = new Vector3();
   }
 
   /**

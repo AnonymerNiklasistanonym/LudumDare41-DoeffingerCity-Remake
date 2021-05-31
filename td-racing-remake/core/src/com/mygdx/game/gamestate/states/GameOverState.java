@@ -54,26 +54,17 @@ public class GameOverState extends GameState implements IControllerCallbackGener
    */
   private final ControllerCallbackGenericMenuButtonGrid controllerCallbackGenericMenuButtonGrid;
   /**
-   * The current cursor position
-   */
-  private final Vector3 cursorPosition;
-  /**
-   * The global asset manager to load and get resources (it uses reference counting to easily
-   * dispose not needed resource any more after they were unloaded)
-   */
-  private final AssetManager assetManager;
-  /**
    * The current level of the game right before death
    */
   private final int level;
   /**
    * The game over text
    */
-  private final String gameOverText = "GAME OVER";
+  private static final String gameOverText = "GAME OVER";
   /**
    * The game over text font scale
    */
-  private final float gameOverFontScale = 1;
+  private static final float gameOverFontScale = 1;
   /**
    * The menu button grid where all buttons are sorted as they are displayed on the screen: `{ {
    * Button1Row1, Button2Row2 }, { Button1Row2 }, { Button1Row3, Button2Row3 } }`
@@ -83,14 +74,6 @@ public class GameOverState extends GameState implements IControllerCallbackGener
    * Variable for the texture of the game over background
    */
   private Texture backgroundGameOver;
-  /**
-   * Indicator if all assets are already loaded
-   */
-  private boolean assetsLoaded = false;
-  /**
-   * Indicator if the application is currently paused
-   */
-  private boolean paused = false;
   /**
    * Progress tracker for asset loading that contains the last progress loading percentage (0-1.0)
    */
@@ -107,46 +90,6 @@ public class GameOverState extends GameState implements IControllerCallbackGener
    * The game over text position
    */
   private Vector2 gameOverTextPosition;
-  /**
-   * Tracker if a controller down key was pressed
-   */
-  private boolean controllerDownKeyWasPressed = false;
-  /**
-   * Tracker if a controller up key was pressed
-   */
-  private boolean controllerUpKeyWasPressed = false;
-  /**
-   * Tracker if a controller left key was pressed
-   */
-  private boolean controllerLeftKeyWasPressed = false;
-  /**
-   * Tracker if a controller right key was pressed
-   */
-  private boolean controllerRightKeyWasPressed = false;
-  /**
-   * Tracker if a controller selection key was pressed
-   */
-  private boolean controllerSelectKeyWasPressed = false;
-  /**
-   * Tracker if a controller start key was pressed
-   */
-  private boolean controllerStartKeyWasPressed = false;
-  /**
-   * Tracker if a controller back key was pressed
-   */
-  private boolean controllerBackKeyWasPressed = false;
-  /**
-   * Tracker if a controller full screen toggle key was pressed
-   */
-  private boolean controllerFullScreenToggleKeyPressed = false;
-  /**
-   * Tracker if a controller music toggle key was pressed
-   */
-  private boolean controllerToggleMusicPressed = false;
-  /**
-   * Tracker if a controller sound effects toggle key was pressed
-   */
-  private boolean controllerToggleSoundEffectsPressed = false;
 
   /**
    * Constructor that creates the game over (state)
@@ -163,11 +106,6 @@ public class GameOverState extends GameState implements IControllerCallbackGener
     // Initialize game camera/canvas
     camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
 
-    // Initialize variable for the cursor position
-    cursorPosition = new Vector3();
-
-    // Get asset manager from the game state manager
-    assetManager = gameStateManager.getAssetManager();
     // Load assets that are not necessary to be available just yet
     assetManager.load(MainGame.getGameFontFilePath("cornerstone_upper_case_big"), BitmapFont.class);
     assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_FONT, BitmapFont.class);
@@ -189,8 +127,8 @@ public class GameOverState extends GameState implements IControllerCallbackGener
 
     if (Gdx.app.getType() == ApplicationType.Desktop) {
       // Toggle full screen when full screen keys are pressed
-      if (controllerFullScreenToggleKeyPressed || Gdx.input.isKeyJustPressed(Keys.F11)) {
-        controllerFullScreenToggleKeyPressed = false;
+      if (controllerToggleFullScreenPressed || Gdx.input.isKeyJustPressed(Keys.F11)) {
+        controllerToggleFullScreenPressed = false;
         GameStateManager.toggleFullScreen();
       }
     }
@@ -519,7 +457,7 @@ public class GameOverState extends GameState implements IControllerCallbackGener
   public void controllerCallbackToggleFullScreen() {
     Gdx.app.debug("game_over_state:controllerCallbackToggleFullScreen",
         MainGame.getCurrentTimeStampLogString());
-    controllerFullScreenToggleKeyPressed = true;
+    controllerToggleFullScreenPressed = true;
   }
 
   @Override

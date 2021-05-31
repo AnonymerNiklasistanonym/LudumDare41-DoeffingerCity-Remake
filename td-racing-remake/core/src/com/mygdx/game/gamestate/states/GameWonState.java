@@ -47,34 +47,6 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
    * Variable for the sound victory of the game won background
    */
   private Sound soundVictory;
-  /**
-   * Indicator if all assets are already loaded
-   */
-  private boolean assetsLoaded = false;
-  /**
-   * Indicator if the application is currently paused
-   */
-  private boolean paused = false;
-  /**
-   * Progress tracker for asset loading that contains the last progress loading percentage (0-1.0)
-   */
-  private float assetsLoadedLastProgress = -1;
-  /**
-   * Tracker if any controller key was pressed (besides the full screen toggle keys)
-   */
-  private boolean controllerAnyKeyWasPressed = false;
-  /**
-   * Tracker if a controller full screen toggle key was pressed
-   */
-  private boolean controllerFullScreenToggleKeyPressed = false;
-  /**
-   * Tracker if a controller music toggle key was pressed
-   */
-  private boolean controllerToggleMusicPressed = false;
-  /**
-   * Tracker if a controller sound effects toggle key was pressed
-   */
-  private boolean controllerToggleSoundEffectsPressed = false;
 
   /**
    * Constructor that creates the game won (state)
@@ -107,8 +79,8 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
 
     if (Gdx.app.getType() == ApplicationType.Desktop) {
       // Toggle full screen when full screen keys are pressed
-      if (controllerFullScreenToggleKeyPressed || Gdx.input.isKeyJustPressed(Keys.F11)) {
-        controllerFullScreenToggleKeyPressed = false;
+      if (controllerToggleFullScreenPressed || Gdx.input.isKeyJustPressed(Keys.F11)) {
+        controllerToggleFullScreenPressed = false;
         GameStateManager.toggleFullScreen();
       }
     }
@@ -210,7 +182,7 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
   public void controllerCallbackToggleFullScreen() {
     Gdx.app.debug("game_won_state:controllerCallbackToggleFullScreen",
         MainGame.getCurrentTimeStampLogString());
-    controllerFullScreenToggleKeyPressed = true;
+    controllerToggleFullScreenPressed = true;
   }
 
   @Override

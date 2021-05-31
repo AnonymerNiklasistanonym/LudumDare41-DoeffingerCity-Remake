@@ -48,15 +48,7 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
    * interface implemented methods in this class on corresponding controller input
    */
   private final ControllerCallbackGenericMenuButtonGrid controllerCallbackGenericMenuButtonGrid;
-  /**
-   * The current cursor position
-   */
-  private final Vector3 cursorPosition;
-  /**
-   * The global asset manager to load and get resources (it uses reference counting to easily
-   * dispose not needed resource any more after they were unloaded)
-   */
-  private final AssetManager assetManager;
+
   /**
    * The menu button grid where all buttons are sorted as they are displayed on the screen: `{ {
    * Button1Row1, Button2Row2 }, { Button1Row2 }, { Button1Row3, Button2Row3 } }`
@@ -70,62 +62,11 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
    * Variable for the texture of the game logo
    */
   private Texture logoTnt;
-  /**
-   * Indicator if all assets are already loaded
-   */
-  private boolean assetsLoaded = false;
-  /**
-   * Indicator if the application is currently paused
-   */
-  private boolean paused = false;
-  /**
-   * Progress tracker for asset loading that contains the last progress loading percentage (0-1.0)
-   */
-  private float assetsLoadedLastProgress = -1;
+
   /**
    * Tracker for the menu button id that was selected before the current one
    */
   private String lastSelectedMenuButtonId = START_ID;
-  /**
-   * Tracker if a controller down key was pressed
-   */
-  private boolean controllerDownKeyWasPressed = false;
-  /**
-   * Tracker if a controller up key was pressed
-   */
-  private boolean controllerUpKeyWasPressed = false;
-  /**
-   * Tracker if a controller left key was pressed
-   */
-  private boolean controllerLeftKeyWasPressed = false;
-  /**
-   * Tracker if a controller right key was pressed
-   */
-  private boolean controllerRightKeyWasPressed = false;
-  /**
-   * Tracker if a controller selection key was pressed
-   */
-  private boolean controllerSelectKeyWasPressed = false;
-  /**
-   * Tracker if a controller start key was pressed
-   */
-  private boolean controllerStartKeyWasPressed = false;
-  /**
-   * Tracker if a controller back key was pressed
-   */
-  private boolean controllerBackKeyWasPressed = false;
-  /**
-   * Tracker if a controller full screen toggle key was pressed
-   */
-  private boolean controllerToggleFullScreenPressed = false;
-  /**
-   * Tracker if a controller music toggle key was pressed
-   */
-  private boolean controllerToggleMusicPressed = false;
-  /**
-   * Tracker if a controller sound effects toggle key was pressed
-   */
-  private boolean controllerToggleSoundEffectsPressed = false;
 
   /**
    * Constructor that creates the main menu (state)
@@ -138,11 +79,6 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
     // Initialize game camera/canvas
     camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
 
-    // Initialize variable for the cursor position
-    cursorPosition = new Vector3();
-
-    // Get asset manager from the game state manager
-    assetManager = gameStateManager.getAssetManager();
     // Load assets that are not necessary to be available just yet
     assetManager.load(MenuButtonBig.ASSET_MANAGER_ID_FONT, BitmapFont.class);
     assetManager.load(MenuButtonBig.ASSET_MANAGER_ID_TEXTURE_DEFAULT, Texture.class);
@@ -160,8 +96,8 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
 
   @Override
   public void handleInput() {
-    if (paused) {
-      // When the game is paused don't handle anything
+    if (paused || !assetsLoaded) {
+      // When the game is paused or assets not loaded don't handle anything
       return;
     }
 
@@ -312,9 +248,9 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
       // When the game is paused don't render anything
       return;
     }
-    if (this.assetManager.update()) {
+    if (assetManager.update()) {
       if (!assetsLoaded) {
-        float progress = this.assetManager.getProgress() * 100;
+        float progress = assetManager.getProgress() * 100;
         Gdx.app.debug("menu_state:render",
             MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
                 + progress + "%");
