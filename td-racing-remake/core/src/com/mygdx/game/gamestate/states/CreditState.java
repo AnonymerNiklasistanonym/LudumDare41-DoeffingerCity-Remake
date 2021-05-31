@@ -36,9 +36,16 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
    * Variable for the font of the credits text
    */
   private BitmapFont fontCredits;
+  private final boolean goToHighscoreListState;
 
   public CreditState(final GameStateManager gameStateManager) {
+    this(gameStateManager, false);
+  }
+
+  public CreditState(final GameStateManager gameStateManager, final boolean goToHighscoreListState) {
     super(gameStateManager, STATE_NAME);
+
+    this.goToHighscoreListState = goToHighscoreListState;
 
     // Initialize game camera/canvas
     camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
@@ -88,7 +95,11 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
     if (Gdx.input.justTouched() || Gdx.input.isKeyJustPressed(Keys.ENTER) || Gdx.input
         .isKeyJustPressed(Keys.SPACE) || Gdx.input.isKeyJustPressed(Keys.ESCAPE)
         || controllerAnyKeyWasPressed || Gdx.input.isCatchKey(Keys.BACK)) {
-      gameStateManager.setGameState(new MenuState(gameStateManager));
+      if (goToHighscoreListState) {
+        gameStateManager.setGameState(new HighscoreListState(gameStateManager));
+      } else {
+        gameStateManager.setGameState(new MenuState(gameStateManager));
+      }
     }
   }
 

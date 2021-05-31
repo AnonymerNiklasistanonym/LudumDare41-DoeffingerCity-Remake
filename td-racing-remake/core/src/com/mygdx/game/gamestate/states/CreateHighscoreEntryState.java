@@ -112,9 +112,9 @@ public class CreateHighscoreEntryState extends GameState implements ControllerMe
 
 	private void goBack() {
 		if (goToCreditStage)
-			gameStateManager.setGameState(new CreditState(gameStateManager));
+			gameStateManager.setGameState(new CreditState(gameStateManager, true));
 		else
-			gameStateManager.setGameState(new MenuState(gameStateManager));
+			gameStateManager.setGameState(new HighscoreListState(gameStateManager));
 	}
 
 	@Override
@@ -151,7 +151,7 @@ public class CreateHighscoreEntryState extends GameState implements ControllerMe
 			name += highscoreCharacterButton.getCurrentCharacter();
 		preferencesManager.saveHighscore(name, this.score);
 		if (goToCreditStage)
-			gameStateManager.setGameState(new CreditState(gameStateManager));
+			gameStateManager.setGameState(new CreditState(gameStateManager, true));
 		else
 			gameStateManager.setGameState(new GameOverState(gameStateManager, level));
 	}
