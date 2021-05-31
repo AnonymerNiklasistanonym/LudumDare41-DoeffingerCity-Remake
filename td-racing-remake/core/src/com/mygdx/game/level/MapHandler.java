@@ -35,7 +35,7 @@ public class MapHandler {
 	}
 
 	public static String[][] getMaps() {
-		return CsvFileHandler.readMapCsvFile(Gdx.files.internal("maps/levelInfo.csv"));
+		return CsvFileHandler.readMapCsvFile(Gdx.files.internal("map/levelInfo.csv"));
 	}
 
 }

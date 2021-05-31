@@ -68,13 +68,13 @@ public class Map {
 
 	public void createSolidMap(String mapName, final World world) {
 
-		map = new Sprite(new Texture(Gdx.files.internal("maps/" + mapName + ".png")));
+		map = new Sprite(new Texture(Gdx.files.internal("map/" + mapName + ".png")));
 		map.setSize(map.getWidth() * PlayState.PIXEL_TO_METER, map.getHeight() * PlayState.PIXEL_TO_METER);
 
-		final BodyEditorLoader loader = new BodyEditorLoader(Gdx.files.internal("maps/" + mapName + "solid.json"));
-		final BodyEditorLoader loaderZiel = new BodyEditorLoader(Gdx.files.internal("maps/" + mapName + "ziel.json"));
+		final BodyEditorLoader loader = new BodyEditorLoader(Gdx.files.internal("map/" + mapName + "_solid.json"));
+		final BodyEditorLoader loaderZiel = new BodyEditorLoader(Gdx.files.internal("map/" + mapName + "_goal.json"));
 		final BodyEditorLoader loaderZombieWay = new BodyEditorLoader(
-				Gdx.files.internal("maps/" + mapName + "zombieway.json"));
+				Gdx.files.internal("map/" + mapName + "_zombie_way.json"));
 
 		// 1. Create a BodyDef, as usual.
 		final BodyDef bd = new BodyDef();

@@ -8,6 +8,7 @@ import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -22,6 +23,9 @@ import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
+import com.mygdx.game.gamestate.states.resources.MenuButton;
+import com.mygdx.game.gamestate.states.resources.MenuButtonBig;
+import com.mygdx.game.gamestate.states.resources.MenuButtonSmall;
 import com.mygdx.game.level.Level;
 import com.mygdx.game.level.LevelHandler;
 import com.mygdx.game.level.Wave;
@@ -51,7 +55,6 @@ import com.mygdx.game.objects.towers.LaserTower;
 import com.mygdx.game.objects.towers.MgTower;
 import com.mygdx.game.objects.towers.SniperTower;
 import com.mygdx.game.unsorted.Node;
-import com.mygdx.game.unsorted.PreferencesManager;
 
 public class PlayState extends GameState implements CollisionCallbackInterface, ControllerCallbackInterface,
 		ScoreBoardCallbackInterface, EnemyCallbackInterface {
@@ -77,7 +80,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	private final Array<Tower> towers;
 	private final Array<Sprite> trailersmoke;
 	private float timesincesmoke;
-	private final PreferencesManager preferencesManager;
 	private final Sprite spritePitStop, spriteCar, spriteFinishLine, spriteSmoke;
 	private final ShapeRenderer shapeRenderer;
 	private final Level[] level;
@@ -95,7 +97,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	private Vector3 mousePos, padPos;
 	private Vector2 trailerpos;
 	private float tutorialtimer, physicsaccumulator, timeforwavetext;
-	private boolean pause, lastPause, musicOn, lastMusic, lastSound, soundOn, debugBox2D, debugCollision, debugDistance,
+	private boolean pausedByUser, lastPause, musicOn, lastMusic, lastSound, soundOn, debugBox2D, debugCollision, debugDistance,
 			debugWay, unlockAllTowers, padActivated, debugTower, wasAlreadyPaused;
 	private int tutorialState, checkPointsCleared, speedFactor;
 
@@ -106,62 +108,113 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 		// scale used font correctly
 		MainGame.font70.getData().setScale(0.10f);
+		assetManager.load(MainGame.getGameFontFilePath("cornerstone_70"), BitmapFont.class);
 
 		// set static dependencies
 		Enemy.callbackInterface = this;
 
 		// create sprite(s)
-		spriteCar = createScaledSprite("cars/car_standard.png");
-		spriteFinishLine = createScaledSprite("maps/finishline.png");
-		spritePitStop = createScaledSprite("pit_stop/pit_stop_01.png");
-		spriteSmoke = createScaledSprite("maps/smoke.png");
+		spriteCar = createScaledSprite("car/car_standard.png");
+		spriteFinishLine = createScaledSprite("map/map_finish_line.png");
+		spritePitStop = createScaledSprite("map/map_pit_stop.png");
+		spriteSmoke = createScaledSprite("map/map_smoke.png");
+		assetManager.load(MainGame.getGameCarFilePath("standard"), Texture.class);
+		assetManager.load(MainGame.getGameMapFilePath("finish_line"), Texture.class);
+		assetManager.load(MainGame.getGameMapFilePath("pit_stop"), Texture.class);
+		assetManager.load(MainGame.getGameMapFilePath("smoke"), Texture.class);
 
-		// set textures
-		TowerMenu.cannonButton = new Texture(Gdx.files.internal("button/cannonbutton.png"));
-		TowerMenu.laserButton = new Texture(Gdx.files.internal("button/laserbutton.png"));
-		TowerMenu.flameButton = new Texture(Gdx.files.internal("button/flamebutton.png"));
-		TowerMenu.sniperButton = new Texture(Gdx.files.internal("button/sniperbutton.png"));
-		MgTower.groundTower = new Texture(Gdx.files.internal("tower/tower_empty.png"));
-		MgTower.upperTower = new Texture(Gdx.files.internal("tower/tower_empty_upper.png"));
-		MgTower.towerFiring = new Texture(Gdx.files.internal("tower/tower_mg_firing.png"));
+		// set textures (tower buttons)
+		TowerMenu.cannonButton = new Texture(Gdx.files.internal("button/button_tower_cannon.png"));
+		TowerMenu.laserButton = new Texture(Gdx.files.internal("button/button_tower_laser.png"));
+		TowerMenu.sniperButton = new Texture(Gdx.files.internal("button/button_tower_sniper.png"));
+		TowerMenu.flameButton = new Texture(Gdx.files.internal("button/button_tower_flame.png"));
+		assetManager.load(MainGame.getGameButtonFilePath("tower_cannon"), Texture.class);
+		assetManager.load(MainGame.getGameButtonFilePath("tower_laser"), Texture.class);
+		assetManager.load(MainGame.getGameButtonFilePath("tower_sniper"), Texture.class);
+		assetManager.load(MainGame.getGameButtonFilePath("tower_flame"), Texture.class);
+
+		// set textures (towers)
+		MgTower.groundTower = new Texture(Gdx.files.internal("tower/tower_cannon_bottom.png"));
+		MgTower.upperTower = new Texture(Gdx.files.internal("tower/tower_cannon_upper.png"));
+		MgTower.towerFiring = new Texture(Gdx.files.internal("tower/tower_cannon_firing.png"));
 		SniperTower.groundTower = new Texture(Gdx.files.internal("tower/tower_sniper_bottom.png"));
 		SniperTower.upperTower = new Texture(Gdx.files.internal("tower/tower_sniper_upper.png"));
 		SniperTower.towerFiring = new Texture(Gdx.files.internal("tower/tower_sniper_firing.png"));
 		LaserTower.groundTower = new Texture(Gdx.files.internal("tower/tower_laser_bottom.png"));
 		LaserTower.upperTower = new Texture(Gdx.files.internal("tower/tower_laser_upper.png"));
 		LaserTower.towerFiring = new Texture(Gdx.files.internal("tower/tower_laser_firing.png"));
-		FireTower.groundTower = new Texture(Gdx.files.internal("tower/tower_fire_bottom.png"));
-		FireTower.upperTower = new Texture(Gdx.files.internal("tower/tower_fire_upper.png"));
-		FireTower.towerFiring = new Texture(Gdx.files.internal("tower/tower_fire_firing.png"));
-		FireTower.tflame = new Texture(Gdx.files.internal("tower/flame.png"));
-		EnemySmall.normalTexture = new Texture(Gdx.files.internal("zombies/zombie_standard.png"));
-		EnemySmall.deadTexture = new Texture(Gdx.files.internal("zombies/zombie_standard_dead.png"));
-		EnemySmall.damageTexture = new Texture(Gdx.files.internal("zombies/zombie_blood.png"));
-		EnemyFat.normalTexture = new Texture(Gdx.files.internal("zombies/zombie_fat.png"));
-		EnemyFat.deadTexture = new Texture(Gdx.files.internal("zombies/zombie_fat_dead.png"));
-		EnemyFat.damageTexture = new Texture(Gdx.files.internal("zombies/zombie_blood.png"));
-		EnemySpider.normalTexture = new Texture(Gdx.files.internal("zombies/zombie_spider.png"));
-		EnemySpider.deadTexture = new Texture(Gdx.files.internal("zombies/zombie_spider_dead.png"));
-		EnemySpider.damageTexture = new Texture(Gdx.files.internal("zombies/zombie_blood_green.png"));
-		EnemyBicycle.normalTexture = new Texture(Gdx.files.internal("zombies/zombie_bicycle.png"));
-		EnemyBicycle.deadTexture = new Texture(Gdx.files.internal("zombies/zombie_bicycle_dead.png"));
-		EnemyBicycle.damageTexture = new Texture(Gdx.files.internal("zombies/zombie_blood.png"));
-		EnemyLincoln.normalTexture = new Texture(Gdx.files.internal("zombies/zombie_lincoln.png"));
-		EnemyLincoln.deadTexture = new Texture(Gdx.files.internal("zombies/zombie_lincoln_dead.png"));
-		EnemyLincoln.damageTexture = new Texture(Gdx.files.internal("zombies/zombie_blood.png"));
+		FireTower.groundTower = new Texture(Gdx.files.internal("tower/tower_flame_bottom.png"));
+		FireTower.upperTower = new Texture(Gdx.files.internal("tower/tower_flame_upper.png"));
+		FireTower.towerFiring = new Texture(Gdx.files.internal("tower/tower_flame_firing.png"));
+		FireTower.tflame = new Texture(Gdx.files.internal("tower/tower_flame_fire.png"));
+		assetManager.load(MainGame.getGameTowerFilePath("cannon_bottom"), Texture.class);
+		assetManager.load(MainGame.getGameTowerFilePath("cannon_upper"), Texture.class);
+		assetManager.load(MainGame.getGameTowerFilePath("cannon_firing"), Texture.class);
+		assetManager.load(MainGame.getGameTowerFilePath("sniper_bottom"), Texture.class);
+		assetManager.load(MainGame.getGameTowerFilePath("sniper_upper"), Texture.class);
+		assetManager.load(MainGame.getGameTowerFilePath("sniper_firing"), Texture.class);
+		assetManager.load(MainGame.getGameTowerFilePath("laser_bottom"), Texture.class);
+		assetManager.load(MainGame.getGameTowerFilePath("laser_upper"), Texture.class);
+		assetManager.load(MainGame.getGameTowerFilePath("laser_firing"), Texture.class);
+		assetManager.load(MainGame.getGameTowerFilePath("flame_bottom"), Texture.class);
+		assetManager.load(MainGame.getGameTowerFilePath("flame_upper"), Texture.class);
+		assetManager.load(MainGame.getGameTowerFilePath("flame_firing"), Texture.class);
+		assetManager.load(MainGame.getGameTowerFilePath("flame_fire"), Texture.class);
 
-		// set audio files
-		MgTower.soundShoot = Gdx.audio.newSound(Gdx.files.internal("sounds/mgturret.wav"));
-		SniperTower.soundShoot = Gdx.audio.newSound(Gdx.files.internal("sounds/sniper.wav"));
-		LaserTower.soundShoot = Gdx.audio.newSound(Gdx.files.internal("sounds/laser_beam.mp3"));
-		FireTower.soundShoot = Gdx.audio.newSound(Gdx.files.internal("sounds/flamethrower.wav"));
+		// set textures (enemies)
+		EnemySmall.normalTexture = new Texture(Gdx.files.internal("zombie/zombie_standard.png"));
+		EnemySmall.deadTexture = new Texture(Gdx.files.internal("zombie/zombie_standard_dead.png"));
+		EnemySmall.damageTexture = new Texture(Gdx.files.internal("zombie/zombie_blood.png"));
+		EnemyFat.normalTexture = new Texture(Gdx.files.internal("zombie/zombie_fat.png"));
+		EnemyFat.deadTexture = new Texture(Gdx.files.internal("zombie/zombie_fat_dead.png"));
+		EnemyFat.damageTexture = new Texture(Gdx.files.internal("zombie/zombie_blood.png"));
+		EnemySpider.normalTexture = new Texture(Gdx.files.internal("zombie/zombie_spider.png"));
+		EnemySpider.deadTexture = new Texture(Gdx.files.internal("zombie/zombie_spider_dead.png"));
+		EnemySpider.damageTexture = new Texture(Gdx.files.internal("zombie/zombie_blood_green.png"));
+		EnemyBicycle.normalTexture = new Texture(Gdx.files.internal("zombie/zombie_bicycle.png"));
+		EnemyBicycle.deadTexture = new Texture(Gdx.files.internal("zombie/zombie_bicycle_dead.png"));
+		EnemyBicycle.damageTexture = new Texture(Gdx.files.internal("zombie/zombie_blood.png"));
+		EnemyLincoln.normalTexture = new Texture(Gdx.files.internal("zombie/zombie_lincoln.png"));
+		EnemyLincoln.deadTexture = new Texture(Gdx.files.internal("zombie/zombie_lincoln_dead.png"));
+		EnemyLincoln.damageTexture = new Texture(Gdx.files.internal("zombie/zombie_blood.png"));
+		assetManager.load(MainGame.getGameZombieFilePath("blood"), Texture.class);
+		assetManager.load(MainGame.getGameZombieFilePath("blood_green"), Texture.class);
+		assetManager.load(MainGame.getGameZombieFilePath("standard"), Texture.class);
+		assetManager.load(MainGame.getGameZombieFilePath("standard_dead"), Texture.class);
+		assetManager.load(MainGame.getGameZombieFilePath("fat"), Texture.class);
+		assetManager.load(MainGame.getGameZombieFilePath("fat_dead"), Texture.class);
+		assetManager.load(MainGame.getGameZombieFilePath("bicycle"), Texture.class);
+		assetManager.load(MainGame.getGameZombieFilePath("bicycle_dead"), Texture.class);
+		assetManager.load(MainGame.getGameZombieFilePath("spider"), Texture.class);
+		assetManager.load(MainGame.getGameZombieFilePath("spider_dead"), Texture.class);
+		assetManager.load(MainGame.getGameZombieFilePath("lincoln"), Texture.class);
+		assetManager.load(MainGame.getGameZombieFilePath("lincoln_dead"), Texture.class);
+
+		// set audio files (towers)
+		MgTower.soundShoot = Gdx.audio.newSound(Gdx.files.internal("sound/sound_tower_cannon.wav"));
+		SniperTower.soundShoot = Gdx.audio.newSound(Gdx.files.internal("sound/sound_tower_sniper.wav"));
+		LaserTower.soundShoot = Gdx.audio.newSound(Gdx.files.internal("sound/sound_tower_laser.mp3"));
+		FireTower.soundShoot = Gdx.audio.newSound(Gdx.files.internal("sound/sound_tower_flame.wav"));
+		assetManager.load(MainGame.getGameSoundFilePath("tower_cannon"), Sound.class);
+		assetManager.load(MainGame.getGameSoundFilePath("tower_sniper"), Sound.class);
+		assetManager.load(MainGame.getGameSoundFilePath("tower_laser", true), Sound.class);
+		assetManager.load(MainGame.getGameSoundFilePath("tower_flame"), Sound.class);
+
+		// set audio files (other)
 		backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("music/music_theme.mp3"));
-		carSound = Gdx.audio.newMusic(Gdx.files.internal("sounds/sound_car_engine.mp3"));
-		splatt = Gdx.audio.newSound(Gdx.files.internal("sounds/splatt.wav"));
-		soundmoney = Gdx.audio.newSound(Gdx.files.internal("sounds/cash.wav"));
-		carSoundStart = Gdx.audio.newSound(Gdx.files.internal("sounds/sound_car_engine_start.mp3"));
+		carSound = Gdx.audio.newMusic(Gdx.files.internal("sound/sound_car_engine.mp3"));
+		splatt = Gdx.audio.newSound(Gdx.files.internal("sound/sound_splatt.wav"));
+		soundmoney = Gdx.audio.newSound(Gdx.files.internal("sound/sound_cash.wav"));
+		carSoundStart = Gdx.audio.newSound(Gdx.files.internal("sound/sound_car_engine_start.mp3"));
 		victorySound = Gdx.audio.newSound(Gdx.files.internal("sound/sound_victory.wav"));
-		soundDamage = Gdx.audio.newSound(Gdx.files.internal("sounds/trailerdamage.wav"));
+		soundDamage = Gdx.audio.newSound(Gdx.files.internal("sound/sound_trailer_damage.wav"));
+		assetManager.load(MainGame.getGameMusicFilePath("theme"), Music.class);
+		assetManager.load(MainGame.getGameSoundFilePath("car_engine", true), Sound.class);
+		assetManager.load(MainGame.getGameSoundFilePath("car_engine_start", true), Sound.class);
+		assetManager.load(MainGame.getGameSoundFilePath("splatt"), Sound.class);
+		assetManager.load(MainGame.getGameSoundFilePath("cash"), Sound.class);
+		assetManager.load(MainGame.getGameSoundFilePath("victory"), Sound.class);
+		assetManager.load(MainGame.getGameSoundFilePath("trailer_damage"), Sound.class);
 		// Sets this camera to an orthographic projection, centered at (viewportWidth/2,
 		// viewportHeight/2), with the y-axis pointing up or down.
 		camera.setToOrtho(false, MainGame.GAME_WIDTH * PIXEL_TO_METER, MainGame.GAME_HEIGHT * PIXEL_TO_METER);
@@ -174,9 +227,9 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		tutorialState = 0;
 		physicsaccumulator = 0;
 		timesincesmoke = 0;
-		pause = false;
-		lastPause = !pause;
-		wasAlreadyPaused = pause;
+		pausedByUser = false;
+		lastPause = !pausedByUser;
+		wasAlreadyPaused = pausedByUser;
 		padActivated = false;
 		debugTower = false;
 		debugBox2D = false;
@@ -189,7 +242,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		scoreBoard = new ScoreBoard(this);
 		controllerHelper = new ControllerHelper(this);
 		Controllers.addListener(controllerHelper);
-		preferencesManager = new PreferencesManager();
 		preferencesManager.checkHighscore();
 		// preferencesManager.setupIfFirstStart();
 		enemies = new Array<Enemy>();
@@ -347,7 +399,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 		// toggle pause
 		if (Gdx.input.isKeyJustPressed(Keys.P))
-			pause = !pause;
+			pausedByUser = !pausedByUser;
 
 		// toggle sound
 		if (Gdx.input.isKeyJustPressed(Keys.U))
@@ -487,10 +539,10 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	protected void update(float deltaTime) {
 
 		// if the pause settings change
-		if (lastPause != pause) {
-			lastPause = pause;
+		if (lastPause != pausedByUser) {
+			lastPause = pausedByUser;
 			// pause or resume all sounds
-			if (pause) {
+			if (pausedByUser) {
 				if (soundOn) {
 					soundmoney.pause();
 					carSound.pause();
@@ -509,7 +561,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 			}
 		}
 
-		if (pause)
+		if (pausedByUser)
 			return;
 
 		// if the sound settings change
@@ -617,7 +669,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	}
 
 	private void updateSmoke() {
-		if (pause || scoreBoard.getHealth() == 100)
+		if (pausedByUser || scoreBoard.getHealth() == 100)
 			return;
 		float smokeseconds = 15 / (100f - scoreBoard.getHealth());
 		timesincesmoke = timesincesmoke + Gdx.graphics.getDeltaTime();
@@ -652,6 +704,29 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	@Override
 	public void render(final SpriteBatch spriteBatch) {
+
+		if (assetManager.update()) {
+			if (!assetsLoaded) {
+				float progress = assetManager.getProgress() * 100;
+				Gdx.app.debug("play_state:render",
+						MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
+								+ progress + "%");
+				assetsLoaded = true;
+
+				// TODO Load assets via the asset manager
+
+				// TODO Set up everything that needed assets to set up
+			}
+		} else {
+			// display loading information
+			float progress = assetManager.getProgress() * 100;
+			if (progress != assetsLoadedLastProgress) {
+				assetsLoadedLastProgress = progress;
+				Gdx.app.debug("play_state:render",
+						MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
+								+ progress + "%");
+			}
+		}
 
 		// set projection matrices
 		spriteBatch.setProjectionMatrix(camera.combined);
@@ -733,7 +808,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		renderTutorial(spriteBatch);
 
 		// draw pause overlay
-		if (pause) {
+		if (pausedByUser) {
 			spriteBatch.end();
 			Gdx.gl.glEnable(GL20.GL_BLEND);
 			Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -747,11 +822,11 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		}
 
 		// draw centered pause or custom wave text
-		if (pause || timeforwavetext > 0) {
+		if (pausedByUser || timeforwavetext > 0) {
 			final Vector2 wavePosition = GameStateManager.calculateCenteredTextPosition(MainGame.font70,
-					pause ? "PAUSE" : waveText, MainGame.GAME_WIDTH * PIXEL_TO_METER,
+					pausedByUser ? "PAUSE" : waveText, MainGame.GAME_WIDTH * PIXEL_TO_METER,
 					MainGame.GAME_HEIGHT * PIXEL_TO_METER);
-			MainGame.font70.draw(spriteBatch, pause ? "PAUSE" : waveText, wavePosition.x, wavePosition.y);
+			MainGame.font70.draw(spriteBatch, pausedByUser ? "PAUSE" : waveText, wavePosition.x, wavePosition.y);
 		}
 		spriteBatch.end();
 
@@ -931,7 +1006,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	}
 
 	private void updatePhysics(final float deltaTime) {
-		if (pause)
+		if (pausedByUser)
 			return;
 
 		physicsaccumulator += Math.min(deltaTime, 0.25f);
@@ -978,6 +1053,67 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		carSound.dispose();
 		victorySound.dispose();
 		shapeRenderer.dispose();
+
+		Gdx.app.debug("menu_state:dispose", "Loaded assets before unloading are:");
+		for (final String loadedAsset : assetManager.getAssetNames()) {
+			Gdx.app.debug("menu_state:dispose", "- " + loadedAsset);
+		}
+
+		assetManager.unload(MainGame.getGameFontFilePath("cornerstone_70"));
+		assetManager.unload(MainGame.getGameCarFilePath("standard"));
+		assetManager.unload(MainGame.getGameMapFilePath("finish_line"));
+		assetManager.unload(MainGame.getGameMapFilePath("pit_stop"));
+		assetManager.unload(MainGame.getGameMapFilePath("smoke"));
+
+		assetManager.unload(MainGame.getGameButtonFilePath("tower_cannon"));
+		assetManager.unload(MainGame.getGameButtonFilePath("tower_laser"));
+		assetManager.unload(MainGame.getGameButtonFilePath("tower_sniper"));
+		assetManager.unload(MainGame.getGameButtonFilePath("tower_flame"));
+
+		assetManager.unload(MainGame.getGameTowerFilePath("cannon_bottom"));
+		assetManager.unload(MainGame.getGameTowerFilePath("cannon_upper"));
+		assetManager.unload(MainGame.getGameTowerFilePath("cannon_firing"));
+		assetManager.unload(MainGame.getGameTowerFilePath("sniper_bottom"));
+		assetManager.unload(MainGame.getGameTowerFilePath("sniper_upper"));
+		assetManager.unload(MainGame.getGameTowerFilePath("sniper_firing"));
+		assetManager.unload(MainGame.getGameTowerFilePath("laser_bottom"));
+		assetManager.unload(MainGame.getGameTowerFilePath("laser_upper"));
+		assetManager.unload(MainGame.getGameTowerFilePath("laser_firing"));
+		assetManager.unload(MainGame.getGameTowerFilePath("flame_bottom"));
+		assetManager.unload(MainGame.getGameTowerFilePath("flame_upper"));
+		assetManager.unload(MainGame.getGameTowerFilePath("flame_firing"));
+		assetManager.unload(MainGame.getGameTowerFilePath("flame_fire"));
+
+		assetManager.unload(MainGame.getGameZombieFilePath("blood"));
+		assetManager.unload(MainGame.getGameZombieFilePath("blood_green"));
+		assetManager.unload(MainGame.getGameZombieFilePath("standard"));
+		assetManager.unload(MainGame.getGameZombieFilePath("standard_dead"));
+		assetManager.unload(MainGame.getGameZombieFilePath("fat"));
+		assetManager.unload(MainGame.getGameZombieFilePath("fat_dead"));
+		assetManager.unload(MainGame.getGameZombieFilePath("bicycle"));
+		assetManager.unload(MainGame.getGameZombieFilePath("bicycle_dead"));
+		assetManager.unload(MainGame.getGameZombieFilePath("spider"));
+		assetManager.unload(MainGame.getGameZombieFilePath("spider_dead"));
+		assetManager.unload(MainGame.getGameZombieFilePath("lincoln"));
+		assetManager.unload(MainGame.getGameZombieFilePath("lincoln_dead"));
+
+		assetManager.unload(MainGame.getGameSoundFilePath("tower_cannon"));
+		assetManager.unload(MainGame.getGameSoundFilePath("tower_sniper"));
+		assetManager.unload(MainGame.getGameSoundFilePath("tower_laser", true));
+		assetManager.unload(MainGame.getGameSoundFilePath("tower_flame"));
+
+		assetManager.unload(MainGame.getGameMusicFilePath("theme"));
+		assetManager.unload(MainGame.getGameSoundFilePath("car_engine", true));
+		assetManager.unload(MainGame.getGameSoundFilePath("car_engine_start", true));
+		assetManager.unload(MainGame.getGameSoundFilePath("splatt"));
+		assetManager.unload(MainGame.getGameSoundFilePath("cash"));
+		assetManager.unload(MainGame.getGameSoundFilePath("victory"));
+		assetManager.unload(MainGame.getGameSoundFilePath("trailer_damage"));
+
+		Gdx.app.debug("menu_state:dispose", "Loaded assets after unloading are:");
+		for (final String loadedAsset : assetManager.getAssetNames()) {
+			Gdx.app.debug("menu_state:dispose", "- " + loadedAsset);
+		}
 	}
 
 	@Override
@@ -1108,7 +1244,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	@Override
 	public void playerIsDeadCallback() {
-		pause = true;
+		pausedByUser = true;
 		// if score can make it in the top 10 go to the name input else game over
 		if (preferencesManager.scoreIsInTop5(scoreBoard.getScore()))
 			gameStateManager.setGameState(
@@ -1173,7 +1309,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	@Override
 	public void controllerCallbackTogglePause() {
-		pause = !pause;
+		pausedByUser = !pausedByUser;
 	}
 
 	@Override
@@ -1204,13 +1340,13 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	@Override
 	public void pause() {
-		wasAlreadyPaused = pause;
-		pause = true;
+		wasAlreadyPaused = pausedByUser;
+		pausedByUser = true;
 	}
 
 	@Override
 	public void resume() {
 		if (!wasAlreadyPaused)
-			pause = false;
+			pausedByUser = false;
 	}
 }

@@ -1,5 +1,6 @@
 package com.mygdx.game.level;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
@@ -93,6 +94,7 @@ public class Level {
 	}
 
 	public void setMapName(final String mapName) {
+		Gdx.app.debug("setMapName", mapName);
 		this.mapName = mapName;
 	}
 

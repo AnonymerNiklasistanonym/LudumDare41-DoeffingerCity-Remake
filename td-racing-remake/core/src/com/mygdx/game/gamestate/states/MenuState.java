@@ -289,7 +289,7 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
       spriteBatch.end();
     } else {
       // display loading information
-      float progress = this.assetManager.getProgress() * 100;
+      float progress = assetManager.getProgress() * 100;
       if (progress != assetsLoadedLastProgress) {
         assetsLoadedLastProgress = progress;
         Gdx.app.debug("menu_state:render",

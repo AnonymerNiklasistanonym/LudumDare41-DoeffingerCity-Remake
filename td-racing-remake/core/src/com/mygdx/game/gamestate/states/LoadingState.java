@@ -8,6 +8,9 @@ import com.mygdx.game.MainGame;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
 
+/**
+ * TODO Replace this class by integrating it into the PlayState class
+ */
 public class LoadingState extends GameState {
 
 	private final Texture backgroundLoading;

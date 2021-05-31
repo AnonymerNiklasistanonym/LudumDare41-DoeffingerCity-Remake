@@ -147,7 +147,39 @@ public class MainGame implements ApplicationListener {
    * @param soundName The name of the game sound
    */
   public static String getGameSoundFilePath(final String soundName) {
-    return "sound/sound_" + soundName + ".wav";
+    return getGameSoundFilePath(soundName, false);
+  }
+
+  /**
+   * Get the filepath of a game sound given its name
+   *
+   * @param soundName The name of the game sound
+   * @param mp3File Indicator if the sound is a *.mp3 file instead of the default *.wav file
+   */
+  public static String getGameSoundFilePath(final String soundName, final boolean mp3File) {
+    return "sound/sound_" + soundName + "." + (mp3File ? "mp3" : "wav");
+  }
+
+  /**
+   * Get the filepath of a game car skin given its name
+   *
+   * @param carName The name of the game car skin
+   */
+  public static String getGameCarFilePath(final String carName) {
+    return "car/car_" + carName + ".png";
+
+  }
+
+  public static String getGameMapFilePath(String mapName) {
+    return "map/map_" + mapName + ".png";
+  }
+
+  public static String getGameTowerFilePath(String towerName) {
+    return "tower/tower_" + towerName + ".png";
+  }
+
+  public static String getGameZombieFilePath(String zombieName) {
+    return "zombie/zombie_" + zombieName + ".png";
   }
 
   @Override
