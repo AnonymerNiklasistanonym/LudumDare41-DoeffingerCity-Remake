@@ -68,8 +68,6 @@ public class ControllerCallbackGenericOneClick implements ControllerListener {
     if (pressed) {
       switch (ControllerInputMapping.getControllerButton(controller, buttonId)) {
         case BUTTON_A:
-        case BUTTON_X:
-        case BUTTON_Y:
         case BUTTON_B:
         case BUTTON_BACK:
         case BUTTON_START:
@@ -83,6 +81,10 @@ public class ControllerCallbackGenericOneClick implements ControllerListener {
         case BUTTON_RB:
           controllerCallbackClass.controllerCallbackToggleFullScreen();
           break;
+        case BUTTON_X:
+          controllerCallbackClass.controllerCallbackToggleMusic();
+        case BUTTON_Y:
+          controllerCallbackClass.controllerCallbackToggleSoundEffects();
         default:
           // not important
       }

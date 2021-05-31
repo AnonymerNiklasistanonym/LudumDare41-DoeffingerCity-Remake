@@ -67,6 +67,14 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
    * Tracker if a controller full screen toggle key was pressed
    */
   private boolean controllerFullScreenToggleKeyPressed = false;
+  /**
+   * Tracker if a controller music toggle key was pressed
+   */
+  private boolean controllerToggleMusicPressed = false;
+  /**
+   * Tracker if a controller sound effects toggle key was pressed
+   */
+  private boolean controllerToggleSoundEffectsPressed = false;
 
   /**
    * Constructor that creates the game won (state)
@@ -110,7 +118,7 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
     if (Gdx.input.justTouched() || Gdx.input.isKeyJustPressed(Keys.ENTER) || Gdx.input
         .isKeyJustPressed(Keys.SPACE) || Gdx.input.isKeyJustPressed(Keys.ESCAPE)
         || controllerAnyKeyWasPressed || Gdx.input.isCatchKey(Keys.BACK)) {
-      gameStateManager.setGameState(new HighscoreNameState(gameStateManager, score, true));
+      gameStateManager.setGameState(new CreateHighscoreEntryState(gameStateManager, score, true));
     }
   }
 
@@ -203,5 +211,19 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
     Gdx.app.debug("game_won_state:controllerCallbackToggleFullScreen",
         MainGame.getCurrentTimeStampLogString());
     controllerFullScreenToggleKeyPressed = true;
+  }
+
+  @Override
+  public void controllerCallbackToggleMusic() {
+    Gdx.app.debug("menu_state:controllerCallbackToggleMusic",
+        MainGame.getCurrentTimeStampLogString());
+    controllerToggleMusicPressed = true;
+  }
+
+  @Override
+  public void controllerCallbackToggleSoundEffects() {
+    Gdx.app.debug("menu_state:controllerCallbackToggleSoundEffects",
+        MainGame.getCurrentTimeStampLogString());
+    controllerToggleSoundEffectsPressed = true;
   }
 }

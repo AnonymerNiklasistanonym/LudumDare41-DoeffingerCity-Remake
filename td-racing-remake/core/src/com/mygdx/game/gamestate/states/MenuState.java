@@ -117,7 +117,15 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
   /**
    * Tracker if a controller full screen toggle key was pressed
    */
-  private boolean controllerFullScreenToggleKeyPressed = false;
+  private boolean controllerToggleFullScreenPressed = false;
+  /**
+   * Tracker if a controller music toggle key was pressed
+   */
+  private boolean controllerToggleMusicPressed = false;
+  /**
+   * Tracker if a controller sound effects toggle key was pressed
+   */
+  private boolean controllerToggleSoundEffectsPressed = false;
 
   /**
    * Constructor that creates the main menu (state)
@@ -159,8 +167,8 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
 
     if (Gdx.app.getType() == ApplicationType.Desktop) {
       // Toggle full screen when full screen keys are pressed
-      if (controllerFullScreenToggleKeyPressed || Gdx.input.isKeyJustPressed(Keys.F11)) {
-        controllerFullScreenToggleKeyPressed = false;
+      if (controllerToggleFullScreenPressed || Gdx.input.isKeyJustPressed(Keys.F11)) {
+        controllerToggleFullScreenPressed = false;
         GameStateManager.toggleFullScreen();
       }
     }
@@ -272,6 +280,17 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
       controllerRightKeyWasPressed = false;
       controllerStartKeyWasPressed = false;
       controllerSelectKeyWasPressed = false;
+    }
+
+    // Turn music on/off
+    if (controllerToggleMusicPressed || Gdx.input.isKeyJustPressed(Keys.M)) {
+      controllerToggleMusicPressed = false;
+      gameStateManager.getPreferencesManager().setMusicOn(!gameStateManager.getPreferencesManager().getMusicOn());
+    }
+    // Turn sound effects on/off
+    if (controllerToggleSoundEffectsPressed || Gdx.input.isKeyJustPressed(Keys.U)) {
+      controllerToggleSoundEffectsPressed = false;
+      gameStateManager.getPreferencesManager().setSoundEffectsOn(!gameStateManager.getPreferencesManager().getSoundEfectsOn());
     }
 
     // If escape or back is pressed quit
@@ -477,6 +496,20 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
   public void controllerCallbackToggleFullScreen() {
     Gdx.app.debug("menu_state:controllerCallbackToggleFullScreen",
         MainGame.getCurrentTimeStampLogString());
-    controllerFullScreenToggleKeyPressed = true;
+    controllerToggleFullScreenPressed = true;
+  }
+
+  @Override
+  public void controllerCallbackToggleMusic() {
+    Gdx.app.debug("menu_state:controllerCallbackToggleMusic",
+        MainGame.getCurrentTimeStampLogString());
+    controllerToggleMusicPressed = true;
+  }
+
+  @Override
+  public void controllerCallbackToggleSoundEffects() {
+    Gdx.app.debug("menu_state:controllerCallbackToggleSoundEffects",
+        MainGame.getCurrentTimeStampLogString());
+    controllerToggleSoundEffectsPressed = true;
   }
 }

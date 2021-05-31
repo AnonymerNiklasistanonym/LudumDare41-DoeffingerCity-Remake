@@ -61,6 +61,14 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
    * Tracker if a controller full screen toggle key was pressed
    */
   private boolean controllerFullScreenToggleKeyPressed = false;
+  /**
+   * Tracker if a controller music toggle key was pressed
+   */
+  private boolean controllerToggleMusicPressed = false;
+  /**
+   * Tracker if a controller sound effects toggle key was pressed
+   */
+  private boolean controllerToggleSoundEffectsPressed = false;
 
   public CreditState(final GameStateManager gameStateManager) {
     super(gameStateManager, STATE_NAME);
@@ -81,8 +89,8 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
 
   @Override
   protected void handleInput() {
-    if (paused) {
-      // When the game is paused don't handle anything
+    if (paused || !assetsLoaded) {
+      // When the game is paused or assets not loaded don't handle anything
       return;
     }
 
@@ -92,6 +100,22 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
         controllerFullScreenToggleKeyPressed = false;
         GameStateManager.toggleFullScreen();
       }
+    }
+
+    // Turn music on/off
+    if (controllerToggleMusicPressed || Gdx.input.isKeyJustPressed(Keys.M)) {
+      controllerToggleMusicPressed = false;
+      gameStateManager.getPreferencesManager().setMusicOn(!gameStateManager.getPreferencesManager().getMusicOn());
+      if (gameStateManager.getPreferencesManager().getMusicOn()) {
+        musicBackground.play();
+      } else {
+        musicBackground.stop();
+      }
+    }
+    // Turn sound effects on/off
+    if (controllerToggleSoundEffectsPressed || Gdx.input.isKeyJustPressed(Keys.U)) {
+      controllerToggleSoundEffectsPressed = false;
+      gameStateManager.getPreferencesManager().setSoundEffectsOn(!gameStateManager.getPreferencesManager().getSoundEfectsOn());
     }
 
     // If a button is touched or the space or enter key is currently pressed or any controller
@@ -123,8 +147,7 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
         assetsLoaded = true;
         musicBackground = assetManager.get(MainGame.getGameMusicFilePath("theme"));
         musicBackground.setLooping(true);
-        // new PreferencesManager().setupIfFirstStart();
-				if (new PreferencesManager().getMusicOn()) {
+				if (gameStateManager.getPreferencesManager().getMusicOn()) {
 					musicBackground.play();
 				}
 
@@ -202,5 +225,19 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
     Gdx.app.debug("credit_state:controllerCallbackToggleFullScreen",
         MainGame.getCurrentTimeStampLogString());
     controllerFullScreenToggleKeyPressed = true;
+  }
+
+  @Override
+  public void controllerCallbackToggleMusic() {
+    Gdx.app.debug("menu_state:controllerCallbackToggleMusic",
+        MainGame.getCurrentTimeStampLogString());
+    controllerToggleMusicPressed = true;
+  }
+
+  @Override
+  public void controllerCallbackToggleSoundEffects() {
+    Gdx.app.debug("menu_state:controllerCallbackToggleSoundEffects",
+        MainGame.getCurrentTimeStampLogString());
+    controllerToggleSoundEffectsPressed = true;
   }
 }

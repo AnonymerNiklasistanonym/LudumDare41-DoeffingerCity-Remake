@@ -1,9 +1,12 @@
 package com.mygdx.game.controller.menu_button_grid;
 
+import com.mygdx.game.controller.IControllerCallbackGenericGlobalButtons;
+
 /**
  * Callback interface for controller inputs in the menu state
  */
-public interface IControllerCallbackGenericMenuButtonGrid {
+public interface IControllerCallbackGenericMenuButtonGrid extends
+    IControllerCallbackGenericGlobalButtons {
 
   /**
    * Select left menu button
@@ -39,10 +42,5 @@ public interface IControllerCallbackGenericMenuButtonGrid {
    * Exit the application because a back button was pressed
    */
   void controllerCallbackClickBackButton();
-
-  /**
-   * Toggle full screen
-   */
-  void controllerCallbackToggleFullScreen();
 
 }

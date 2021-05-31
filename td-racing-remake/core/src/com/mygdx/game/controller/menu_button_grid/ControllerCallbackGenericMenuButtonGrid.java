@@ -72,8 +72,6 @@ public class ControllerCallbackGenericMenuButtonGrid implements ControllerListen
     if (pressed) {
       switch (ControllerInputMapping.getControllerButton(controller, buttonId)) {
         case BUTTON_A:
-        case BUTTON_X:
-        case BUTTON_Y:
           controllerCallbackClass.controllerCallbackClickMenuButton();
           break;
         case BUTTON_B:
@@ -99,6 +97,10 @@ public class ControllerCallbackGenericMenuButtonGrid implements ControllerListen
         case BUTTON_RIGHT:
           controllerCallbackClass.controllerCallbackSelectRightMenuButton();
           break;
+        case BUTTON_X:
+          controllerCallbackClass.controllerCallbackToggleMusic();
+        case BUTTON_Y:
+          controllerCallbackClass.controllerCallbackToggleSoundEffects();
         default:
           // not important
       }

@@ -18,9 +18,9 @@ import com.mygdx.game.listener.controller.ControllerMenuCallbackInterface;
 import com.mygdx.game.listener.controller.ControllerWiki;
 import com.mygdx.game.unsorted.PreferencesManager;
 
-public class HighscoreNameState extends GameState implements ControllerMenuCallbackInterface {
+public class CreateHighscoreEntryState extends GameState implements ControllerMenuCallbackInterface {
 
-	private static final String STATE_NAME = "Highscore > Name";
+	private static final String STATE_NAME = "CreateHighscoreEntry";
 
 	private final HighscoreCharacterButton[] highscoreCharacterButtons;
 	private final ShapeRenderer shapeRenderer;
@@ -39,7 +39,7 @@ public class HighscoreNameState extends GameState implements ControllerMenuCallb
 	private final boolean goToCreditStage;
 	private final int level;
 
-	public HighscoreNameState(GameStateManager gameStateManager, final int score, final int level,
+	public CreateHighscoreEntryState(GameStateManager gameStateManager, final int score, final int level,
 			final boolean goToCreditStage) {
 		super(gameStateManager, STATE_NAME);
 
@@ -64,7 +64,7 @@ public class HighscoreNameState extends GameState implements ControllerMenuCallb
 
 		MainGame.fontUpperCaseBig.getData().setScale(0.65f);
 		MainGame.fontUpperCaseBig.setUseIntegerPositions(false);
-		this.highscoreText = "YOU REACHED THE TOP 10!";
+		this.highscoreText = "YOU REACHED THE TOP 5!";
 		this.highscoreTextPosition = GameStateManager.calculateCenteredTextPosition(MainGame.fontUpperCaseBig,
 				highscoreText, MainGame.GAME_WIDTH, (float)MainGame.GAME_HEIGHT / 3 * 5);
 		this.scoreText = "" + score;
@@ -85,7 +85,7 @@ public class HighscoreNameState extends GameState implements ControllerMenuCallb
 		controllerTimeHelper = 0;
 	}
 
-	public HighscoreNameState(GameStateManager gameStateManager, final int score, final boolean goToCreditStage) {
+	public CreateHighscoreEntryState(GameStateManager gameStateManager, final int score, final boolean goToCreditStage) {
 		this(gameStateManager, score, 0, goToCreditStage);
 	}
 

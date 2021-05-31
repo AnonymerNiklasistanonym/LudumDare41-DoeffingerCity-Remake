@@ -130,7 +130,7 @@ public class PreferencesManager {
   }
 
   public boolean getMusicOn() {
-    return prefs.getBoolean(PREFERENCE_SOUND_EFFECTS_ON_BOOL, true);
+    return prefs.getBoolean(PREFERENCE_MUSIC_ON_BOOL, true);
   }
 
   public void setMusicOn(final boolean musicOn) {
@@ -138,7 +138,7 @@ public class PreferencesManager {
   }
 
   public boolean getSoundEfectsOn() {
-    return prefs.getBoolean(PREFERENCE_MUSIC_ON_BOOL, true);
+    return prefs.getBoolean(PREFERENCE_SOUND_EFFECTS_ON_BOOL, true);
   }
 
   public void saveHighscore(String name, int score) {

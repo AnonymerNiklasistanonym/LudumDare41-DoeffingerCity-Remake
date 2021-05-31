@@ -1112,7 +1112,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		// if score can make it in the top 10 go to the name input else game over
 		if (preferencesManager.scoreIsInTop5(scoreBoard.getScore()))
 			gameStateManager.setGameState(
-					new HighscoreNameState(gameStateManager, scoreBoard.getScore(), scoreBoard.getLevel(), false));
+					new CreateHighscoreEntryState(gameStateManager, scoreBoard.getScore(), scoreBoard.getLevel(), false));
 		else {
 			gameStateManager.setGameState(new GameOverState(gameStateManager, scoreBoard.getLevel()));
 		}

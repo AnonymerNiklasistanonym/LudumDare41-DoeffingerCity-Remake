@@ -139,6 +139,14 @@ public class GameOverState extends GameState implements IControllerCallbackGener
    * Tracker if a controller full screen toggle key was pressed
    */
   private boolean controllerFullScreenToggleKeyPressed = false;
+  /**
+   * Tracker if a controller music toggle key was pressed
+   */
+  private boolean controllerToggleMusicPressed = false;
+  /**
+   * Tracker if a controller sound effects toggle key was pressed
+   */
+  private boolean controllerToggleSoundEffectsPressed = false;
 
   /**
    * Constructor that creates the game over (state)
@@ -512,5 +520,19 @@ public class GameOverState extends GameState implements IControllerCallbackGener
     Gdx.app.debug("game_over_state:controllerCallbackToggleFullScreen",
         MainGame.getCurrentTimeStampLogString());
     controllerFullScreenToggleKeyPressed = true;
+  }
+
+  @Override
+  public void controllerCallbackToggleMusic() {
+    Gdx.app.debug("game_over_state:controllerCallbackToggleMusic",
+        MainGame.getCurrentTimeStampLogString());
+    controllerToggleMusicPressed = true;
+  }
+
+  @Override
+  public void controllerCallbackToggleSoundEffects() {
+    Gdx.app.debug("game_over_state:controllerCallbackToggleSoundEffects",
+        MainGame.getCurrentTimeStampLogString());
+    controllerToggleSoundEffectsPressed = true;
   }
 }
