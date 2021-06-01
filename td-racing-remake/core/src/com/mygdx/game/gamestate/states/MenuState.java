@@ -3,20 +3,18 @@ package com.mygdx.game.gamestate.states;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.controller.menu_button_grid.ControllerCallbackGenericMenuButtonGrid;
 import com.mygdx.game.controller.menu_button_grid.IControllerCallbackGenericMenuButtonGrid;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
-import com.mygdx.game.gamestate.states.resources.MenuButton;
-import com.mygdx.game.gamestate.states.resources.MenuButtonBig;
-import com.mygdx.game.gamestate.states.resources.MenuButtonSmall;
+import com.mygdx.game.gamestate.states.elements.MenuButton;
+import com.mygdx.game.gamestate.states.elements.MenuButtonBig;
+import com.mygdx.game.gamestate.states.elements.MenuButtonSmall;
 import com.mygdx.game.helper.HelperMenu;
 import com.mygdx.game.helper.HelperMenuButtonNavigation;
 
@@ -193,8 +191,6 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
         controllerUpKeyWasPressed = false;
         controllerLeftKeyWasPressed = false;
         controllerRightKeyWasPressed = false;
-        controllerStartKeyWasPressed = false;
-        controllerSelectKeyWasPressed = false;
       }
       if (controllerStartKeyWasPressed) {
         controllerStartKeyWasPressed = false;
@@ -221,12 +217,14 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
     // Turn music on/off
     if (controllerToggleMusicPressed || Gdx.input.isKeyJustPressed(Keys.M)) {
       controllerToggleMusicPressed = false;
-      gameStateManager.getPreferencesManager().setMusicOn(!gameStateManager.getPreferencesManager().getMusicOn());
+      gameStateManager.getPreferencesManager()
+          .setMusicOn(!gameStateManager.getPreferencesManager().getMusicOn());
     }
     // Turn sound effects on/off
     if (controllerToggleSoundEffectsPressed || Gdx.input.isKeyJustPressed(Keys.U)) {
       controllerToggleSoundEffectsPressed = false;
-      gameStateManager.getPreferencesManager().setSoundEffectsOn(!gameStateManager.getPreferencesManager().getSoundEfectsOn());
+      gameStateManager.getPreferencesManager()
+          .setSoundEffectsOn(!gameStateManager.getPreferencesManager().getSoundEfectsOn());
     }
 
     // If escape or back is pressed quit
@@ -313,22 +311,16 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
 
     // Reduce the reference to used resources in this state (when no object is referencing the
     // resource any more it is automatically disposed by the global asset manager)
-    Gdx.app.debug("menu_state:dispose", "Loaded assets before unloading are:");
-    for (final String loadedAsset : assetManager.getAssetNames()) {
-      Gdx.app.debug("menu_state:dispose", "- " + loadedAsset);
-    }
-    assetManager.unload(MenuButtonBig.ASSET_MANAGER_ID_FONT);
-    assetManager.unload(MenuButtonBig.ASSET_MANAGER_ID_TEXTURE_DEFAULT);
-    assetManager.unload(MenuButtonBig.ASSET_MANAGER_ID_TEXTURE_SELECTED);
-    assetManager.unload(MenuButtonSmall.ASSET_MANAGER_ID_FONT);
-    assetManager.unload(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_DEFAULT);
-    assetManager.unload(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED);
-    assetManager.unload(MainGame.getGameBackgroundFilePath("stars"));
-    assetManager.unload(MainGame.getGameLogoFilePath("tnt"));
-    Gdx.app.debug("menu_state:dispose", "Loaded assets after unloading are:");
-    for (final String loadedAsset : assetManager.getAssetNames()) {
-      Gdx.app.debug("menu_state:dispose", "- " + loadedAsset);
-    }
+    unloadAssetManagerResources(new String[]{
+        MenuButtonBig.ASSET_MANAGER_ID_FONT,
+        MenuButtonBig.ASSET_MANAGER_ID_TEXTURE_DEFAULT,
+        MenuButtonBig.ASSET_MANAGER_ID_TEXTURE_SELECTED,
+        MenuButtonSmall.ASSET_MANAGER_ID_FONT,
+        MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_DEFAULT,
+        MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED,
+        MainGame.getGameBackgroundFilePath("stars"),
+        MainGame.getGameLogoFilePath("tnt"),
+    });
   }
 
   /**

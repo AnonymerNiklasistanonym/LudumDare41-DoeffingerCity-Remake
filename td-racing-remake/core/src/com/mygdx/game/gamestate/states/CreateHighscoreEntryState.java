@@ -12,7 +12,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
-import com.mygdx.game.gamestate.states.resources.HighscoreCharacterButton;
+import com.mygdx.game.gamestate.states.elements.HighscoreCharacterButton;
 import com.mygdx.game.listener.controller.ControllerHelperMenu;
 import com.mygdx.game.listener.controller.ControllerMenuCallbackInterface;
 import com.mygdx.game.listener.controller.ControllerWiki;

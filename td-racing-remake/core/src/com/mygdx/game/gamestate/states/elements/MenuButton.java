@@ -1,4 +1,4 @@
-package com.mygdx.game.gamestate.states.resources;
+package com.mygdx.game.gamestate.states.elements;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
@@ -78,42 +78,20 @@ public abstract class MenuButton implements Disposable, IHelperMenuButton {
     this.fontScale = fontScale;
 
     // Get assets
-    this.font = assetManager.get(assetManagerIdFont);
-    this.textureDefault = assetManager.get(assetManagerIdTextureDefault);
-    this.textureSelected = assetManager.get(assetManagerIdTextureSelected);
+    font = assetManager.get(assetManagerIdFont);
+    textureDefault = assetManager.get(assetManagerIdTextureDefault);
+    textureSelected = assetManager.get(assetManagerIdTextureSelected);
 
     // Create new button sprite with the given information
-    this.button = new Sprite(this.selected ? textureSelected : textureDefault);
-    this.button.setSize(textureSelected.getWidth(), textureSelected.getHeight());
-    this.button.setPosition(xPosition - this.button.getWidth() / 2,
-        yPosition - this.button.getHeight() / 2);
+    button = new Sprite(this.selected ? textureSelected : textureDefault);
+    button.setSize(textureSelected.getWidth(), textureSelected.getHeight());
+    button.setPosition(xPosition - button.getWidth() / 2,
+        yPosition - button.getHeight() / 2);
 
     // Calculate the text position and set the font scale
-    this.font.getData().setScale(this.fontScale);
-    this.textPosition = GameStateManager
-        .calculateCenteredTextPosition(this.font, this.text, xPosition * 2, yPosition * 2);
-  }
-
-  /**
-   * Overload constructor so that it can be called without the button being selected
-   *
-   * @param id                            The ID of the button to identify it when pressed or not
-   * @param text                          The button text
-   * @param assetManager                  Asset manager that contains the font and texture
-   *                                      resources
-   * @param assetManagerIdFont            The asset manager ID for the text font
-   * @param fontScale                     The menu button text font scale
-   * @param assetManagerIdTextureDefault  The asset manager ID for the texture of a button
-   * @param assetManagerIdTextureSelected The asset manager ID for the texture of a selected button
-   * @param xPosition                     X position for rendering
-   * @param yPosition                     Y position for rendering
-   */
-  public MenuButton(final String id, final String text, final AssetManager assetManager,
-      final String assetManagerIdFont, final float fontScale,
-      final String assetManagerIdTextureDefault, final String assetManagerIdTextureSelected,
-      final float xPosition, final float yPosition) {
-    this(id, text, assetManager, assetManagerIdFont, fontScale, assetManagerIdTextureDefault,
-        assetManagerIdTextureSelected, xPosition, yPosition, false);
+    font.getData().setScale(fontScale);
+    textPosition = GameStateManager
+        .calculateCenteredTextPosition(font, this.text, xPosition * 2, yPosition * 2);
   }
 
   /**
@@ -122,7 +100,7 @@ public abstract class MenuButton implements Disposable, IHelperMenuButton {
    * @return True if currently selected
    */
   public boolean isSelected() {
-    return this.selected;
+    return selected;
   }
 
   /**
@@ -130,7 +108,7 @@ public abstract class MenuButton implements Disposable, IHelperMenuButton {
    */
   public void setSelected(final boolean selected) {
     this.selected = selected;
-    this.button.setTexture(this.selected ? this.textureSelected : this.textureDefault);
+    button.setTexture(this.selected ? textureSelected : textureDefault);
   }
 
   /**
@@ -140,16 +118,16 @@ public abstract class MenuButton implements Disposable, IHelperMenuButton {
    */
   public void draw(final SpriteBatch spriteBatch) {
     // Draw the button (texture)
-    if (this.selected) {
-      this.button.setAlpha(1.0f);
+    if (selected) {
+      button.setAlpha(1.0f);
     } else {
-      this.button.setAlpha(0.25f);
+      button.setAlpha(0.25f);
     }
-    this.button.draw(spriteBatch);
+    button.draw(spriteBatch);
 
     // Draw the text on top of the button
-    this.font.getData().setScale(this.fontScale);
-    this.font.draw(spriteBatch, this.text, this.textPosition.x, this.textPosition.y);
+    font.getData().setScale(fontScale);
+    font.draw(spriteBatch, text, textPosition.x, textPosition.y);
   }
 
   /**
@@ -159,10 +137,10 @@ public abstract class MenuButton implements Disposable, IHelperMenuButton {
    * @return True if cursor position is on the button
    */
   public boolean contains(final Vector3 cursorPosition) {
-    return (cursorPosition.x > this.button.getX()
-        && cursorPosition.x < this.button.getX() + this.button.getWidth())
-        && (cursorPosition.y > this.button.getY()
-        && cursorPosition.y < this.button.getY() + this.button.getHeight());
+    return (cursorPosition.x > button.getX()
+        && cursorPosition.x < button.getX() + button.getWidth())
+        && (cursorPosition.y > button.getY()
+        && cursorPosition.y < button.getY() + button.getHeight());
   }
 
   /**
@@ -171,16 +149,17 @@ public abstract class MenuButton implements Disposable, IHelperMenuButton {
    * @return The ID of the button
    */
   public String getId() {
-    return this.id;
+    return id;
   }
 
   /**
    * Dispose textures and fonts TODO Asset manager migration later? (https://github.com/libgdx/libgdx/wiki/Managing-your-assets)
    */
   public void disposeMedia() {
-    this.textureSelected.dispose();
-    this.textureDefault.dispose();
-    this.font.dispose();
+    // Dispose loaded assets
+    textureSelected.dispose();
+    textureDefault.dispose();
+    font.dispose();
   }
 
 }

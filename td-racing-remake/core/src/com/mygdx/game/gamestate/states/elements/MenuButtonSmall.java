@@ -1,4 +1,4 @@
-package com.mygdx.game.gamestate.states.resources;
+package com.mygdx.game.gamestate.states.elements;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.mygdx.game.MainGame;

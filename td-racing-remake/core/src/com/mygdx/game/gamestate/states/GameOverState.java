@@ -3,20 +3,18 @@ package com.mygdx.game.gamestate.states;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.controller.menu_button_grid.ControllerCallbackGenericMenuButtonGrid;
 import com.mygdx.game.controller.menu_button_grid.IControllerCallbackGenericMenuButtonGrid;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
-import com.mygdx.game.gamestate.states.resources.MenuButton;
-import com.mygdx.game.gamestate.states.resources.MenuButtonSmall;
+import com.mygdx.game.gamestate.states.elements.MenuButton;
+import com.mygdx.game.gamestate.states.elements.MenuButtonSmall;
 import com.mygdx.game.helper.HelperMenu;
 import com.mygdx.game.helper.HelperMenuButtonNavigation;
 
@@ -48,6 +46,14 @@ public class GameOverState extends GameState implements IControllerCallbackGener
    */
   private static final String STATE_NAME = "GameOver";
   /**
+   * The game over text
+   */
+  private static final String gameOverText = "GAME OVER";
+  /**
+   * The game over text font scale
+   */
+  private static final float gameOverFontScale = 1;
+  /**
    * Controller callback class that gets this class in its constructor which implements some
    * callback methods and can then be added as a controller listener which can then call the
    * interface implemented methods in this class on corresponding controller input
@@ -57,14 +63,6 @@ public class GameOverState extends GameState implements IControllerCallbackGener
    * The current level of the game right before death
    */
   private final int level;
-  /**
-   * The game over text
-   */
-  private static final String gameOverText = "GAME OVER";
-  /**
-   * The game over text font scale
-   */
-  private static final float gameOverFontScale = 1;
   /**
    * The menu button grid where all buttons are sorted as they are displayed on the screen: `{ {
    * Button1Row1, Button2Row2 }, { Button1Row2 }, { Button1Row3, Button2Row3 } }`
@@ -217,8 +215,6 @@ public class GameOverState extends GameState implements IControllerCallbackGener
         controllerUpKeyWasPressed = false;
         controllerLeftKeyWasPressed = false;
         controllerRightKeyWasPressed = false;
-        controllerStartKeyWasPressed = false;
-        controllerSelectKeyWasPressed = false;
       }
       if (controllerStartKeyWasPressed) {
         controllerStartKeyWasPressed = false;

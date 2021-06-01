@@ -3,7 +3,6 @@ package com.mygdx.game.gamestate.states;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -14,12 +13,12 @@ import com.mygdx.game.controller.one_click.ControllerCallbackGenericOneClick;
 import com.mygdx.game.controller.one_click.IControllerCallbackGenericOneClick;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
-import com.mygdx.game.unsorted.PreferencesManager;
 
 public class CreditState extends GameState implements IControllerCallbackGenericOneClick {
 
   private static final String STATE_NAME = "Credits";
-  private static final String[] textCredits = new String[]{"THIS GAME WAS MADE BY", "DANIEL CZEPPEL",
+  private static final String[] textCredits = new String[]{"THIS GAME WAS MADE BY",
+      "DANIEL CZEPPEL",
       "NIKLAS MIKELER", "PATRICK ULMER", "",
       "MUSIC BY SASCHA CZEPPEL"};
   /**
@@ -27,6 +26,7 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
    */
   private static final float fontScaleCredits = 0.5f;
   private final ControllerCallbackGenericOneClick controllerCallbackGenericOneClick;
+  private final boolean goToHighscoreListState;
   private Vector2[] textContentPosition;
   /**
    * Variable for the texture of the stars background
@@ -36,13 +36,13 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
    * Variable for the font of the credits text
    */
   private BitmapFont fontCredits;
-  private final boolean goToHighscoreListState;
 
   public CreditState(final GameStateManager gameStateManager) {
     this(gameStateManager, false);
   }
 
-  public CreditState(final GameStateManager gameStateManager, final boolean goToHighscoreListState) {
+  public CreditState(final GameStateManager gameStateManager,
+      final boolean goToHighscoreListState) {
     super(gameStateManager, STATE_NAME);
 
     this.goToHighscoreListState = goToHighscoreListState;
@@ -77,7 +77,8 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
     // Turn music on/off
     if (controllerToggleMusicPressed || Gdx.input.isKeyJustPressed(Keys.M)) {
       controllerToggleMusicPressed = false;
-      gameStateManager.getPreferencesManager().setMusicOn(!gameStateManager.getPreferencesManager().getMusicOn());
+      gameStateManager.getPreferencesManager()
+          .setMusicOn(!gameStateManager.getPreferencesManager().getMusicOn());
       if (gameStateManager.getPreferencesManager().getMusicOn()) {
         musicBackground.play();
       } else {
@@ -87,7 +88,8 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
     // Turn sound effects on/off
     if (controllerToggleSoundEffectsPressed || Gdx.input.isKeyJustPressed(Keys.U)) {
       controllerToggleSoundEffectsPressed = false;
-      gameStateManager.getPreferencesManager().setSoundEffectsOn(!gameStateManager.getPreferencesManager().getSoundEfectsOn());
+      gameStateManager.getPreferencesManager()
+          .setSoundEffectsOn(!gameStateManager.getPreferencesManager().getSoundEfectsOn());
     }
 
     // If a button is touched or the space or enter key is currently pressed or any controller
@@ -123,9 +125,9 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
         assetsLoaded = true;
         musicBackground = assetManager.get(MainGame.getGameMusicFilePath("theme"));
         musicBackground.setLooping(true);
-				if (gameStateManager.getPreferencesManager().getMusicOn()) {
-					musicBackground.play();
-				}
+        if (gameStateManager.getPreferencesManager().getMusicOn()) {
+          musicBackground.play();
+        }
 
         // set font scale to the correct size and disable to use integers for scaling
         fontCredits = assetManager.get(MainGame.getGameFontFilePath("cornerstone_upper_case_big"));
@@ -140,10 +142,10 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
       spriteBatch.begin();
 
       // render the text that should be displayed
-			for (int i = 0; i < textCredits.length; i++) {
-				fontCredits.draw(spriteBatch, textCredits[i], textContentPosition[i].x,
-						textContentPosition[i].y);
-			}
+      for (int i = 0; i < textCredits.length; i++) {
+        fontCredits.draw(spriteBatch, textCredits[i], textContentPosition[i].x,
+            textContentPosition[i].y);
+      }
 
       spriteBatch.end();
     } else {
@@ -165,16 +167,10 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
 
     // Reduce the reference to used resources in this state (when no object is referencing the
     // resource any more it is automatically disposed by the global asset manager)
-    Gdx.app.debug("credit_state:dispose", "Loaded assets before unloading are:");
-    for (final String loadedAsset : assetManager.getAssetNames()) {
-      Gdx.app.debug("credit_state:dispose", "- " + loadedAsset);
-    }
-    assetManager.unload(MainGame.getGameMusicFilePath("theme"));
-    assetManager.unload(MainGame.getGameFontFilePath("cornerstone_upper_case_big"));
-    Gdx.app.debug("credit_state:dispose", "Loaded assets after unloading are:");
-    for (final String loadedAsset : assetManager.getAssetNames()) {
-      Gdx.app.debug("credit_state:dispose", "- " + loadedAsset);
-    }
+    unloadAssetManagerResources(new String[]{
+        MainGame.getGameMusicFilePath("theme"),
+        MainGame.getGameFontFilePath("cornerstone_upper_case_big"),
+    });
   }
 
   @Override

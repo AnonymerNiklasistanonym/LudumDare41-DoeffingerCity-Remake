@@ -1,158 +1,234 @@
 package com.mygdx.game.gamestate.states;
 
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
-import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
-//import com.badlogic.gdx.controllers.PovDirection;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.MainGame;
+import com.mygdx.game.controller.one_click.ControllerCallbackGenericOneClick;
+import com.mygdx.game.controller.one_click.IControllerCallbackGenericOneClick;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
-import com.mygdx.game.gamestate.states.resources.HighscoreButton;
-import com.mygdx.game.listener.controller.ControllerHelperMenu;
-import com.mygdx.game.listener.controller.ControllerMenuCallbackInterface;
-import com.mygdx.game.listener.controller.ControllerWiki;
-import com.mygdx.game.unsorted.PreferencesManager;
-import com.mygdx.game.unsorted.PreferencesManager.HighscoreEntry;
+import com.mygdx.game.gamestate.states.elements.HighscoreEntry;
 
-public class HighscoreListState extends GameState implements ControllerMenuCallbackInterface {
+public class HighscoreListState extends GameState implements IControllerCallbackGenericOneClick {
 
-	private static final String STATE_NAME = "Highscore > List";
+  private static final String STATE_NAME = "HighscoreList";
+  private final static float fontScaleHighscoreListEntry = 1;
+  private final ControllerCallbackGenericOneClick controllerCallbackGenericOneClick;
+  private final int level;
+  private final boolean goToGameOverState;
+  private HighscoreEntry[] highscoreEntries;
+  private BitmapFont fontHighscoreListEntry;
 
-	private final PreferencesManager preferencesManager;
+  public HighscoreListState(GameStateManager gameStateManager) {
+    this(gameStateManager, false, -1);
+  }
 
-	private HighscoreButton[] highscoreButtons;
-	private float controllerTimeHelper;
-	private final ControllerListener controllerHelperMenu;
+  public HighscoreListState(GameStateManager gameStateManager, final boolean goToGameOverState,
+      final int level) {
+    super(gameStateManager, STATE_NAME);
+    this.level = level;
+    this.goToGameOverState = goToGameOverState;
 
-	public HighscoreListState(GameStateManager gameStateManager) {
-		super(gameStateManager, STATE_NAME);
+    // Load assets that are not necessary to be available just yet
+    assetManager.load(MainGame.getGameButtonFilePath("highscore"), Texture.class);
+    assetManager.load(MainGame.getGameFontFilePath("cornerstone"), BitmapFont.class);
+    assetManager.load(MainGame.getGameFontFilePath("cornerstone_upper_case_big"), BitmapFont.class);
 
-		// load static texture for high score entry
-		HighscoreButton.texture = new Texture(Gdx.files.internal("button/button_highscore.png"));
+    // set camera to 1280x720
+    camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
 
-		// set camera to 1280x720
-		camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
+    // Register controller callback so that controller input can be managed
+    controllerCallbackGenericOneClick = new ControllerCallbackGenericOneClick(this);
+    Controllers.addListener(controllerCallbackGenericOneClick);
+  }
 
-		// create a preferences manager for loading/clearing high score entries
-		preferencesManager = new PreferencesManager();
-		loadHighScoreList();
+  private void loadHighScoreList() {
+    // Get the current highscore list from the preference manager
+    preferencesManager.checkHighscore();
 
-		// controller setup
-		controllerHelperMenu = new ControllerHelperMenu(this);
-		Controllers.addListener(controllerHelperMenu);
-		controllerTimeHelper = 0;
-	}
+    // Create/Update highscore buttons
+    com.mygdx.game.preferences.PreferencesManager.HighscoreEntry[] entries = preferencesManager
+        .retrieveHighscore();
+    highscoreEntries = new HighscoreEntry[5];
+    for (int i = 0; i < 5; i++) {
+      highscoreEntries[i] = new HighscoreEntry(i + 1, entries[i].getScore(), entries[i].getName(),
+          assetManager, MainGame.getGameFontFilePath("cornerstone_upper_case_big"), 0.5f,
+          MainGame.getGameButtonFilePath("highscore"), (float) MainGame.GAME_WIDTH / 2,
+          (float) MainGame.GAME_HEIGHT / 6 * (5 - i));
+    }
+  }
 
-	private void loadHighScoreList() {
-		preferencesManager.checkHighscore();
-		// load and display high score entries
-		HighscoreEntry[] entries = preferencesManager.retrieveHighscore();
-		this.highscoreButtons = new HighscoreButton[] {
-				new HighscoreButton(1, entries[0].getScore(), entries[0].getName(), MainGame.GAME_WIDTH / 2,
-						MainGame.GAME_HEIGHT / 6 * 5),
-				new HighscoreButton(2, entries[1].getScore(), entries[1].getName(), MainGame.GAME_WIDTH / 2,
-						MainGame.GAME_HEIGHT / 6 * 4),
-				new HighscoreButton(3, entries[2].getScore(), entries[2].getName(), MainGame.GAME_WIDTH / 2,
-						MainGame.GAME_HEIGHT / 6 * 3),
-				new HighscoreButton(4, entries[3].getScore(), entries[3].getName(), MainGame.GAME_WIDTH / 2,
-						MainGame.GAME_HEIGHT / 6 * 2),
-				new HighscoreButton(5, entries[4].getScore(), entries[4].getName(), MainGame.GAME_WIDTH / 2,
-						MainGame.GAME_HEIGHT / 6 * 1) };
-	}
+  @Override
+  protected void handleInput() {
+    if (paused || !assetsLoaded) {
+      // When the game is paused or assets not loaded don't handle anything
+      return;
+    }
 
-	@Override
-	protected void handleInput() {
-		GameStateManager.toggleFullScreen(true);
+    if (Gdx.app.getType() == ApplicationType.Desktop) {
+      // Toggle full screen when full screen keys are pressed
+      if (controllerToggleFullScreenPressed || Gdx.input.isKeyJustPressed(Keys.F11)) {
+        controllerToggleFullScreenPressed = false;
+        GameStateManager.toggleFullScreen();
+      }
+    }
 
-		// go back to the menu state
-		if (Gdx.input.justTouched() || (Gdx.input.isKeyJustPressed(Keys.ESCAPE) || Gdx.input.isCatchBackKey()))
-			goBack();
+    // Turn music on/off
+    if (controllerToggleMusicPressed || Gdx.input.isKeyJustPressed(Keys.M)) {
+      controllerToggleMusicPressed = false;
+      gameStateManager.getPreferencesManager()
+          .setMusicOn(!gameStateManager.getPreferencesManager().getMusicOn());
+    }
+    // Turn sound effects on/off
+    if (controllerToggleSoundEffectsPressed || Gdx.input.isKeyJustPressed(Keys.U)) {
+      controllerToggleSoundEffectsPressed = false;
+      gameStateManager.getPreferencesManager()
+          .setSoundEffectsOn(!gameStateManager.getPreferencesManager().getSoundEfectsOn());
+    }
 
-		if (MainGame.DEVELOPER_MODE) {
+    // If a button is touched or the space or enter key is currently pressed or any controller
+    // key is currently pressed go back to the menu
+    if (Gdx.input.justTouched() || Gdx.input.isKeyJustPressed(Keys.ENTER) || Gdx.input
+        .isKeyJustPressed(Keys.SPACE) || Gdx.input.isKeyJustPressed(Keys.ESCAPE)
+        || controllerAnyKeyWasPressed || Gdx.input.isCatchKey(Keys.BACK)) {
+      if (goToGameOverState) {
+        gameStateManager.setGameState(new GameOverState(gameStateManager, level));
+      } else {
+        gameStateManager.setGameState(new MenuState(gameStateManager));
+      }
+    }
 
-			// clear high score list
-			if (Gdx.input.isKeyJustPressed(Keys.C)) {
-				preferencesManager.resetHighscore();
-				loadHighScoreList();
+    // Provide additional functionality when in developer mode
+    if (MainGame.DEVELOPER_MODE) {
+      // Reset the highscore list
+      if (Gdx.input.isKeyJustPressed(Keys.C)) {
+        preferencesManager.resetHighscore();
+        loadHighScoreList();
+      }
+    }
+  }
+
+  private void goBack() {
+    gameStateManager.setGameState(new MenuState(gameStateManager));
+  }
+
+  @Override
+  protected void update(final float deltaTime) {
+    // Not necessary to do anything
+  }
+
+  @Override
+  protected void render(final SpriteBatch spriteBatch) {
+    if (paused) {
+      // When the game is paused don't render anything
+      return;
+    }
+    if (assetManager.update()) {
+      if (!assetsLoaded) {
+        float progress = assetManager.getProgress() * 100;
+        Gdx.app.debug("highscore_list_state:render",
+            MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
+                + progress + "%");
+        assetsLoaded = true;
+
+        // TODO Change button class to not have a static texture
+        HighscoreEntry.texture = assetManager.get(MainGame.getGameButtonFilePath("highscore"));
+
+        // set font scale to the correct size and disable to use integers for scaling
+        fontHighscoreListEntry = assetManager.get(MainGame.getGameFontFilePath("cornerstone"));
+        fontHighscoreListEntry.setUseIntegerPositions(false);
+        fontHighscoreListEntry.getData().setScale(fontScaleHighscoreListEntry);
+
+        // Load highscore list which updates the highscore "buttons"
+        loadHighScoreList();
+      }
+      // Render credits
+      spriteBatch.setProjectionMatrix(camera.combined);
+      spriteBatch.begin();
+
+      // Draw highscore (entry) "buttons"
+			for (final HighscoreEntry highscoreEntry : highscoreEntries) {
+				highscoreEntry.draw(spriteBatch);
 			}
 
+      // If in development mode provide a list with additional available features
+      if (MainGame.DEVELOPER_MODE) {
+        fontHighscoreListEntry.getData().setScale(1);
+        fontHighscoreListEntry.setColor(1, 1, 1, 1);
+        fontHighscoreListEntry.draw(spriteBatch, "Reset list: C", 10, 30);
+      }
+
+      spriteBatch.end();
+    } else {
+      // display loading information
+      float progress = assetManager.getProgress() * 100;
+      if (progress != assetsLoadedLastProgress) {
+        assetsLoadedLastProgress = progress;
+        Gdx.app.debug("highscore_list_state:render",
+            MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
+                + progress + "%");
+      }
+    }
+  }
+
+  @Override
+  protected void dispose() {
+    Controllers.removeListener(controllerCallbackGenericOneClick);
+    HighscoreEntry.texture.dispose();
+		for (final HighscoreEntry highscoreEntry : highscoreEntries) {
+			highscoreEntry.dispose();
 		}
-	}
 
-	private void goBack() {
-		gameStateManager.setGameState(new MenuState(gameStateManager));
-	}
+    unloadAssetManagerResources(new String[]{
+        MainGame.getGameFontFilePath("cornerstone"),
+        MainGame.getGameFontFilePath("cornerstone_upper_case_big"),
+        MainGame.getGameButtonFilePath("highscore"),
+    });
+  }
 
-	@Override
-	protected void update(final float deltaTime) {
-		controllerTimeHelper += deltaTime;
-	}
+  @Override
+  public void pause() {
+    Gdx.app.debug("highscore_list_state:pause", MainGame.getCurrentTimeStampLogString() + "pause");
+    paused = true;
+  }
 
-	@Override
-	protected void render(final SpriteBatch spriteBatch) {
-		spriteBatch.begin();
+  @Override
+  public void resume() {
+    Gdx.app
+        .debug("highscore_list_state:resume", MainGame.getCurrentTimeStampLogString() + "resume");
+    paused = false;
+  }
 
-		// draw high score (entry) buttons
-		for (final HighscoreButton highscoreButton : highscoreButtons)
-			highscoreButton.draw(spriteBatch);
+  @Override
+  public void controllerCallbackClickAnyButton() {
+    Gdx.app.debug("highscore_list_state:controllerCallbackClickAnyButton",
+        MainGame.getCurrentTimeStampLogString());
+    controllerAnyKeyWasPressed = true;
+  }
 
-		if (MainGame.DEVELOPER_MODE) {
+  @Override
+  public void controllerCallbackToggleFullScreen() {
+    Gdx.app.debug("highscore_list_state:controllerCallbackToggleFullScreen",
+        MainGame.getCurrentTimeStampLogString());
+    controllerToggleFullScreenPressed = true;
+  }
 
-			// draw message to inform how the list can be cleared
-			MainGame.font.getData().setScale(1);
-			MainGame.font.setColor(1, 1, 1, 1);
-			MainGame.font.draw(spriteBatch, "Clear List: C", 10, 30);
+  @Override
+  public void controllerCallbackToggleMusic() {
+    Gdx.app.debug("highscore_list_state:controllerCallbackToggleMusic",
+        MainGame.getCurrentTimeStampLogString());
+    controllerToggleMusicPressed = true;
+  }
 
-		}
-
-		spriteBatch.end();
-	}
-
-	@Override
-	protected void dispose() {
-		Controllers.removeListener(controllerHelperMenu);
-		HighscoreButton.texture.dispose();
-		for (final HighscoreButton highscoreButton : highscoreButtons)
-			highscoreButton.dispose();
-	}
-
-	@Override
-	public void controllerCallbackBackPressed() {
-		goBack();
-	}
-
-	@Override
-	public void controllerCallbackButtonPressed(int buttonId) {
-		if (controllerTimeHelper < 0.2)
-			return;
-		if (buttonId == ControllerWiki.BUTTON_A)
-			goBack();
-		if (buttonId == ControllerWiki.BUTTON_START)
-			GameStateManager.toggleFullScreen();
-	}
-/*
-	@Override
-	public void controllerCallbackDPadButtonPressed(PovDirection direction) {
-		// Nothing to do
-	}
-*/
-	@Override
-	public void controllerCallbackStickMoved(final boolean xAxis, final float value) {
-		// Nothing to do
-	}
-
-	@Override
-	public void pause() {
-		// Nothing to do
-
-	}
-
-	@Override
-	public void resume() {
-		// Nothing to do
-	}
-
+  @Override
+  public void controllerCallbackToggleSoundEffects() {
+    Gdx.app.debug("highscore_list_state:controllerCallbackToggleSoundEffects",
+        MainGame.getCurrentTimeStampLogString());
+    controllerToggleSoundEffectsPressed = true;
+  }
 }

@@ -15,10 +15,10 @@ import com.mygdx.game.preferences.PreferencesManager;
  */
 public abstract class GameState extends ControllerCallbackVariables {
 
-	/**
-	 * The name of the game state
-	 */
-	final public String stateName;
+  /**
+   * The name of the game state
+   */
+  final public String stateName;
   /**
    * Game screen camera
    */
@@ -36,7 +36,10 @@ public abstract class GameState extends ControllerCallbackVariables {
    * Preferences manager
    */
   protected final PreferencesManager preferencesManager;
-
+  /**
+   * The current cursor position
+   */
+  protected final Vector3 cursorPosition;
   /**
    * Indicator if all assets are already loaded
    */
@@ -51,11 +54,6 @@ public abstract class GameState extends ControllerCallbackVariables {
   protected float assetsLoadedLastProgress = -1;
 
   /**
-   * The current cursor position
-   */
-  protected final Vector3 cursorPosition;
-
-  /**
    * Constructor
    *
    * @param gameStateManager The game state manager
@@ -64,7 +62,7 @@ public abstract class GameState extends ControllerCallbackVariables {
   protected GameState(final GameStateManager gameStateManager, final String stateName) {
     Gdx.app.log("game_state:constructor",
         MainGame.getCurrentTimeStampLogString() + "create new state: \"" + stateName + "\"");
-		this.stateName = stateName;
+    this.stateName = stateName;
     this.gameStateManager = gameStateManager;
     this.camera = new OrthographicCamera();
 
@@ -109,5 +107,24 @@ public abstract class GameState extends ControllerCallbackVariables {
    * Callback in case the state is resumed
    */
   public abstract void resume();
+
+  /**
+   * Method that unloads all given resources with additional logging. Unloading a resource reduces
+   * the reference (when assetManager.get() is called it increases the reference count) - when the
+   * count is zero the resource is automatically disposed by the asset manager.
+   */
+  protected void unloadAssetManagerResources(final String[] resourcesToUnload) {
+    Gdx.app.debug("game_state:unloadAssetManagerResources", "Loaded assets before unloading are:");
+    for (final String loadedAsset : assetManager.getAssetNames()) {
+      Gdx.app.debug("game_state:unloadAssetManagerResources", "- " + loadedAsset);
+    }
+    for (final String resourceToUnload : resourcesToUnload) {
+      assetManager.unload(resourceToUnload);
+    }
+    Gdx.app.debug("game_state:unloadAssetManagerResources", "Loaded assets after unloading are:");
+    for (final String loadedAsset : assetManager.getAssetNames()) {
+      Gdx.app.debug("game_state:unloadAssetManagerResources", "- " + loadedAsset);
+    }
+  }
 
 }
