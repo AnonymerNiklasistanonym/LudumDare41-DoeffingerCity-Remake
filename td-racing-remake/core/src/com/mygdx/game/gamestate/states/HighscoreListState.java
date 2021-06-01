@@ -13,16 +13,18 @@ import com.mygdx.game.controller.one_click.IControllerCallbackGenericOneClick;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
 import com.mygdx.game.gamestate.states.elements.HighscoreEntry;
+import com.mygdx.game.preferences.PreferencesManager;
 
 public class HighscoreListState extends GameState implements IControllerCallbackGenericOneClick {
 
   private static final String STATE_NAME = "HighscoreList";
-  private final static float fontScaleHighscoreListEntry = 1;
+  private final static float fontScaleDeveloperInfo = 1;
   private final ControllerCallbackGenericOneClick controllerCallbackGenericOneClick;
   private final int level;
   private final boolean goToGameOverState;
   private HighscoreEntry[] highscoreEntries;
-  private BitmapFont fontHighscoreListEntry;
+  private BitmapFont fontDeveloperInfo;
+  private static final String ASSET_MANAGER_ID_FONT_DEVELOPER_INFO = MainGame.getGameFontFilePath("cornerstone");
 
   public HighscoreListState(GameStateManager gameStateManager) {
     this(gameStateManager, false, -1);
@@ -35,9 +37,11 @@ public class HighscoreListState extends GameState implements IControllerCallback
     this.goToGameOverState = goToGameOverState;
 
     // Load assets that are not necessary to be available just yet
-    assetManager.load(MainGame.getGameButtonFilePath("highscore"), Texture.class);
-    assetManager.load(MainGame.getGameFontFilePath("cornerstone"), BitmapFont.class);
-    assetManager.load(MainGame.getGameFontFilePath("cornerstone_upper_case_big"), BitmapFont.class);
+    if (MainGame.DEVELOPER_MODE) {
+      assetManager.load(ASSET_MANAGER_ID_FONT_DEVELOPER_INFO, BitmapFont.class);
+    }
+    assetManager.load(HighscoreEntry.ASSET_MANAGER_ID_FONT, BitmapFont.class);
+    assetManager.load(HighscoreEntry.ASSET_MANAGER_ID_TEXTURE, Texture.class);
 
     // set camera to 1280x720
     camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
@@ -52,13 +56,11 @@ public class HighscoreListState extends GameState implements IControllerCallback
     preferencesManager.checkHighscore();
 
     // Create/Update highscore buttons
-    com.mygdx.game.preferences.PreferencesManager.HighscoreEntry[] entries = preferencesManager
-        .retrieveHighscore();
+    PreferencesManager.HighscoreEntry[] entries = preferencesManager.retrieveHighscore();
     highscoreEntries = new HighscoreEntry[5];
     for (int i = 0; i < 5; i++) {
       highscoreEntries[i] = new HighscoreEntry(i + 1, entries[i].getScore(), entries[i].getName(),
-          assetManager, MainGame.getGameFontFilePath("cornerstone_upper_case_big"), 0.5f,
-          MainGame.getGameButtonFilePath("highscore"), (float) MainGame.GAME_WIDTH / 2,
+          assetManager, (float) MainGame.GAME_WIDTH / 2,
           (float) MainGame.GAME_HEIGHT / 6 * (5 - i));
     }
   }
@@ -136,13 +138,12 @@ public class HighscoreListState extends GameState implements IControllerCallback
                 + progress + "%");
         assetsLoaded = true;
 
-        // TODO Change button class to not have a static texture
-        HighscoreEntry.texture = assetManager.get(MainGame.getGameButtonFilePath("highscore"));
-
-        // set font scale to the correct size and disable to use integers for scaling
-        fontHighscoreListEntry = assetManager.get(MainGame.getGameFontFilePath("cornerstone"));
-        fontHighscoreListEntry.setUseIntegerPositions(false);
-        fontHighscoreListEntry.getData().setScale(fontScaleHighscoreListEntry);
+        if (MainGame.DEVELOPER_MODE) {
+          // set font scale to the correct size and disable to use integers for scaling
+          fontDeveloperInfo = assetManager.get(ASSET_MANAGER_ID_FONT_DEVELOPER_INFO);
+          fontDeveloperInfo.setUseIntegerPositions(false);
+          fontDeveloperInfo.getData().setScale(fontScaleDeveloperInfo);
+        }
 
         // Load highscore list which updates the highscore "buttons"
         loadHighScoreList();
@@ -158,9 +159,9 @@ public class HighscoreListState extends GameState implements IControllerCallback
 
       // If in development mode provide a list with additional available features
       if (MainGame.DEVELOPER_MODE) {
-        fontHighscoreListEntry.getData().setScale(1);
-        fontHighscoreListEntry.setColor(1, 1, 1, 1);
-        fontHighscoreListEntry.draw(spriteBatch, "Reset list: C", 10, 30);
+        fontDeveloperInfo.getData().setScale(1);
+        fontDeveloperInfo.setColor(1, 1, 1, 1);
+        fontDeveloperInfo.draw(spriteBatch, "Reset list: C", 10, 30);
       }
 
       spriteBatch.end();
@@ -184,10 +185,14 @@ public class HighscoreListState extends GameState implements IControllerCallback
 			highscoreEntry.dispose();
 		}
 
+    if (MainGame.DEVELOPER_MODE) {
+      unloadAssetManagerResources(new String[]{
+          ASSET_MANAGER_ID_FONT_DEVELOPER_INFO,
+      });
+    }
     unloadAssetManagerResources(new String[]{
-        MainGame.getGameFontFilePath("cornerstone"),
-        MainGame.getGameFontFilePath("cornerstone_upper_case_big"),
-        MainGame.getGameButtonFilePath("highscore"),
+        HighscoreEntry.ASSET_MANAGER_ID_FONT,
+        HighscoreEntry.ASSET_MANAGER_ID_TEXTURE,
     });
   }
 

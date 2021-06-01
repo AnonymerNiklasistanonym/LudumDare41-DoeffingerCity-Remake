@@ -4,29 +4,34 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.controllers.Controllers;
-//import com.badlogic.gdx.controllers.PovDirection;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.MainGame;
+import com.mygdx.game.controller.menu_button_grid.ControllerCallbackGenericMenuButtonGrid;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
-import com.mygdx.game.gamestate.states.elements.HighscoreCharacterButton;
+import com.mygdx.game.gamestate.states.elements.HighscoreSelectCharacterDisplay;
+import com.mygdx.game.gamestate.states.elements.HighscoreSelectCharacterDisplayInputState;
+import com.mygdx.game.gamestate.states.elements.MenuButton;
+import com.mygdx.game.gamestate.states.elements.MenuButtonBig;
+import com.mygdx.game.gamestate.states.elements.MenuButtonSmall;
 import com.mygdx.game.listener.controller.ControllerHelperMenu;
 import com.mygdx.game.listener.controller.ControllerMenuCallbackInterface;
 import com.mygdx.game.listener.controller.ControllerWiki;
-import com.mygdx.game.unsorted.PreferencesManager;
 
 public class CreateHighscoreEntryState extends GameState implements ControllerMenuCallbackInterface {
 
 	private static final String STATE_NAME = "CreateHighscoreEntry";
 
-	private final HighscoreCharacterButton[] highscoreCharacterButtons;
+	private HighscoreSelectCharacterDisplay[] highscoreCharacterButtons;
 	private final ShapeRenderer shapeRenderer;
-	private final PreferencesManager preferencesManager;
-	private final String highscoreText, scoreText;
-	private final Vector2 highscoreTextPosition, scoreTextPosition;
+	private static final String highscoreText = "YOU REACHED THE TOP 5!";
+	private final String scoreText;
+	private Vector2 highscoreTextPosition, scoreTextPosition;
 	private final int score;
 
 	private int currentIndex = 0;
@@ -38,6 +43,14 @@ public class CreateHighscoreEntryState extends GameState implements ControllerMe
 
 	private final boolean goToCreditStage;
 	private final int level;
+	/**
+	 * Variable for the font scale of the credits text
+	 */
+	private static final float fontScaleYouReachedTop5 = 0.65f;
+	/**
+	 * Variable for the font of the credits text
+	 */
+	private BitmapFont fontYouReachedTop5;
 
 	public CreateHighscoreEntryState(GameStateManager gameStateManager, final int score, final int level,
 			final boolean goToCreditStage) {
@@ -45,44 +58,22 @@ public class CreateHighscoreEntryState extends GameState implements ControllerMe
 
 		this.score = score;
 		this.level = level;
-
 		this.goToCreditStage = goToCreditStage;
+		scoreText = "" + score;
 
+		// Create a shape renderer
 		shapeRenderer = new ShapeRenderer();
-		preferencesManager = new PreferencesManager();
 
+		// Initialize game camera/canvas
 		camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
 
-		highscoreCharacterButtons = new HighscoreCharacterButton[6];
-		char startChar = 'A';
-		for (int i = 0; i < highscoreCharacterButtons.length; i++) {
-			highscoreCharacterButtons[i] = new HighscoreCharacterButton(startChar++,
-					MainGame.GAME_WIDTH / 8 * ((i + 1) * 2 + 1));
-		}
+		// Load assets that are not necessary to be available just yet
+		assetManager.load(HighscoreSelectCharacterDisplay.ASSET_MANAGER_ID_CHARACTER_FONT, BitmapFont.class);
+		assetManager.load(MainGame.getGameFontFilePath("cornerstone_upper_case_big"), BitmapFont.class);
 
-		highscoreCharacterButtons[currentIndex].activate(true);
-
-		MainGame.fontUpperCaseBig.getData().setScale(0.65f);
-		MainGame.fontUpperCaseBig.setUseIntegerPositions(false);
-		this.highscoreText = "YOU REACHED THE TOP 5!";
-		this.highscoreTextPosition = GameStateManager.calculateCenteredTextPosition(MainGame.fontUpperCaseBig,
-				highscoreText, MainGame.GAME_WIDTH, (float)MainGame.GAME_HEIGHT / 3 * 5);
-		this.scoreText = "" + score;
-		this.scoreTextPosition = GameStateManager.calculateCenteredTextPosition(MainGame.fontUpperCaseBig, scoreText,
-				MainGame.GAME_WIDTH, (float)MainGame.GAME_HEIGHT / 3);
-
-		final char[] name = preferencesManager.getName();
-		if (name != null && name.length == highscoreCharacterButtons.length) {
-			for (int i = 0; i < highscoreCharacterButtons.length; i++)
-				highscoreCharacterButtons[i].setNewCharacter(name[i]);
-		}
-
-		// controller setup
+		// Register controller callback so that controller input can be managed
 		controllerHelperMenu = new ControllerHelperMenu(this);
 		Controllers.addListener(controllerHelperMenu);
-		blockStickInput = false;
-		stickTimeHelper = 0;
-		controllerTimeHelper = 0;
 	}
 
 	public CreateHighscoreEntryState(GameStateManager gameStateManager, final int score, final boolean goToCreditStage) {
@@ -119,24 +110,71 @@ public class CreateHighscoreEntryState extends GameState implements ControllerMe
 
 	@Override
 	protected void update(final float deltaTime) {
-		controllerTimeHelper += deltaTime;
-		stickTimeHelper += deltaTime;
+		if (highscoreCharacterButtons != null) {
+			Gdx.app.debug("update", MainGame.getCurrentTimeStampLogString() + "(highscoreCharacterButtons != null, update with deltaTime=" + deltaTime + "ms");
+			for (final HighscoreSelectCharacterDisplay highscoreCharacterButton : highscoreCharacterButtons)
+				highscoreCharacterButton.update(deltaTime);
+		}
 	}
 
 	@Override
 	protected void render(final SpriteBatch spriteBatch) {
-		spriteBatch.setProjectionMatrix(this.camera.combined);
-		spriteBatch.begin();
-		MainGame.fontUpperCaseBig.draw(spriteBatch, highscoreText, highscoreTextPosition.x, highscoreTextPosition.y);
-		MainGame.fontUpperCaseBig.draw(spriteBatch, scoreText, scoreTextPosition.x, scoreTextPosition.y);
-		for (final HighscoreCharacterButton highscoreCharacterButton : highscoreCharacterButtons)
-			highscoreCharacterButton.draw(spriteBatch);
-		spriteBatch.end();
-		shapeRenderer.begin(ShapeType.Filled);
-		shapeRenderer.setColor(1, 1, 1, 1);
-		for (final HighscoreCharacterButton highscoreCharacterButton : highscoreCharacterButtons)
-			highscoreCharacterButton.drawTriangels(shapeRenderer);
-		shapeRenderer.end();
+		if (paused) {
+			// When the game is paused don't render anything
+			return;
+		}
+		if (assetManager.update()) {
+			if (!assetsLoaded) {
+				float progress = assetManager.getProgress() * 100;
+				Gdx.app.debug("menu_state:render",
+						MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
+								+ progress + "%");
+				assetsLoaded = true;
+
+				highscoreCharacterButtons = new HighscoreSelectCharacterDisplay[6];
+				char startChar = 'A';
+				for (int i = 0; i < highscoreCharacterButtons.length; i++) {
+					highscoreCharacterButtons[i] = new HighscoreSelectCharacterDisplay(startChar++,
+							assetManager,  (float) MainGame.GAME_WIDTH / 16 * ((i + 1) * 2 + 1), (float) MainGame.GAME_HEIGHT / 2,
+							(i != currentIndex) ? HighscoreSelectCharacterDisplayInputState.NOT_ACTIVE : HighscoreSelectCharacterDisplayInputState.ACTIVE);
+				}
+
+				fontYouReachedTop5 = assetManager.get(MainGame.getGameFontFilePath("cornerstone_upper_case_big"));
+				fontYouReachedTop5.getData().setScale(fontScaleYouReachedTop5);
+				fontYouReachedTop5.setUseIntegerPositions(false);
+				highscoreTextPosition = GameStateManager.calculateCenteredTextPosition(fontYouReachedTop5,
+						highscoreText, MainGame.GAME_WIDTH, (float)MainGame.GAME_HEIGHT / 3 * 5);
+				scoreTextPosition = GameStateManager.calculateCenteredTextPosition(fontYouReachedTop5, scoreText,
+						MainGame.GAME_WIDTH, (float)MainGame.GAME_HEIGHT / 3);
+
+				final char[] name = preferencesManager.getName();
+				if (name != null && name.length == highscoreCharacterButtons.length) {
+					for (int i = 0; i < highscoreCharacterButtons.length; i++)
+						highscoreCharacterButtons[i].setNewCharacter(name[i]);
+				}
+			}
+			// Render highscore entry
+			spriteBatch.setProjectionMatrix(camera.combined);
+			spriteBatch.begin();
+			fontYouReachedTop5.draw(spriteBatch, highscoreText, highscoreTextPosition.x, highscoreTextPosition.y);
+			fontYouReachedTop5.draw(spriteBatch, scoreText, scoreTextPosition.x, scoreTextPosition.y);
+			for (final HighscoreSelectCharacterDisplay highscoreCharacterButton : highscoreCharacterButtons)
+				highscoreCharacterButton.draw(spriteBatch);
+			spriteBatch.end();
+			shapeRenderer.begin(ShapeType.Filled);
+			for (final HighscoreSelectCharacterDisplay highscoreCharacterButton : highscoreCharacterButtons)
+				highscoreCharacterButton.drawUpDownInput(shapeRenderer);
+			shapeRenderer.end();
+		} else {
+			// display loading information
+			float progress = assetManager.getProgress() * 100;
+			if (progress != assetsLoadedLastProgress) {
+				assetsLoadedLastProgress = progress;
+				Gdx.app.debug("menu_state:render",
+						MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
+								+ progress + "%");
+			}
+		}
 	}
 
 	@Override
@@ -147,8 +185,8 @@ public class CreateHighscoreEntryState extends GameState implements ControllerMe
 
 	private void saveHighscoreAndGoToList() {
 		String name = "";
-		for (final HighscoreCharacterButton highscoreCharacterButton : highscoreCharacterButtons)
-			name += highscoreCharacterButton.getCurrentCharacter();
+		for (final HighscoreSelectCharacterDisplay highscoreCharacterButton : highscoreCharacterButtons)
+			name += highscoreCharacterButton.getCurrentSelectedCharacter();
 		preferencesManager.saveHighscore(name, this.score);
 		if (goToCreditStage)
 			gameStateManager.setGameState(new CreditState(gameStateManager, true));
@@ -177,24 +215,11 @@ public class CreateHighscoreEntryState extends GameState implements ControllerMe
 		else
 			currentIndex = (currentIndex - 1 < 0) ? highscoreCharacterButtons.length - 1 : currentIndex - 1;
 
-		for (final HighscoreCharacterButton highscoreCharacterButton : highscoreCharacterButtons)
-			highscoreCharacterButton.activate(false);
-		highscoreCharacterButtons[currentIndex].activate(true);
+		for (final HighscoreSelectCharacterDisplay highscoreCharacterButton : highscoreCharacterButtons)
+			highscoreCharacterButton.setUpDownInput(HighscoreSelectCharacterDisplayInputState.NOT_ACTIVE);
+		highscoreCharacterButtons[currentIndex].setUpDownInput(HighscoreSelectCharacterDisplayInputState.ACTIVE);
 	}
-/*
-	@Override
-	public void controllerCallbackDPadButtonPressed(PovDirection direction) {
-		// select character next button
-		if (direction == ControllerWiki.BUTTON_DPAD_RIGHT)
-			selectNextCharacterButton(true);
-		if (direction == ControllerWiki.BUTTON_DPAD_LEFT)
-			selectNextCharacterButton(false);
-		if (direction == ControllerWiki.BUTTON_DPAD_UP)
-			selectNextCharacter(true);
-		if (direction == ControllerWiki.BUTTON_DPAD_DOWN)
-			selectNextCharacter(false);
-	}
-*/
+
 	@Override
 	public void controllerCallbackStickMoved(final boolean xAxis, final float value) {
 		// select next button
@@ -213,7 +238,7 @@ public class CreateHighscoreEntryState extends GameState implements ControllerMe
 	}
 
 	private void selectNextCharacter(boolean upwards) {
-		final char currentChar = highscoreCharacterButtons[currentIndex].getCurrentCharacter();
+		final char currentChar = highscoreCharacterButtons[currentIndex].getCurrentSelectedCharacter();
 		if (upwards) {
 			highscoreCharacterButtons[currentIndex]
 					.setNewCharacter((currentChar + 1 > 'Z') ? 'A' : (char) (currentChar + 1));
@@ -222,9 +247,9 @@ public class CreateHighscoreEntryState extends GameState implements ControllerMe
 					.setNewCharacter((currentChar - 1 < 'A') ? 'Z' : (char) (currentChar - 1));
 		}
 
-		for (final HighscoreCharacterButton highscoreCharacterButton : highscoreCharacterButtons)
-			highscoreCharacterButton.activate(false);
-		highscoreCharacterButtons[currentIndex].activate(true);
+		for (final HighscoreSelectCharacterDisplay highscoreCharacterButton : highscoreCharacterButtons)
+			highscoreCharacterButton.setUpDownInput(HighscoreSelectCharacterDisplayInputState.NOT_ACTIVE);
+		highscoreCharacterButtons[currentIndex].setUpDownInput(upwards ? HighscoreSelectCharacterDisplayInputState.UP : HighscoreSelectCharacterDisplayInputState.DOWN);
 
 	}
 

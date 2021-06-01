@@ -36,6 +36,8 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
    * Variable for the font of the credits text
    */
   private BitmapFont fontCredits;
+  private static final String ASSET_MANAGER_ID_MUSIC_THEME = MainGame.getGameMusicFilePath("theme");
+  private static final String ASSET_MANAGER_ID_FONT_CREDITS = MainGame.getGameFontFilePath("cornerstone_upper_case_big");
 
   public CreditState(final GameStateManager gameStateManager) {
     this(gameStateManager, false);
@@ -51,8 +53,8 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
     camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
 
     // Load assets that are not necessary to be available just yet
-    assetManager.load(MainGame.getGameMusicFilePath("theme"), Music.class);
-    assetManager.load(MainGame.getGameFontFilePath("cornerstone_upper_case_big"), BitmapFont.class);
+    assetManager.load(ASSET_MANAGER_ID_MUSIC_THEME, Music.class);
+    assetManager.load(ASSET_MANAGER_ID_FONT_CREDITS, BitmapFont.class);
 
     // Register controller callback so that controller input can be managed
     controllerCallbackGenericOneClick = new ControllerCallbackGenericOneClick(this);
@@ -77,9 +79,8 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
     // Turn music on/off
     if (controllerToggleMusicPressed || Gdx.input.isKeyJustPressed(Keys.M)) {
       controllerToggleMusicPressed = false;
-      gameStateManager.getPreferencesManager()
-          .setMusicOn(!gameStateManager.getPreferencesManager().getMusicOn());
-      if (gameStateManager.getPreferencesManager().getMusicOn()) {
+      preferencesManager.setMusicOn(!preferencesManager.getMusicOn());
+      if (preferencesManager.getMusicOn()) {
         musicBackground.play();
       } else {
         musicBackground.stop();
@@ -88,8 +89,7 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
     // Turn sound effects on/off
     if (controllerToggleSoundEffectsPressed || Gdx.input.isKeyJustPressed(Keys.U)) {
       controllerToggleSoundEffectsPressed = false;
-      gameStateManager.getPreferencesManager()
-          .setSoundEffectsOn(!gameStateManager.getPreferencesManager().getSoundEfectsOn());
+      preferencesManager.setSoundEffectsOn(!preferencesManager.getSoundEfectsOn());
     }
 
     // If a button is touched or the space or enter key is currently pressed or any controller
@@ -123,14 +123,14 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
             MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
                 + progress + "%");
         assetsLoaded = true;
-        musicBackground = assetManager.get(MainGame.getGameMusicFilePath("theme"));
+        musicBackground = assetManager.get(ASSET_MANAGER_ID_MUSIC_THEME);
         musicBackground.setLooping(true);
-        if (gameStateManager.getPreferencesManager().getMusicOn()) {
+        if (preferencesManager.getMusicOn()) {
           musicBackground.play();
         }
 
         // set font scale to the correct size and disable to use integers for scaling
-        fontCredits = assetManager.get(MainGame.getGameFontFilePath("cornerstone_upper_case_big"));
+        fontCredits = assetManager.get(ASSET_MANAGER_ID_FONT_CREDITS);
         fontCredits.setUseIntegerPositions(false);
         fontCredits.getData().setScale(fontScaleCredits);
         // calculate the text positions so that every line is centered
@@ -168,8 +168,8 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
     // Reduce the reference to used resources in this state (when no object is referencing the
     // resource any more it is automatically disposed by the global asset manager)
     unloadAssetManagerResources(new String[]{
-        MainGame.getGameMusicFilePath("theme"),
-        MainGame.getGameFontFilePath("cornerstone_upper_case_big"),
+        ASSET_MANAGER_ID_MUSIC_THEME,
+        ASSET_MANAGER_ID_FONT_CREDITS,
     });
   }
 
