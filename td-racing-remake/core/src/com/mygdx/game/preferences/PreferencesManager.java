@@ -80,12 +80,12 @@ public class PreferencesManager {
   public void checkHighscore() {
     final HighscoreEntry[] entries = retrieveHighscore();
     for (int i = 0; i < entries.length; i++) {
-			if (entries[i].getName() == null || entries[i].getName().equals("")) {
-				prefs.putString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + i, "NOBODY");
-			}
-			if (entries[i].getScore() < 0) {
-				prefs.putInteger(PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i, 0);
-			}
+      if (entries[i].getName() == null || entries[i].getName().equals("")) {
+        prefs.putString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + i, "NOBODY");
+      }
+      if (entries[i].getScore() < 0) {
+        prefs.putInteger(PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i, 0);
+      }
     }
     prefs.flush();
   }
@@ -94,18 +94,18 @@ public class PreferencesManager {
    * Clear highscore list by setting every value to 0 and the scorer name to NOBODY
    */
   public void resetHighscore() {
-		for (int i = 0; i < NUMBER_HIGHSCORE_ENTRIES; i++) {
-			prefs.putString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + i, "------").putInteger(
-					PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i, 0);
-		}
+    for (int i = 0; i < NUMBER_HIGHSCORE_ENTRIES; i++) {
+      prefs.putString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + i, "------").putInteger(
+          PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i, 0);
+    }
     prefs.flush();
   }
 
   public void saveHighscore(String[] names, int[] scores) {
-		for (int i = 0; i < NUMBER_HIGHSCORE_ENTRIES; i++) {
-			prefs.putString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + i, names[i]).putInteger(
-					PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i, scores[i]);
-		}
+    for (int i = 0; i < NUMBER_HIGHSCORE_ENTRIES; i++) {
+      prefs.putString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + i, names[i]).putInteger(
+          PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i, scores[i]);
+    }
     prefs.flush();
   }
 
@@ -118,13 +118,13 @@ public class PreferencesManager {
 
   public HighscoreEntry[] retrieveHighscore() {
     final HighscoreEntry[] entries = new HighscoreEntry[NUMBER_HIGHSCORE_ENTRIES];
-		for (int i = 0; i < entries.length; i++) {
-			entries[i] = new HighscoreEntry(
-			    prefs.getInteger(PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i),
-					prefs.getInteger(PREFERENCE_HIGHSCORE_LEVEL_VALUE_BASE + i),
+    for (int i = 0; i < entries.length; i++) {
+      entries[i] = new HighscoreEntry(
+          prefs.getInteger(PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i),
+          prefs.getInteger(PREFERENCE_HIGHSCORE_LEVEL_VALUE_BASE + i),
           prefs.getString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + i)
       );
-		}
+    }
     return entries;
   }
 
@@ -163,10 +163,12 @@ public class PreferencesManager {
 
   public boolean scoreIsInTop5(final int score) {
     for (final HighscoreEntry entry : retrieveHighscore()) {
-      Gdx.app.debug("preferences_manager", MainGame.getCurrentTimeStampLogString() + "score (" + score + ") > existing entry (" + entry.getScore() + ")");
-			if (entry.getScore() < score) {
-				return true;
-			}
+      Gdx.app.debug("preferences_manager",
+          MainGame.getCurrentTimeStampLogString() + "score (" + score + ") > existing entry ("
+              + entry.getScore() + ")");
+      if (entry.getScore() < score) {
+        return true;
+      }
     }
     return false;
   }

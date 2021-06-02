@@ -1,6 +1,5 @@
 package com.mygdx.game.gamestate.states.elements;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -45,20 +44,18 @@ public class HighscoreEntry implements Disposable {
     fontYNumber = yPositionText;
     fontXName = fontXNumber + (float) MainGame.GAME_WIDTH / 15;
     fontYName = yPositionText;
-    fontXScore = fontXName + (float) MainGame.GAME_WIDTH / 5;
+    fontXScore = fontXName + (float) MainGame.GAME_WIDTH / 4.5f;
     fontYScore = yPositionText;
-    fontXLevel = fontXScore + (float) MainGame.GAME_WIDTH / 3.5f;
+    fontXLevel = fontXScore + (float) MainGame.GAME_WIDTH / 3.75f;
     fontYLevel = yPositionText;
 
     textPlace = "" + place + ".";
     textName = name;
-    textScore = "" + score;
-    textLevel = "(LEVEL " + level + ")";
+    textScore = "" + (name.equals("------") ? "-" : score);
+    textLevel = "(LEVEL " + (name.equals("------") ? "-" : (level + 1)) + ")";
   }
 
   public void draw(final SpriteBatch spriteBatch) {
-    Gdx.app.debug("highscore_entry:draw",
-        MainGame.getCurrentTimeStampLogString() + "I am never called???????");
     spriteEntry.draw(spriteBatch);
     fontText.getData().setScale(fontScale);
     fontText.draw(spriteBatch, textPlace, fontXNumber, fontYNumber);

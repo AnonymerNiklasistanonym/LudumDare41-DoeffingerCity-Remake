@@ -10,19 +10,16 @@ import com.mygdx.game.gamestate.GameStateManager;
 
 public class HighscoreSelectCharacterDisplay {
 
-  private char selectedCharacter;
-
-  private final Vector2 position;
-  private final float x1, x2, x3, y1up, y1down, y23up, y23down;
-  private HighscoreSelectCharacterDisplayInputState state;
-
-  private static final float BUTTON_INPUT_ANIMATION_TIME_IN_S = (float) 1 / 10;
-  private BitmapFont fontCharacter;
-  private static final float fontScaleCharacter = 1;
-  private float elapsedAnimationTimeInS = 0;
-
   public static final String ASSET_MANAGER_ID_CHARACTER_FONT = MainGame
       .getGameFontFilePath("cornerstone_big");
+  private static final float BUTTON_INPUT_ANIMATION_TIME_IN_S = (float) 1 / 10;
+  private static final float fontScaleCharacter = 1;
+  private final Vector2 position;
+  private final float x1, x2, x3, y1up, y1down, y23up, y23down;
+  private char selectedCharacter;
+  private HighscoreSelectCharacterDisplayInputState state;
+  private final BitmapFont fontCharacter;
+  private float elapsedAnimationTimeInS = 0;
 
   public HighscoreSelectCharacterDisplay(final char defaultCharacter,
       final AssetManager assetManager, final float xPosition, final float yPosition,
@@ -49,9 +46,6 @@ public class HighscoreSelectCharacterDisplay {
     // Calculate how long the button should be highlighted if down or up was pressed
     if (state == HighscoreSelectCharacterDisplayInputState.DOWN
         || state == HighscoreSelectCharacterDisplayInputState.UP) {
-      System.out.print(
-          state.name() + " elapsedAnimationTimeInMs: " + elapsedAnimationTimeInS + "s (deltaTime="
-              + deltaTime + "s)");
       elapsedAnimationTimeInS += deltaTime;
       if (elapsedAnimationTimeInS > BUTTON_INPUT_ANIMATION_TIME_IN_S) {
         state = HighscoreSelectCharacterDisplayInputState.ACTIVE;
