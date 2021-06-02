@@ -1,4 +1,4 @@
-package com.mygdx.game.controller.one_click;
+package com.mygdx.game.controller.generic.one_click;
 
 import com.mygdx.game.controller.IControllerCallbackGenericGlobalButtons;
 

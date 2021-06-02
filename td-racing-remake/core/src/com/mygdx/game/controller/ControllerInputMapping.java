@@ -55,4 +55,32 @@ public class ControllerInputMapping {
     }
     return ControllerInputMappingButtons.UNKNOWN;
   }
+
+  public static ControllerInputMappingAxes getControllerAxis(Controller controller,
+      int axisCode) {
+    switch (controller.getName()) {
+      case "Xbox One Wireless Controller (Model 1708)":
+      case "X360 Controller":
+      default:
+        if (axisCode == 0) {
+          return ControllerInputMappingAxes.AXIS_LEFT_PAD_HORIZONTAL;
+        }
+        if (axisCode == 1) {
+          return ControllerInputMappingAxes.AXIS_LEFT_PAD_VERTICAL;
+        }
+        if (axisCode == 2) {
+          return ControllerInputMappingAxes.AXIS_RIGHT_PAD_HORIZONTAL;
+        }
+        if (axisCode == 3) {
+          return ControllerInputMappingAxes.AXIS_RIGHT_PAD_VERTICAL;
+        }
+        if (axisCode == 4) {
+          return ControllerInputMappingAxes.AXIS_LT;
+        }
+        if (axisCode == 5) {
+          return ControllerInputMappingAxes.AXIS_RT;
+        }
+    }
+    return ControllerInputMappingAxes.UNKNOWN;
+  }
 }

@@ -191,7 +191,7 @@ public abstract class Enemy implements Disposable {
 
 	public void update(final float deltaTime) {
 
-		if (this.isTot() || !this.activated)
+		if (this.isDead() || !this.activated)
 			return;
 
 		timesincedeepsearch = timesincedeepsearch + deltaTime;
@@ -339,7 +339,7 @@ public abstract class Enemy implements Disposable {
 	public void draw(final SpriteBatch spriteBatch) {
 		if (activated)
 			sprite.draw(spriteBatch);
-		if (!this.isTot() && this.wasHitTime > 0)
+		if (!this.isDead() && this.wasHitTime > 0)
 			spriteDamage.draw(spriteBatch);
 	}
 
@@ -367,7 +367,7 @@ public abstract class Enemy implements Disposable {
 		this.health = health;
 	}
 
-	public boolean isTot() {
+	public boolean isDead() {
 		return tot;
 	}
 
@@ -375,7 +375,7 @@ public abstract class Enemy implements Disposable {
 		this.tot = tot;
 	}
 
-	public boolean isActivated() {
+	public boolean isSpawned() {
 		return this.activated;
 	}
 

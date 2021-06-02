@@ -1,4 +1,4 @@
-package com.mygdx.game.controller.menu_button_grid;
+package com.mygdx.game.controller.play_state;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.controllers.Controller;
@@ -6,34 +6,30 @@ import com.badlogic.gdx.controllers.ControllerListener;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.controller.ControllerInputMapping;
 
-/**
- * Controller listener for the menu (game) state. Any class that implements the interface
- * IControllerCallbackMenuState can be inserted in the constructor of an instance of this class (for
- * example via this) so that callbacks to controller inputs can provided to this class via the
- * implemented methods of the interface. This class needs to be added as controller listener and
- * removed again on closing of the game state.
- */
-public class ControllerCallbackGenericMenuButtonGrid implements ControllerListener {
+public class ControllerCallbackPlayState implements ControllerListener {
 
-  private final IControllerCallbackGenericMenuButtonGrid controllerCallbackClass;
+  /**
+   * Class that implements the controller callbacks
+   */
+  private final IControllerCallbackPlayState controllerCallbackClass;
 
-  public ControllerCallbackGenericMenuButtonGrid(
-      IControllerCallbackGenericMenuButtonGrid controllerCallbackClass) {
-    Gdx.app.debug("controller_callback_menu_state:constructor",
+  public ControllerCallbackPlayState(
+      IControllerCallbackPlayState controllerCallbackClass) {
+    Gdx.app.debug("controller_callback_play_state:constructor",
         MainGame.getCurrentTimeStampLogString());
     this.controllerCallbackClass = controllerCallbackClass;
   }
 
   @Override
   public void connected(Controller controller) {
-    Gdx.app.debug("controller_callback_menu_state:connected",
+    Gdx.app.debug("controller_callback_play_state:connected",
         MainGame.getCurrentTimeStampLogString() + "controller connected with the id \"" + controller
             .getName() + "\"");
   }
 
   @Override
   public void disconnected(Controller controller) {
-    Gdx.app.debug("controller_callback_menu_state:disconnected",
+    Gdx.app.debug("controller_callback_play_state:disconnected",
         MainGame.getCurrentTimeStampLogString() + "controller disconnected with the id \""
             + controller.getName() + "\"");
   }
@@ -54,7 +50,7 @@ public class ControllerCallbackGenericMenuButtonGrid implements ControllerListen
 
   @Override
   public boolean axisMoved(Controller controller, int axisCode, float value) {
-    Gdx.app.debug("controller_callback_menu_state:axisMoved",
+    Gdx.app.debug("controller_callback_play_state:axisMoved",
         MainGame.getCurrentTimeStampLogString() + "controller axis moved \"" + axisCode
             + "\" with the value " + value);
 
@@ -65,37 +61,37 @@ public class ControllerCallbackGenericMenuButtonGrid implements ControllerListen
   }
 
   private void buttonPressed(Controller controller, int buttonId, boolean pressed) {
-    Gdx.app.debug("controller_callback_menu_state:buttonPressed",
+    Gdx.app.debug("controller_callback_play_state:buttonPressed",
         MainGame.getCurrentTimeStampLogString() + "controller button" + (pressed ? "" : " not")
             + " pressed \"" + buttonId + "\"");
 
     if (pressed) {
       switch (ControllerInputMapping.getControllerButton(controller, buttonId)) {
         case BUTTON_A:
-          controllerCallbackClass.controllerCallbackClickMenuButton();
+          controllerCallbackClass.controllerCallbackBuildTower();
           break;
         case BUTTON_B:
         case BUTTON_BACK:
           controllerCallbackClass.controllerCallbackClickBackButton();
           break;
         case BUTTON_START:
-          controllerCallbackClass.controllerCallbackClickStartMenuButton();
+          controllerCallbackClass.controllerCallbackToggleManualPause();
           break;
         case BUTTON_LB:
         case BUTTON_RB:
           controllerCallbackClass.controllerCallbackToggleFullScreen();
           break;
         case BUTTON_UP:
-          controllerCallbackClass.controllerCallbackSelectAboveMenuButton();
-          break;
-        case BUTTON_DOWN:
-          controllerCallbackClass.controllerCallbackSelectBelowMenuButton();
-          break;
-        case BUTTON_LEFT:
-          controllerCallbackClass.controllerCallbackSelectLeftMenuButton();
+          controllerCallbackClass.controllerCallbackSelectTowerToBuild(0);
           break;
         case BUTTON_RIGHT:
-          controllerCallbackClass.controllerCallbackSelectRightMenuButton();
+          controllerCallbackClass.controllerCallbackSelectTowerToBuild(1);
+          break;
+        case BUTTON_DOWN:
+          controllerCallbackClass.controllerCallbackSelectTowerToBuild(2);
+          break;
+        case BUTTON_LEFT:
+          controllerCallbackClass.controllerCallbackSelectTowerToBuild(3);
           break;
         case BUTTON_X:
           controllerCallbackClass.controllerCallbackToggleMusic();

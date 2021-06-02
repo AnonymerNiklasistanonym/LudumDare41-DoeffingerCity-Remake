@@ -8,8 +8,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.MainGame;
-import com.mygdx.game.controller.menu_button_grid.ControllerCallbackGenericMenuButtonGrid;
-import com.mygdx.game.controller.menu_button_grid.IControllerCallbackGenericMenuButtonGrid;
+import com.mygdx.game.controller.generic.menu_button_grid.ControllerCallbackGenericMenuButtonGrid;
+import com.mygdx.game.controller.generic.menu_button_grid.IControllerCallbackGenericMenuButtonGrid;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
 import com.mygdx.game.gamestate.states.elements.MenuButton;
@@ -100,11 +100,31 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
     }
 
     if (Gdx.app.getType() == ApplicationType.Desktop) {
-      // Toggle full screen when full screen keys are pressed
+      // Toggle full screen when full screen keys are pressed (desktop only)
       if (controllerToggleFullScreenPressed || Gdx.input.isKeyJustPressed(Keys.F11)) {
         controllerToggleFullScreenPressed = false;
         GameStateManager.toggleFullScreen();
       }
+    }
+
+    // Turn music on/off
+    if (controllerToggleMusicPressed || Gdx.input.isKeyJustPressed(Keys.M)) {
+      controllerToggleMusicPressed = false;
+      gameStateManager.getPreferencesManager()
+          .setMusicOn(!gameStateManager.getPreferencesManager().getMusicOn());
+    }
+    // Turn sound effects on/off
+    if (controllerToggleSoundEffectsPressed || Gdx.input.isKeyJustPressed(Keys.U)) {
+      controllerToggleSoundEffectsPressed = false;
+      gameStateManager.getPreferencesManager()
+          .setSoundEffectsOn(!gameStateManager.getPreferencesManager().getSoundEfectsOn());
+    }
+
+    // If escape or back is pressed quit
+    if (Gdx.input.isCatchKey(Keys.BACK) || Gdx.input.isKeyJustPressed(Keys.ESCAPE)
+        || controllerBackKeyWasPressed) {
+      controllerBackKeyWasPressed = false;
+      Gdx.app.exit();
     }
 
     // Update the cursor position
@@ -212,26 +232,6 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
       controllerRightKeyWasPressed = false;
       controllerStartKeyWasPressed = false;
       controllerSelectKeyWasPressed = false;
-    }
-
-    // Turn music on/off
-    if (controllerToggleMusicPressed || Gdx.input.isKeyJustPressed(Keys.M)) {
-      controllerToggleMusicPressed = false;
-      gameStateManager.getPreferencesManager()
-          .setMusicOn(!gameStateManager.getPreferencesManager().getMusicOn());
-    }
-    // Turn sound effects on/off
-    if (controllerToggleSoundEffectsPressed || Gdx.input.isKeyJustPressed(Keys.U)) {
-      controllerToggleSoundEffectsPressed = false;
-      gameStateManager.getPreferencesManager()
-          .setSoundEffectsOn(!gameStateManager.getPreferencesManager().getSoundEfectsOn());
-    }
-
-    // If escape or back is pressed quit
-    if (Gdx.input.isCatchKey(Keys.BACK) || Gdx.input.isKeyJustPressed(Keys.ESCAPE)
-        || controllerBackKeyWasPressed) {
-      controllerBackKeyWasPressed = false;
-      Gdx.app.exit();
     }
   }
 

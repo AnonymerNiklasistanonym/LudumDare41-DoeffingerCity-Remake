@@ -9,8 +9,8 @@ import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.MainGame;
-import com.mygdx.game.controller.one_click.ControllerCallbackGenericOneClick;
-import com.mygdx.game.controller.one_click.IControllerCallbackGenericOneClick;
+import com.mygdx.game.controller.generic.one_click.ControllerCallbackGenericOneClick;
+import com.mygdx.game.controller.generic.one_click.IControllerCallbackGenericOneClick;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
 

@@ -2,6 +2,6 @@ package com.mygdx.game.objects;
 
 public interface ScoreBoardCallbackInterface {
 
-	public void playerIsDeadCallback();
+	public void trailerHealthIs0();
 
 }

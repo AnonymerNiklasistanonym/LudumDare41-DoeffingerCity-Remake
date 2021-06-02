@@ -337,7 +337,7 @@ public abstract class Tower implements Disposable {
 			return;
 		}
 
-		if (target.isTot() || !isTargetInRange(target)) {
+		if (target.isDead() || !isTargetInRange(target)) {
 			target = null;
 			return;
 		}

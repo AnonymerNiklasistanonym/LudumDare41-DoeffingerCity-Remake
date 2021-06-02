@@ -1,4 +1,4 @@
-package com.mygdx.game.controller.menu_button_grid;
+package com.mygdx.game.controller.generic.menu_button_grid;
 
 import com.mygdx.game.controller.IControllerCallbackGenericGlobalButtons;
 
@@ -39,7 +39,7 @@ public interface IControllerCallbackGenericMenuButtonGrid extends
   void controllerCallbackClickMenuButton();
 
   /**
-   * Exit the application because a back button was pressed
+   * Go back because a back button was pressed
    */
   void controllerCallbackClickBackButton();
 

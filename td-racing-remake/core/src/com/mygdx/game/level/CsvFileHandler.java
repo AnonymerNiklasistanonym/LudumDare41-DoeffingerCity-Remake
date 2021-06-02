@@ -11,6 +11,7 @@ public class CsvFileHandler {
 	 * @return Array which contains all CSV level files
 	 */
 	public static FileHandle[] getAllLevelFiles() {
+		// TODO Load levelInfo.csv and determine by that what levels exist and which to load, this is so wrong
 		// return Gdx.files.internal("./bin/level").list();
 		return new FileHandle[] { Gdx.files.internal("level/level_01.csv"), Gdx.files.internal("level/level_02.csv"),
 				Gdx.files.internal("level/level_03.csv") };

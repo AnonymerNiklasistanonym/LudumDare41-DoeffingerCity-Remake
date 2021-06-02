@@ -38,7 +38,7 @@ public class Level {
 			System.out.print("Checkpoint #" + j + ": " + checkPoints[j] + ", ");
 		System.out.println();
 		for (int j = 0; j < towersUnlocked.length; j++)
-			System.out.print("Tower #" + j + " unlocked: " + Boolean.toString(towersUnlocked[j]) + ", ");
+			System.out.print("Tower #" + j + " unlocked: " + towersUnlocked[j] + ", ");
 		System.out.println();
 
 		for (int j = 0; j < waves.size; j++)

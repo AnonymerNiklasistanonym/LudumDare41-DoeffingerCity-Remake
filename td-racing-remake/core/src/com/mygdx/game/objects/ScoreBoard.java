@@ -14,7 +14,7 @@ public class ScoreBoard {
 	private int lapNumber;
 	private int killCount;
 	private float healthPoints;
-	private float maxHealthPoints;
+	private final float maxHealthPoints;
 	private final ScoreBoardCallbackInterface playState;
 	private final int COLUMN;
 	private int level;
@@ -29,7 +29,7 @@ public class ScoreBoard {
 		healthPoints = 100;
 		maxHealthPoints = healthPoints;
 		debugDisplay = true;
-		reset(0);
+		resetNewLevelLoaded();
 	}
 
 	public void draw(final SpriteBatch spriteBatch) {
@@ -88,10 +88,10 @@ public class ScoreBoard {
 		}
 	}
 
-	public void reduceLife(float damage) {
-		healthPoints -= damage;
+	public void trailerHitByEnemy(final Enemy enemy) {
+		healthPoints -= enemy.getDamadge();
 		if (healthPoints <= 0)
-			playState.playerIsDeadCallback();
+			playState.trailerHealthIs0();
 	}
 
 	public void update(final float deltaTime) {
@@ -99,10 +99,10 @@ public class ScoreBoard {
 		currentTime += deltaTime;
 	}
 
-	public void killedEnemy(final float score, final float money) {
+	public void killEnemy(final Enemy enemy) {
 		killCount++;
-		this.score += score;
-		this.money += money;
+		this.score += enemy.getScore();
+		this.money += enemy.getMoney();
 	}
 
 	public void newLap(final int newMoney) {
@@ -115,12 +115,12 @@ public class ScoreBoard {
 		waveNumber++;
 	}
 
-	public void reset(final int money) {
+	public void resetNewLevelLoaded() {
 		currentTime = 0f;
 		score = 0;
 		killCount = 0;
-		this.money = money;
 		wholeTime = 0;
+		money = 0;
 		currentTime = 0f;
 		lapNumber = 0;
 		waveNumber = 0;
@@ -183,4 +183,8 @@ public class ScoreBoard {
 		this.debugDisplay = debugDisplay;
 	}
 
+	public void debugKillTrailer() {
+		healthPoints = 0;
+		playState.trailerHealthIs0();
+	}
 }
