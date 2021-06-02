@@ -19,12 +19,13 @@ public class HighscoreListState extends GameState implements IControllerCallback
 
   private static final String STATE_NAME = "HighscoreList";
   private final static float fontScaleDeveloperInfo = 1;
+  private static final String ASSET_MANAGER_ID_FONT_DEVELOPER_INFO = MainGame
+      .getGameFontFilePath("cornerstone");
   private final ControllerCallbackGenericOneClick controllerCallbackGenericOneClick;
   private final int level;
   private final boolean goToGameOverState;
   private HighscoreEntry[] highscoreEntries;
   private BitmapFont fontDeveloperInfo;
-  private static final String ASSET_MANAGER_ID_FONT_DEVELOPER_INFO = MainGame.getGameFontFilePath("cornerstone");
 
   public HighscoreListState(GameStateManager gameStateManager) {
     this(gameStateManager, false, -1);
@@ -59,7 +60,8 @@ public class HighscoreListState extends GameState implements IControllerCallback
     PreferencesManager.HighscoreEntry[] entries = preferencesManager.retrieveHighscore();
     highscoreEntries = new HighscoreEntry[5];
     for (int i = 0; i < 5; i++) {
-      highscoreEntries[i] = new HighscoreEntry(i + 1, entries[i].getScore(), entries[i].getName(),
+      highscoreEntries[i] = new HighscoreEntry(i + 1, entries[i].getScore(), entries[i].getLevel(),
+          entries[i].getName(),
           assetManager, (float) MainGame.GAME_WIDTH / 2,
           (float) MainGame.GAME_HEIGHT / 6 * (5 - i));
     }
@@ -153,9 +155,9 @@ public class HighscoreListState extends GameState implements IControllerCallback
       spriteBatch.begin();
 
       // Draw highscore (entry) "buttons"
-			for (final HighscoreEntry highscoreEntry : highscoreEntries) {
-				highscoreEntry.draw(spriteBatch);
-			}
+      for (final HighscoreEntry highscoreEntry : highscoreEntries) {
+        highscoreEntry.draw(spriteBatch);
+      }
 
       // If in development mode provide a list with additional available features
       if (MainGame.DEVELOPER_MODE) {
@@ -181,9 +183,9 @@ public class HighscoreListState extends GameState implements IControllerCallback
   protected void dispose() {
     Controllers.removeListener(controllerCallbackGenericOneClick);
     HighscoreEntry.texture.dispose();
-		for (final HighscoreEntry highscoreEntry : highscoreEntries) {
-			highscoreEntry.dispose();
-		}
+    for (final HighscoreEntry highscoreEntry : highscoreEntries) {
+      highscoreEntry.dispose();
+    }
 
     if (MainGame.DEVELOPER_MODE) {
       unloadAssetManagerResources(new String[]{

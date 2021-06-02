@@ -197,6 +197,7 @@ public class MainGame implements ApplicationListener {
 
     // Create preferences manager
     preferencesManager = new PreferencesManager();
+
     // Activate fullscreen if activated
     if (preferencesManager.getFullscreen()) {
       Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());

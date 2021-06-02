@@ -1224,7 +1224,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	 * Game was won
 	 */
 	private void victoryGame() {
-		// TODO Highscore integration with
 		gameStateManager.setGameState(new GameWonState(gameStateManager, scoreBoard.getScore()));
 	}
 

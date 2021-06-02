@@ -1,5 +1,6 @@
 package com.mygdx.game.gamestate.states.elements;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -10,7 +11,8 @@ import com.mygdx.game.MainGame;
 
 public class HighscoreEntry implements Disposable {
 
-  public static final String ASSET_MANAGER_ID_FONT = MainGame.getGameFontFilePath("cornerstone_upper_case_big");
+  public static final String ASSET_MANAGER_ID_FONT = MainGame
+      .getGameFontFilePath("cornerstone_upper_case_big");
   public static final String ASSET_MANAGER_ID_TEXTURE = MainGame.getGameButtonFilePath("highscore");
   private static final float fontScale = 0.5f;
 
@@ -18,14 +20,16 @@ public class HighscoreEntry implements Disposable {
   public static BitmapFont fontText;
   private final Sprite spriteEntry;
   private final String name;
-  private final int place, score;
-  private final float fontXNumber, fontYNumber, fontXName, fontYName, fontXScore, fontYScore;
+  private final int place, score, level;
+  private final float fontXNumber, fontYNumber, fontXName, fontYName, fontXScore, fontYScore, fontXLevel, fontYLevel;
+  private final String textPlace, textName, textScore, textLevel;
 
-  public HighscoreEntry(final int place, final int score, final String name,
+  public HighscoreEntry(final int place, final int score, final int level, final String name,
       final AssetManager assetManager,
       final float xPosition, final float yPosition) {
     this.place = place;
     this.score = score;
+    this.level = level;
     this.name = name;
 
     fontText = assetManager.get(ASSET_MANAGER_ID_FONT, BitmapFont.class);
@@ -36,20 +40,33 @@ public class HighscoreEntry implements Disposable {
     spriteEntry
         .setPosition(xPosition - spriteEntry.getWidth() / 2,
             yPosition - spriteEntry.getHeight() / 2);
+    final float yPositionText = yPosition + spriteEntry.getHeight() / 5 * 2;
     fontXNumber = xPosition - spriteEntry.getWidth() / 2 + 20;
-    fontYNumber = yPosition + spriteEntry.getHeight() / 5 * 2;
-    fontXName = xPosition - spriteEntry.getWidth() / 9 * 3 - 10;
-    fontYName = yPosition + spriteEntry.getHeight() / 5 * 2;
-    fontXScore = xPosition + spriteEntry.getWidth() / 9;
-    fontYScore = yPosition + spriteEntry.getHeight() / 5 * 2;
+    fontYNumber = yPositionText;
+    fontXName = fontXNumber + (float) MainGame.GAME_WIDTH / 15;
+    fontYName = yPositionText;
+    fontXScore = fontXName + (float) MainGame.GAME_WIDTH / 5;
+    fontYScore = yPositionText;
+    fontXLevel = fontXScore + (float) MainGame.GAME_WIDTH / 3.5f;
+    fontYLevel = yPositionText;
+
+    textPlace = "" + place + ".";
+    textName = name;
+    textScore = "" + score;
+    textLevel = "(LEVEL " + level + ")";
   }
 
   public void draw(final SpriteBatch spriteBatch) {
+    Gdx.app.debug("highscore_entry:draw",
+        MainGame.getCurrentTimeStampLogString() + "I am never called???????");
     spriteEntry.draw(spriteBatch);
     fontText.getData().setScale(fontScale);
-    fontText.draw(spriteBatch, "" + place, fontXNumber, fontYNumber);
-    fontText.draw(spriteBatch, name, fontXName, fontYName);
-    fontText.draw(spriteBatch, "" + score, fontXScore, fontYScore);
+    fontText.draw(spriteBatch, textPlace, fontXNumber, fontYNumber);
+    fontText.draw(spriteBatch, textName, fontXName, fontYName);
+    // TODO Make font scale different when score exceeds a high value
+    fontText.draw(spriteBatch, textScore, fontXScore, fontYScore);
+    fontText.getData().setScale(fontScale / 3);
+    fontText.draw(spriteBatch, textLevel, fontXLevel, fontYLevel);
   }
 
   @Override

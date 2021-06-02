@@ -90,7 +90,11 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
     if (Gdx.input.justTouched() || Gdx.input.isKeyJustPressed(Keys.ENTER) || Gdx.input
         .isKeyJustPressed(Keys.SPACE) || Gdx.input.isKeyJustPressed(Keys.ESCAPE)
         || controllerAnyKeyWasPressed || Gdx.input.isCatchKey(Keys.BACK)) {
-      gameStateManager.setGameState(new CreateHighscoreEntryState(gameStateManager, score, true));
+      if (preferencesManager.scoreIsInTop5(score)) {
+        gameStateManager.setGameState(new CreateHighscoreEntryState(gameStateManager, score, true));
+      } else {
+        gameStateManager.setGameState(new CreditState(gameStateManager, true));
+      }
     }
   }
 

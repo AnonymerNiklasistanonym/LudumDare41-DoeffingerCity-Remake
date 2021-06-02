@@ -14,6 +14,7 @@ public class PreferencesManager {
   private static final String PREFERENCE_SOUND_EFFECTS_ON_BOOL = "SOUND_EFFECTS_ON_BOOL";
   private static final String PREFERENCE_HIGHSCORE_NAME_STRING_BASE = "HIGHSCORE_NAME_STRING_";
   private static final String PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE = "HIGHSCORE_SCORE_VALUE_";
+  private static final String PREFERENCE_HIGHSCORE_LEVEL_VALUE_BASE = "HIGHSCORE_LEVEL_VALUE_";
   private static final String PREFERENCE_ALREADY_LAUNCHED_BOOL = "ALREADY_LAUNCHED_BOOL";
   private static final String PREFERENCE_LAST_HIGHSCORE_NAME_STRING = "LAST_HIGHSCORE_NAME_STRING";
   private static final String PREFERENCES_ID = "td-racing-ludum-dare-41";
@@ -94,7 +95,7 @@ public class PreferencesManager {
    */
   public void resetHighscore() {
 		for (int i = 0; i < NUMBER_HIGHSCORE_ENTRIES; i++) {
-			prefs.putString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + i, "NOBODY").putInteger(
+			prefs.putString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + i, "------").putInteger(
 					PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i, 0);
 		}
     prefs.flush();
@@ -118,9 +119,11 @@ public class PreferencesManager {
   public HighscoreEntry[] retrieveHighscore() {
     final HighscoreEntry[] entries = new HighscoreEntry[NUMBER_HIGHSCORE_ENTRIES];
 		for (int i = 0; i < entries.length; i++) {
-			entries[i] = new HighscoreEntry(prefs.getInteger(PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i),
-					prefs.getString(
-							PREFERENCE_HIGHSCORE_NAME_STRING_BASE + i));
+			entries[i] = new HighscoreEntry(
+			    prefs.getInteger(PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i),
+					prefs.getInteger(PREFERENCE_HIGHSCORE_LEVEL_VALUE_BASE + i),
+          prefs.getString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + i)
+      );
 		}
     return entries;
   }
@@ -160,6 +163,7 @@ public class PreferencesManager {
 
   public boolean scoreIsInTop5(final int score) {
     for (final HighscoreEntry entry : retrieveHighscore()) {
+      Gdx.app.debug("preferences_manager", MainGame.getCurrentTimeStampLogString() + "score (" + score + ") > existing entry (" + entry.getScore() + ")");
 			if (entry.getScore() < score) {
 				return true;
 			}
@@ -177,6 +181,10 @@ public class PreferencesManager {
      */
     private final int score;
     /**
+     * The level value
+     */
+    private final int level;
+    /**
      * The name of the person that set the score
      */
     private final String name;
@@ -187,13 +195,18 @@ public class PreferencesManager {
      * @param score The score value
      * @param name  The name of the person that set the score
      */
-    HighscoreEntry(final int score, final String name) {
+    HighscoreEntry(final int score, final int level, final String name) {
       this.score = score;
+      this.level = level;
       this.name = name;
     }
 
     public int getScore() {
       return score;
+    }
+
+    public int getLevel() {
+      return level;
     }
 
     public String getName() {
