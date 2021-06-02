@@ -10,16 +10,15 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.MainGame;
+import com.mygdx.game.controller.create_highscore_entry.ControllerCallbackCreateHighscoreEntryState;
+import com.mygdx.game.controller.create_highscore_entry.IControllerCallbackCreateHighscoreEntryState;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
 import com.mygdx.game.gamestate.states.elements.HighscoreSelectCharacterDisplay;
 import com.mygdx.game.gamestate.states.elements.HighscoreSelectCharacterDisplayInputState;
-import com.mygdx.game.listener.controller.ControllerHelperMenu;
-import com.mygdx.game.listener.controller.ControllerMenuCallbackInterface;
-import com.mygdx.game.listener.controller.ControllerWiki;
 
 public class CreateHighscoreEntryState extends GameState implements
-    ControllerMenuCallbackInterface {
+    IControllerCallbackCreateHighscoreEntryState {
 
   private static final String STATE_NAME = "CreateHighscoreEntry";
   private static final String highscoreText = "YOU REACHED THE TOP 5!";
@@ -30,15 +29,13 @@ public class CreateHighscoreEntryState extends GameState implements
   private final ShapeRenderer shapeRenderer;
   private final String scoreText;
   private final int score;
-  private final ControllerListener controllerHelperMenu;
+  private final ControllerListener controllerCallbackCreateHighscoreEntryState;
   private final boolean goToCreditStage;
   private final int level;
   private HighscoreSelectCharacterDisplay[] highscoreCharacterButtons;
   private Vector2 highscoreTextPosition, scoreTextPosition;
   private int currentIndex = 0;
-  private boolean blockStickInput = false;
-  private float stickTimeHelper;
-  private float controllerTimeHelper;
+
   /**
    * Variable for the font of the credits text
    */
@@ -66,8 +63,9 @@ public class CreateHighscoreEntryState extends GameState implements
     assetManager.load(MainGame.getGameFontFilePath("cornerstone_upper_case_big"), BitmapFont.class);
 
     // Register controller callback so that controller input can be managed
-    controllerHelperMenu = new ControllerHelperMenu(this);
-    Controllers.addListener(controllerHelperMenu);
+    controllerCallbackCreateHighscoreEntryState = new ControllerCallbackCreateHighscoreEntryState(
+        this);
+    Controllers.addListener(controllerCallbackCreateHighscoreEntryState);
   }
 
   public CreateHighscoreEntryState(GameStateManager gameStateManager, final int score,
@@ -79,44 +77,50 @@ public class CreateHighscoreEntryState extends GameState implements
   protected void handleInput() {
     GameStateManager.toggleFullScreen(true);
 
-		if (Gdx.input.isKeyJustPressed(Keys.LEFT) || Gdx.input.isKeyJustPressed(Keys.A)) {
-			selectNextCharacterButton(false);
-		}
-		if (Gdx.input.isKeyJustPressed(Keys.RIGHT) || Gdx.input.isKeyJustPressed(Keys.D)) {
-			selectNextCharacterButton(true);
-		}
+    if (Gdx.input.isKeyJustPressed(Keys.LEFT) || Gdx.input.isKeyJustPressed(Keys.A)
+        || controllerLeftKeyWasPressed) {
+      controllerLeftKeyWasPressed = false;
+      selectNextCharacterButton(false);
+    }
+    if (Gdx.input.isKeyJustPressed(Keys.RIGHT) || Gdx.input.isKeyJustPressed(Keys.D)
+        || controllerRightKeyWasPressed) {
+      controllerRightKeyWasPressed = false;
+      selectNextCharacterButton(true);
+    }
 
-		if (Gdx.input.isKeyJustPressed(Keys.UP) || Gdx.input.isKeyJustPressed(Keys.W)) {
-			selectNextCharacter(true);
-		}
-		if (Gdx.input.isKeyJustPressed(Keys.DOWN) || Gdx.input.isKeyJustPressed(Keys.S)) {
-			selectNextCharacter(false);
-		}
+    if (Gdx.input.isKeyJustPressed(Keys.UP) || Gdx.input.isKeyJustPressed(Keys.W)
+        || controllerUpKeyWasPressed) {
+      controllerUpKeyWasPressed = false;
+      selectNextCharacter(true);
+    }
+    if (Gdx.input.isKeyJustPressed(Keys.DOWN) || Gdx.input.isKeyJustPressed(Keys.S)
+        || controllerDownKeyWasPressed) {
+      controllerDownKeyWasPressed = false;
+      selectNextCharacter(false);
+    }
 
-		if (Gdx.input.isKeyJustPressed(Keys.ENTER)) {
-			saveHighscoreAndGoToList();
-		}
+    if (Gdx.input.isKeyJustPressed(Keys.ENTER) || controllerSelectKeyWasPressed) {
+      controllerSelectKeyWasPressed = false;
+      saveHighscoreAndGoToList();
+    }
 
-		if (Gdx.input.justTouched() || (Gdx.input.isKeyJustPressed(Keys.ESCAPE) || Gdx.input
-				.isCatchBackKey())) {
-			goBack();
-		}
-  }
-
-  private void goBack() {
-		if (goToCreditStage) {
-			gameStateManager.setGameState(new CreditState(gameStateManager, true));
-		} else {
-			gameStateManager.setGameState(new HighscoreListState(gameStateManager));
-		}
+    if (Gdx.input.isCatchKey(Keys.BACK) || Gdx.input.isKeyJustPressed(Keys.ESCAPE)
+        || controllerBackKeyWasPressed) {
+      controllerBackKeyWasPressed = false;
+      if (goToCreditStage) {
+        gameStateManager.setGameState(new CreditState(gameStateManager, true));
+      } else {
+        gameStateManager.setGameState(new HighscoreListState(gameStateManager));
+      }
+    }
   }
 
   @Override
   protected void update(final float deltaTime) {
     if (highscoreCharacterButtons != null) {
-			for (final HighscoreSelectCharacterDisplay highscoreCharacterButton : highscoreCharacterButtons) {
-				highscoreCharacterButton.update(deltaTime);
-			}
+      for (final HighscoreSelectCharacterDisplay highscoreCharacterButton : highscoreCharacterButtons) {
+        highscoreCharacterButton.update(deltaTime);
+      }
     }
   }
 
@@ -156,9 +160,9 @@ public class CreateHighscoreEntryState extends GameState implements
 
         final char[] name = preferencesManager.getName();
         if (name != null && name.length == highscoreCharacterButtons.length) {
-					for (int i = 0; i < highscoreCharacterButtons.length; i++) {
-						highscoreCharacterButtons[i].setNewCharacter(name[i]);
-					}
+          for (int i = 0; i < highscoreCharacterButtons.length; i++) {
+            highscoreCharacterButtons[i].setNewCharacter(name[i]);
+          }
         }
       }
       // Render highscore entry
@@ -167,14 +171,14 @@ public class CreateHighscoreEntryState extends GameState implements
       fontYouReachedTop5
           .draw(spriteBatch, highscoreText, highscoreTextPosition.x, highscoreTextPosition.y);
       fontYouReachedTop5.draw(spriteBatch, scoreText, scoreTextPosition.x, scoreTextPosition.y);
-			for (final HighscoreSelectCharacterDisplay highscoreCharacterButton : highscoreCharacterButtons) {
-				highscoreCharacterButton.draw(spriteBatch);
-			}
+      for (final HighscoreSelectCharacterDisplay highscoreCharacterButton : highscoreCharacterButtons) {
+        highscoreCharacterButton.draw(spriteBatch);
+      }
       spriteBatch.end();
       shapeRenderer.begin(ShapeType.Filled);
-			for (final HighscoreSelectCharacterDisplay highscoreCharacterButton : highscoreCharacterButtons) {
-				highscoreCharacterButton.drawUpDownInput(shapeRenderer);
-			}
+      for (final HighscoreSelectCharacterDisplay highscoreCharacterButton : highscoreCharacterButtons) {
+        highscoreCharacterButton.drawUpDownInput(shapeRenderer);
+      }
       shapeRenderer.end();
     } else {
       // display loading information
@@ -190,72 +194,36 @@ public class CreateHighscoreEntryState extends GameState implements
 
   @Override
   protected void dispose() {
-    Controllers.removeListener(controllerHelperMenu);
+    Controllers.removeListener(controllerCallbackCreateHighscoreEntryState);
     shapeRenderer.dispose();
   }
 
   private void saveHighscoreAndGoToList() {
-    String name = "";
-		for (final HighscoreSelectCharacterDisplay highscoreCharacterButton : highscoreCharacterButtons) {
-			name += highscoreCharacterButton.getCurrentSelectedCharacter();
-		}
-    preferencesManager.saveHighscore(name, this.score);
-		if (goToCreditStage) {
-			gameStateManager.setGameState(new CreditState(gameStateManager, true));
-		} else {
-			gameStateManager.setGameState(new GameOverState(gameStateManager, level));
-		}
-  }
-
-  @Override
-  public void controllerCallbackBackPressed() {
-    goBack();
-  }
-
-  @Override
-  public void controllerCallbackButtonPressed(int buttonId) {
-		if (controllerTimeHelper < 0.2) {
-			return;
-		}
-		if (buttonId == ControllerWiki.BUTTON_A) {
-			saveHighscoreAndGoToList();
-		}
-		if (buttonId == ControllerWiki.BUTTON_START) {
-			GameStateManager.toggleFullScreen();
-		}
+    StringBuilder name = new StringBuilder();
+    for (final HighscoreSelectCharacterDisplay highscoreCharacterButton : highscoreCharacterButtons) {
+      name.append(highscoreCharacterButton.getCurrentSelectedCharacter());
+    }
+    preferencesManager.saveHighscore(name.toString(), this.score);
+    if (goToCreditStage) {
+      gameStateManager.setGameState(new CreditState(gameStateManager, true));
+    } else {
+      gameStateManager.setGameState(new GameOverState(gameStateManager, level));
+    }
   }
 
   private void selectNextCharacterButton(boolean left) {
-		if (left) {
-			currentIndex = (currentIndex + 1 == highscoreCharacterButtons.length) ? 0 : currentIndex + 1;
-		} else {
-			currentIndex =
-					(currentIndex - 1 < 0) ? highscoreCharacterButtons.length - 1 : currentIndex - 1;
-		}
+    if (left) {
+      currentIndex = (currentIndex + 1 == highscoreCharacterButtons.length) ? 0 : currentIndex + 1;
+    } else {
+      currentIndex =
+          (currentIndex - 1 < 0) ? highscoreCharacterButtons.length - 1 : currentIndex - 1;
+    }
 
-		for (final HighscoreSelectCharacterDisplay highscoreCharacterButton : highscoreCharacterButtons) {
-			highscoreCharacterButton.setUpDownInput(HighscoreSelectCharacterDisplayInputState.NOT_ACTIVE);
-		}
+    for (final HighscoreSelectCharacterDisplay highscoreCharacterButton : highscoreCharacterButtons) {
+      highscoreCharacterButton.setUpDownInput(HighscoreSelectCharacterDisplayInputState.NOT_ACTIVE);
+    }
     highscoreCharacterButtons[currentIndex]
         .setUpDownInput(HighscoreSelectCharacterDisplayInputState.ACTIVE);
-  }
-
-  @Override
-  public void controllerCallbackStickMoved(final boolean xAxis, final float value) {
-    // select next button
-		if (blockStickInput && stickTimeHelper >= 0.3) {
-			blockStickInput = false;
-		}
-    if ((!blockStickInput && !xAxis) && (value > 0.3 || value < -0.3)) {
-      selectNextCharacter(value > 0.3);
-      stickTimeHelper = 0;
-      blockStickInput = true;
-    }
-    if ((!blockStickInput && xAxis) && (value > 0.3 || value < -0.3)) {
-      selectNextCharacterButton(value > 0.3);
-      stickTimeHelper = 0;
-      blockStickInput = true;
-    }
   }
 
   private void selectNextCharacter(boolean upwards) {
@@ -268,9 +236,9 @@ public class CreateHighscoreEntryState extends GameState implements
           .setNewCharacter((currentChar - 1 < 'A') ? 'Z' : (char) (currentChar - 1));
     }
 
-		for (final HighscoreSelectCharacterDisplay highscoreCharacterButton : highscoreCharacterButtons) {
-			highscoreCharacterButton.setUpDownInput(HighscoreSelectCharacterDisplayInputState.NOT_ACTIVE);
-		}
+    for (final HighscoreSelectCharacterDisplay highscoreCharacterButton : highscoreCharacterButtons) {
+      highscoreCharacterButton.setUpDownInput(HighscoreSelectCharacterDisplayInputState.NOT_ACTIVE);
+    }
     highscoreCharacterButtons[currentIndex].setUpDownInput(
         upwards ? HighscoreSelectCharacterDisplayInputState.UP
             : HighscoreSelectCharacterDisplayInputState.DOWN);
@@ -288,4 +256,47 @@ public class CreateHighscoreEntryState extends GameState implements
     // Nothing to do
   }
 
+  @Override
+  public void controllerCallbackToggleFullScreen() {
+    controllerToggleFullScreenPressed = true;
+  }
+
+  @Override
+  public void controllerCallbackToggleMusic() {
+    controllerToggleMusicPressed = true;
+  }
+
+  @Override
+  public void controllerCallbackToggleSoundEffects() {
+    controllerToggleSoundEffectsPressed = true;
+  }
+
+  @Override
+  public void controllerCallbackSelectLeftCharacter() {
+    controllerLeftKeyWasPressed = true;
+  }
+
+  @Override
+  public void controllerCallbackSelectRightCharacter() {
+    controllerRightKeyWasPressed = true;
+  }
+
+  @Override
+  public void controllerCallbackSelectAboveMenuButton(boolean upwards) {
+    if (upwards) {
+      controllerUpKeyWasPressed = true;
+    } else {
+      controllerDownKeyWasPressed = true;
+    }
+  }
+
+  @Override
+  public void controllerCallbackClickSelect() {
+    controllerSelectKeyWasPressed = true;
+  }
+
+  @Override
+  public void controllerCallbackClickBackButton() {
+    controllerBackKeyWasPressed = true;
+  }
 }
