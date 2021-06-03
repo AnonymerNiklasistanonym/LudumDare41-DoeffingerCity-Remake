@@ -22,6 +22,10 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.MainGame;
+import com.mygdx.game.controller.play_state.ControllerCallbackPlayState;
+import com.mygdx.game.controller.play_state.IControllerCallbackPlayState;
+import com.mygdx.game.controller.play_state.SteerCarForwardsBackwards;
+import com.mygdx.game.controller.play_state.SteerCarLeftRight;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
 import com.mygdx.game.level.Level;
@@ -29,8 +33,6 @@ import com.mygdx.game.level.LevelHandler;
 import com.mygdx.game.level.Wave;
 import com.mygdx.game.listener.collisions.CollisionCallbackInterface;
 import com.mygdx.game.listener.collisions.CollisionListener;
-import com.mygdx.game.listener.controller.ControllerCallbackInterface;
-import com.mygdx.game.listener.controller.ControllerHelper;
 import com.mygdx.game.objects.Car;
 import com.mygdx.game.objects.Checkpoint;
 import com.mygdx.game.objects.Enemy;
@@ -54,7 +56,7 @@ import com.mygdx.game.objects.towers.MgTower;
 import com.mygdx.game.objects.towers.SniperTower;
 import com.mygdx.game.unsorted.Node;
 
-public class PlayState extends GameState implements CollisionCallbackInterface, ControllerCallbackInterface,
+public class PlayState extends GameState implements CollisionCallbackInterface, IControllerCallbackPlayState,
 		ScoreBoardCallbackInterface, EnemyCallbackInterface {
 
 	private final static String STATE_NAME = "Play";
@@ -72,7 +74,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	private final Music musicBackground, soundCar;
 	private final Sound splatt, soundGetMoney, soundCarStart, soundVictory, soundDamage;
-	private final ControllerHelper controllerHelper;
 	private final ScoreBoard scoreBoard;
 	private final Array<Enemy> enemies, enemiesDead;
 	private final Array<Tower> towers;
@@ -99,6 +100,38 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	private boolean pausedByUser, lastPause, musicOn, lastMusic, lastSound, soundOn, debugBox2D, debugCollision, debugDistance,
 			debugWay, unlockAllTowers, padActivated, debugTower, wasAlreadyPaused;
 	private int tutorialState, checkPointsCleared, speedFactor;
+
+
+	/**
+	 * Tracker if a controller manual pause key was pressed
+	 */
+	private boolean controllerToggleManualPausePressed = false;
+	/**
+	 * Tracker if a controller key to accelerate the car was pressed
+	 */
+	private boolean controllerAccelerateCarPressed = false;
+	/**
+	 * Tracker if a controller key to brake the car was pressed
+	 */
+	private boolean controllerBrakeCarPressed = false;
+	/**
+	 * Tracker if a controller key to steer the car to the left was pressed
+	 */
+	private boolean controllerSteerLeftPressed = false;
+	/**
+	 * Tracker if a controller key to steer the car to the right was pressed
+	 */
+	private boolean controllerSteerRightPressed = false;
+	/**
+	 * Tracker which tower was selected by a controller to build key (see controllerSelectTowerPressed)
+	 */
+	private int controllerSelectTowerId = 0;
+	/**
+	 * Tracker if a controller key to select a tower to build was pressed
+	 */
+	private boolean controllerSelectTowerPressed = false;
+
+	private final ControllerCallbackPlayState controllerCallbackPlayState;
 
 	public PlayState(final GameStateManager gameStateManager, final int levelNumber) {
 		super(gameStateManager, STATE_NAME);
@@ -240,8 +273,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		// TODO Create a level info object which is loaded and from this level info object load the levels
 		levels = LevelHandler.loadLevels();
 		scoreBoard = new ScoreBoard(this);
-		controllerHelper = new ControllerHelper(this);
-		Controllers.addListener(controllerHelper);
 		preferencesManager.checkHighscore();
 		// preferencesManager.setupIfFirstStart();
 		enemies = new Array<Enemy>();
@@ -268,6 +299,10 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 		// load level
 		loadLevel(levelNumber);
+
+		// Register controller callback so that controller input can be managed
+		controllerCallbackPlayState = new ControllerCallbackPlayState(this);
+		Controllers.addListener(controllerCallbackPlayState);
 	}
 
 	private void loadLevel(int levelNumber) {
@@ -410,12 +445,18 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		if (Gdx.input.isCatchKey(Keys.BACK) || Gdx.input.isKeyJustPressed(Keys.ESCAPE)
 				|| controllerBackKeyWasPressed) {
 			controllerBackKeyWasPressed = false;
-			gameStateManager.setGameState(new MenuState(gameStateManager));
+			// Check if currently in building mode and exit this mode before instead of going back to the menu
+			if (buildingtower != null) {
+				stopBuilding();
+			} else {
+				// TODO Add dialog that asks if the user wants really to quit?
+				gameStateManager.setGameState(new MenuState(gameStateManager));
+			}
 		}
 
 		// Toggle the manual pause
-		if (controllerStartKeyWasPressed || Gdx.input.isKeyJustPressed(Keys.P)) {
-			controllerStartKeyWasPressed = false;
+		if (controllerToggleManualPausePressed || Gdx.input.isKeyJustPressed(Keys.P)) {
+			controllerToggleManualPausePressed = false;
 			pausedByUser = !pausedByUser;
 		}
 
@@ -427,40 +468,49 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		// Update the cursor position
 		cursorPosition.set(GameStateManager.getMousePosition(camera));
 
-		// control the car
-		if (Gdx.input.isKeyPressed(Keys.W) || Gdx.input.isKeyPressed(Keys.UP))
+		// Check for additional debug inputs when in developer mode
+		if (MainGame.DEVELOPER_MODE) {
+			debugInputs();
+		}
+
+		// Car control
+		SteerCarLeftRight controllerSteerCarLeftRight = controllerCallbackPlayState.getSteerCarLeftRight();
+		SteerCarForwardsBackwards controllerSteerForwardsBackwards = controllerCallbackPlayState.getSteerCarForwardsBackwards();
+
+		if (Gdx.input.isKeyPressed(Keys.W) || Gdx.input.isKeyPressed(Keys.UP) || controllerSteerForwardsBackwards == SteerCarForwardsBackwards.FORWARDS) {
 			car.accelarate();
-		if (Gdx.input.isKeyPressed(Keys.S) || Gdx.input.isKeyPressed(Keys.DOWN))
+		}
+		if (Gdx.input.isKeyPressed(Keys.S) || Gdx.input.isKeyPressed(Keys.DOWN) || controllerSteerForwardsBackwards == SteerCarForwardsBackwards.BACKWARDS) {
 			car.brake();
-		if (Gdx.input.isKeyPressed(Keys.A) || Gdx.input.isKeyPressed(Keys.LEFT))
+		}
+		if (Gdx.input.isKeyPressed(Keys.A) || Gdx.input.isKeyPressed(Keys.LEFT) || controllerSteerCarLeftRight == SteerCarLeftRight.LEFT) {
 			car.steerLeft();
-		if (Gdx.input.isKeyPressed(Keys.D) || Gdx.input.isKeyPressed(Keys.RIGHT))
+		}
+		if (Gdx.input.isKeyPressed(Keys.D) || Gdx.input.isKeyPressed(Keys.RIGHT) || controllerSteerCarLeftRight == SteerCarLeftRight.RIGHT) {
 			car.steerRight();
+		}
 
-		// toggle sound
-		if (Gdx.input.isKeyJustPressed(Keys.U))
-			soundOn = !soundOn;
-		// toggle background music
-		if (Gdx.input.isKeyJustPressed(Keys.M))
-			musicOn = !musicOn;
-
-		// select tower
-		if (Gdx.input.isKeyJustPressed(Keys.NUM_1))
+		// Select tower to build
+		if (Gdx.input.isKeyJustPressed(Keys.NUM_1) || controllerSelectTowerPressed && controllerSelectTowerId == 0) {
+			controllerSelectTowerPressed = false;
 			towerMenu.selectTower(0, cursorPosition, enemies);
-		if (Gdx.input.isKeyJustPressed(Keys.NUM_2))
+		}
+		if (Gdx.input.isKeyJustPressed(Keys.NUM_2) || controllerSelectTowerPressed && controllerSelectTowerId == 1) {
+			controllerSelectTowerPressed = false;
 			towerMenu.selectTower(1, cursorPosition, enemies);
-		if (Gdx.input.isKeyJustPressed(Keys.NUM_3))
+		}
+		if (Gdx.input.isKeyJustPressed(Keys.NUM_3) || controllerSelectTowerPressed && controllerSelectTowerId == 2) {
+			controllerSelectTowerPressed = false;
 			towerMenu.selectTower(2, cursorPosition, enemies);
-		if (Gdx.input.isKeyJustPressed(Keys.NUM_4))
+		}
+		if (Gdx.input.isKeyJustPressed(Keys.NUM_4) || controllerSelectTowerPressed && controllerSelectTowerId == 3) {
+			controllerSelectTowerPressed = false;
 			towerMenu.selectTower(3, cursorPosition, enemies);
+		}
 
 		// build tower if in building mode
 		if (Gdx.input.justTouched() && buildingtower != null)
 			buildTowerIfAllowed(true);
-
-		// turn on developer shortcuts
-		if (MainGame.DEVELOPER_MODE)
-			debugInputs();
 	}
 
 	private void debugInputs() {
@@ -636,7 +686,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		timeToDisplayWaveTextInS -= deltaTime;
 
 		// update objects
-		controllerHelper.update();
 		towerMenu.update();
 		scoreBoard.update(deltaTime * speedFactor);
 		car.update(deltaTime);
@@ -890,6 +939,10 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 			if (debugBox2D)
 				debugRender.render(world, camera.combined);
+
+			shapeRenderer.begin(ShapeType.Filled);
+			controllerCallbackPlayState.drawDebugInput(shapeRenderer);
+			shapeRenderer.end();
 		}
 	}
 
@@ -1054,8 +1107,9 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	@Override
 	protected void dispose() {
-		// remove all listeners
-		Controllers.removeListener(controllerHelper);
+		// Remove controller listener
+		Controllers.removeListener(controllerCallbackPlayState);
+
 		// dispose loaded objects
 		for (final Enemy enemy : enemies)
 			enemy.dispose();
@@ -1090,9 +1144,9 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		soundVictory.dispose();
 		shapeRenderer.dispose();
 
-		Gdx.app.debug("menu_state:dispose", "Loaded assets before unloading are:");
+		Gdx.app.debug("play_state:dispose", "Loaded assets before unloading are:");
 		for (final String loadedAsset : assetManager.getAssetNames()) {
-			Gdx.app.debug("menu_state:dispose", "- " + loadedAsset);
+			Gdx.app.debug("play_state:dispose", "- " + loadedAsset);
 		}
 
 		assetManager.unload(MainGame.getGameFontFilePath("cornerstone_70"));
@@ -1146,9 +1200,9 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		assetManager.unload(MainGame.getGameSoundFilePath("victory"));
 		assetManager.unload(MainGame.getGameSoundFilePath("trailer_damage"));
 
-		Gdx.app.debug("menu_state:dispose", "Loaded assets after unloading are:");
+		Gdx.app.debug("play_state:dispose", "Loaded assets after unloading are:");
 		for (final String loadedAsset : assetManager.getAssetNames()) {
-			Gdx.app.debug("menu_state:dispose", "- " + loadedAsset);
+			Gdx.app.debug("play_state:dispose", "- " + loadedAsset);
 		}
 	}
 
@@ -1303,13 +1357,36 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	@Override
 	public void controllerCallbackSteerCar(boolean left) {
-		// TODO Update controller integration
-		if (left)
-			car.steerLeft();
-		else
-			car.steerRight();
+		if (left) {
+			controllerSteerLeftPressed = true;
+		} else {
+			controllerSteerRightPressed = true;
+		}
 	}
 
+	@Override
+	public void controllerCallbackSelectTowerToBuild(int towerId) {
+		controllerSelectTowerId = towerId;
+		controllerSelectTowerPressed = true;
+	}
+
+	@Override
+	public void controllerCallbackPlaceTowerCursorPositionChanged(Vector3 padPos) {
+		// TODO Try to make this better
+		if (!padActivated)
+			return;
+
+		if (((this.padPos.x + padPos.x >= 0) && (this.padPos.x + padPos.x <= MainGame.GAME_WIDTH * PIXEL_TO_METER))
+				&& ((this.padPos.y + padPos.y >= 0) && (
+				this.padPos.y + padPos.y <= MainGame.GAME_HEIGHT * PIXEL_TO_METER))) {
+			this.padPos.mulAdd(padPos, 1);
+		}
+
+		if (buildingtower != null)
+			buildingtower.update(0, this.padPos);
+	}
+
+	/*
 	@Override
 	public void controllerCallbackStartBuildingMode(final int towerId) {
 		// TODO Update controller integration
@@ -1320,67 +1397,69 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		} else {
 			padActivated = towerMenu.selectTower(towerId, padPos, enemies);
 		}
-	}
+	}*/
 
 	@Override
 	public void controllerCallbackAccelerateCar(final boolean forwards) {
+		Gdx.app.debug("play_state:controllerCallbackAccelerateCar",
+				MainGame.getCurrentTimeStampLogString() + "(forwards=" + forwards + ")");
 		// TODO Update controller integration
-		if (forwards)
-			car.accelarate();
-		else
-			car.brake();
+		if (forwards) {
+			controllerAccelerateCarPressed = true;
+		} else {
+			controllerBrakeCarPressed = false;
+		}
 	}
 
 	@Override
-	public void controllerCallbackBackButtonPressed() {
+	public void controllerCallbackBuildTower() {
+		Gdx.app.debug("play_state:controllerCallbackBuildTower",
+				MainGame.getCurrentTimeStampLogString());
 		// TODO Update controller integration
+		// when in building mode try build the current tower
+		if (buildingtower != null) {
+			buildTowerIfAllowed(true);
+		}
+	}
+
+	@Override
+	public void controllerCallbackToggleManualPause() {
+		Gdx.app.debug("play_state:controllerCallbackToggleManualPause",
+				MainGame.getCurrentTimeStampLogString());
+		controllerToggleManualPausePressed = true;
+	}
+
+	@Override
+	public void controllerCallbackClickBackButton() {
+		Gdx.app.debug("play_state:controllerCallbackClickBackButton",
+				MainGame.getCurrentTimeStampLogString());
 		controllerBackKeyWasPressed = true;
 	}
 
 	@Override
 	public void controllerCallbackToggleFullScreen() {
-		// TODO Update controller integration
+		Gdx.app.debug("play_state:controllerCallbackToggleFullScreen",
+				MainGame.getCurrentTimeStampLogString());
 		controllerToggleFullScreenPressed = true;
 	}
 
 	@Override
-	public void controllerCallbackToggleSound() {
-		// TODO Update controller integration
+	public void controllerCallbackToggleMusic() {
+		Gdx.app.debug("play_state:controllerCallbackToggleMusic",
+				MainGame.getCurrentTimeStampLogString());
 		controllerToggleMusicPressed = true;
+	}
+
+	@Override
+	public void controllerCallbackToggleSoundEffects() {
+		Gdx.app.debug("play_state:controllerCallbackToggleSoundEffects",
+				MainGame.getCurrentTimeStampLogString());
 		controllerToggleSoundEffectsPressed = true;
 	}
 
 	@Override
-	public void controllerCallbackTogglePause() {
-		// TODO Update controller integration
-		controllerStartKeyWasPressed = true;
-	}
-
-	@Override
-	public void controllerCallbackMouseChanged(final Vector3 rightPad) {
-		// TODO Update controller integration
-		if (!padActivated)
-			return;
-
-		if (((padPos.x + rightPad.x >= 0) && (padPos.x + rightPad.x <= MainGame.GAME_WIDTH * PIXEL_TO_METER))
-				&& ((padPos.y + rightPad.y >= 0) && (padPos.y + rightPad.y <= MainGame.GAME_HEIGHT * PIXEL_TO_METER))) {
-			padPos.mulAdd(rightPad, 1);
-		}
-
-		if (buildingtower != null)
-			buildingtower.update(0, padPos);
-	}
-
-	@Override
-	public void controllerCallbackBuildTower() {
-		// TODO Update controller integration
-		// when in building mode try build the current tower
-		if (buildingtower != null)
-			buildTowerIfAllowed(true);
-	}
-
-	@Override
 	public void enemyDied(final Enemy enemy) {
+		Gdx.app.debug("play_state:enemyDied", MainGame.getCurrentTimeStampLogString() + "\"" + enemy.getName() + "\" enemy killed (score + " + enemy.getScore() + ")");
 		// Log the kill in the scoreboard
 		scoreBoard.killEnemy(enemy);
 	}

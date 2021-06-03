@@ -21,7 +21,7 @@ public class EnemyFat extends Enemy {
 	public static Texture normalTexture;
 
 	public EnemyFat(final Vector2 position, final World world, final Map map, final float time) {
-		super(position, world, normalTexture, deadTexture, damageTexture, map, time);
+		super("Fat", position, world, normalTexture, deadTexture, damageTexture, map, time);
 		damage = DAMAGE;
 		health = HEALTH;
 		maxHealth = HEALTH;

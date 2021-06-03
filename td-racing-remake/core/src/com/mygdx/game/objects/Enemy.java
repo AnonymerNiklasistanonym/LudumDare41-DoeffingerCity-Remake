@@ -45,9 +45,11 @@ public abstract class Enemy implements Disposable {
 	private Vector2 hitRandom;
 	private Color color;
 	protected boolean activated, bodyDeleted, healthBar, tot, deleteBody, delete, leftSpawn;
+	protected final String name;
 
-	public Enemy(final Vector2 position, final World world, final Texture alive, final Texture deadsprite,
+	public Enemy(final String name, final Vector2 position, final World world, final Texture alive, final Texture deadsprite,
 			final Texture damagesprite, final Map map, final float time) {
+		this.name = name;
 		timeAlive = 0f;
 		textureDead = deadsprite;
 		deleteBody = false;
@@ -421,5 +423,9 @@ public abstract class Enemy implements Disposable {
 
 	public Vector2 getCenteredPosition() {
 		return new Vector2(sprite.getX() + sprite.getWidth() / 2, sprite.getY() + sprite.getHeight() / 2);
+	}
+
+  public String getName() {
+		return name;
 	}
 }
