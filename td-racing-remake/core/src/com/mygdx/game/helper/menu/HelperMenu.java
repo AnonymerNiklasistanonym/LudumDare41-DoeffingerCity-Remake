@@ -1,6 +1,6 @@
-package com.mygdx.game.helper;
+package com.mygdx.game.helper.menu;
 
-import com.badlogic.gdx.Input.Keys;
+import com.mygdx.game.helper.HelperUtil;
 
 public class HelperMenu {
   public static String selectNextButton(final IHelperMenuButton[][] menuButtons, final HelperMenuButtonNavigation key, final String lastId) {

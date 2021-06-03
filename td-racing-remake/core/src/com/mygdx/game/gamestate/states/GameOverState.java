@@ -15,8 +15,8 @@ import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
 import com.mygdx.game.gamestate.states.elements.MenuButton;
 import com.mygdx.game.gamestate.states.elements.MenuButtonSmall;
-import com.mygdx.game.helper.HelperMenu;
-import com.mygdx.game.helper.HelperMenuButtonNavigation;
+import com.mygdx.game.helper.menu.HelperMenu;
+import com.mygdx.game.helper.menu.HelperMenuButtonNavigation;
 
 /**
  * Creates the game over state which renders the a menu and handles keyboard, touch and controller

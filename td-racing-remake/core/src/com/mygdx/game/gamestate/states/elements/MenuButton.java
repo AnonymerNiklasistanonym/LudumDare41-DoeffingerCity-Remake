@@ -9,7 +9,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.game.gamestate.GameStateManager;
-import com.mygdx.game.helper.IHelperMenuButton;
+import com.mygdx.game.helper.menu.IHelperMenuButton;
 
 /**
  * Abstract class for menu buttons

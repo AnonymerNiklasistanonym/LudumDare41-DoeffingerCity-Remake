@@ -1,4 +1,4 @@
-package com.mygdx.game.helper;
+package com.mygdx.game.helper.menu;
 
 /**
  * Menu Button mockup for menu navigation implementation with multiple menu buttons in a grid ([][])

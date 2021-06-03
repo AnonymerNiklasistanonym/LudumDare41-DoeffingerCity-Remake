@@ -9,11 +9,13 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Scaling;
+import com.mygdx.game.file.LevelInfoCsvFile;
 import com.mygdx.game.gamestate.GameStateManager;
 import com.mygdx.game.gamestate.states.MenuState;
 import com.mygdx.game.preferences.PreferencesManager;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.HashMap;
 
 public class MainGame implements ApplicationListener {
 
@@ -38,25 +40,6 @@ public class MainGame implements ApplicationListener {
    * Indicator if release or development version of the game
    */
   public static final boolean DEVELOPER_MODE = true;
-
-  /**
-   * The game state manager that manages states, input handling, rendering
-   */
-  private GameStateManager gameStateManager;
-  /**
-   * A batch/collection of draw calls for rendering with OpenGL
-   */
-  private SpriteBatch spriteBatch;
-  /**
-   * Loads and stores assets like textures, bitmap fonts, sounds, music, ...
-   */
-  private AssetManager assetManager;
-  /**
-   * Manages application wide options and preferences
-   */
-  private PreferencesManager preferencesManager;
-
-  // Remove fonts later when asset manager works begin
   /**
    * Font "cornerstone_70"
    */
@@ -73,10 +56,28 @@ public class MainGame implements ApplicationListener {
    * Font "cornerstone_outline"
    */
   public static BitmapFont fontOutline;
+
+  // Remove fonts later when asset manager works begin
   /**
    * Font "cornerstone_upper_case_big"
    */
   public static BitmapFont fontUpperCaseBig;
+  /**
+   * The game state manager that manages states, input handling, rendering
+   */
+  private GameStateManager gameStateManager;
+  /**
+   * A batch/collection of draw calls for rendering with OpenGL
+   */
+  private SpriteBatch spriteBatch;
+  /**
+   * Loads and stores assets like textures, bitmap fonts, sounds, music, ...
+   */
+  private AssetManager assetManager;
+  /**
+   * Manages application wide options and preferences
+   */
+  private PreferencesManager preferencesManager;
   // Remove fonts later when asset manager works end
 
   /**
@@ -154,7 +155,7 @@ public class MainGame implements ApplicationListener {
    * Get the filepath of a game sound given its name
    *
    * @param soundName The name of the game sound
-   * @param mp3File Indicator if the sound is a *.mp3 file instead of the default *.wav file
+   * @param mp3File   Indicator if the sound is a *.mp3 file instead of the default *.wav file
    */
   public static String getGameSoundFilePath(final String soundName, final boolean mp3File) {
     return "sound/sound_" + soundName + "." + (mp3File ? "mp3" : "wav");
@@ -228,6 +229,15 @@ public class MainGame implements ApplicationListener {
     // Create game state manager
     Gdx.app.debug("main:create", getCurrentTimeStampLogString() + "create game state manager");
     gameStateManager = new GameStateManager(assetManager, preferencesManager);
+
+    // Test of new level info reader (delete later)
+    HashMap<Integer, LevelInfoCsvFile> levelInfo = LevelInfoCsvFile
+        .readLevelInfoFromCsvFile(Gdx.files.internal("level/levelInfo.csv"));
+    for (HashMap.Entry<Integer, LevelInfoCsvFile> entry : levelInfo.entrySet()) {
+      Gdx.app.debug("testing",
+          MainGame.getCurrentTimeStampLogString() + entry.getKey() + ": " + entry.getValue()
+              .toString());
+    }
 
     // Switch to the menu state
     Gdx.app.debug("main:create", getCurrentTimeStampLogString() + "switch to menu state");
