@@ -140,7 +140,7 @@ public class PreferencesManager {
     prefs.putBoolean(PREFERENCE_MUSIC_ON_BOOL, musicOn).flush();
   }
 
-  public boolean getSoundEfectsOn() {
+  public boolean getSoundEffectsOn() {
     return prefs.getBoolean(PREFERENCE_SOUND_EFFECTS_ON_BOOL, true);
   }
 

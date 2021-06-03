@@ -49,4 +49,6 @@ public interface IControllerCallbackPlayState extends
    * Go back because a back button was pressed
    */
   void controllerCallbackClickBackButton();
+
+  Vector3 getCurrentMouseCursorPosition();
 }

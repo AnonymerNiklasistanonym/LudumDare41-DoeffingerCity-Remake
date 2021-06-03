@@ -117,7 +117,7 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
     if (controllerToggleSoundEffectsPressed || Gdx.input.isKeyJustPressed(Keys.U)) {
       controllerToggleSoundEffectsPressed = false;
       gameStateManager.getPreferencesManager()
-          .setSoundEffectsOn(!gameStateManager.getPreferencesManager().getSoundEfectsOn());
+          .setSoundEffectsOn(!gameStateManager.getPreferencesManager().getSoundEffectsOn());
     }
 
     // If escape or back is pressed quit

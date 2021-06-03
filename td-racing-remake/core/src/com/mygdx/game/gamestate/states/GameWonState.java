@@ -118,7 +118,7 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
         assetsLoaded = true;
         backgroundGameWon = assetManager.get(MainGame.getGameBackgroundFilePath("game_won"));
         soundVictory = assetManager.get(MainGame.getGameSoundFilePath("victory"));
-        if (gameStateManager.getPreferencesManager().getSoundEfectsOn()) {
+        if (gameStateManager.getPreferencesManager().getSoundEffectsOn()) {
           soundVictory.play();
         }
       }

@@ -92,7 +92,7 @@ public class HighscoreListState extends GameState implements IControllerCallback
     if (controllerToggleSoundEffectsPressed || Gdx.input.isKeyJustPressed(Keys.U)) {
       controllerToggleSoundEffectsPressed = false;
       gameStateManager.getPreferencesManager()
-          .setSoundEffectsOn(!gameStateManager.getPreferencesManager().getSoundEfectsOn());
+          .setSoundEffectsOn(!gameStateManager.getPreferencesManager().getSoundEffectsOn());
     }
 
     // If a button is touched or the space or enter key is currently pressed or any controller

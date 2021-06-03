@@ -55,6 +55,7 @@ import com.mygdx.game.objects.towers.LaserTower;
 import com.mygdx.game.objects.towers.MgTower;
 import com.mygdx.game.objects.towers.SniperTower;
 import com.mygdx.game.unsorted.Node;
+import java.util.Date;
 
 public class PlayState extends GameState implements CollisionCallbackInterface, IControllerCallbackPlayState,
 		ScoreBoardCallbackInterface, EnemyCallbackInterface {
@@ -72,7 +73,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	public final static float PIXEL_TO_METER = 0.05f;
 	public final static float METER_TO_PIXEL = 20f;
 
-	private final Music musicBackground, soundCar;
+	private final Music musicBackground, musicCar;
 	private final Sound splatt, soundGetMoney, soundCarStart, soundVictory, soundDamage;
 	private final ScoreBoard scoreBoard;
 	private final Array<Enemy> enemies, enemiesDead;
@@ -97,8 +98,8 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	private Vector3 padPos;
 	private Vector2 trailerpos;
 	private float tutorialtimer, physicsaccumulator, timeToDisplayWaveTextInS;
-	private boolean pausedByUser, lastPause, musicOn, lastMusic, lastSound, soundOn, debugBox2D, debugCollision, debugDistance,
-			debugWay, unlockAllTowers, padActivated, debugTower, wasAlreadyPaused;
+	private boolean pausedByUser, debugBox2D, debugCollision, debugDistance,
+			debugWay, unlockAllTowers, padActivated, debugTower;
 	private int tutorialState, checkPointsCleared, speedFactor;
 
 
@@ -130,6 +131,9 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	 * Tracker if a controller key to select a tower to build was pressed
 	 */
 	private boolean controllerSelectTowerPressed = false;
+
+	private Vector3 previousMouseCursorPosition = new Vector3();
+	private long timeStampMouseCursorPositionWasChanged = 0;
 
 	private final ControllerCallbackPlayState controllerCallbackPlayState;
 
@@ -234,7 +238,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 		// set audio files (other)
 		musicBackground = Gdx.audio.newMusic(Gdx.files.internal("music/music_theme.mp3"));
-		soundCar = Gdx.audio.newMusic(Gdx.files.internal("sound/sound_car_engine.mp3"));
+		musicCar = Gdx.audio.newMusic(Gdx.files.internal("sound/sound_car_engine.mp3"));
 		splatt = Gdx.audio.newSound(Gdx.files.internal("sound/sound_splatt.wav"));
 		soundGetMoney = Gdx.audio.newSound(Gdx.files.internal("sound/sound_cash.wav"));
 		soundCarStart = Gdx.audio.newSound(Gdx.files.internal("sound/sound_car_engine_start.mp3"));
@@ -260,8 +264,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		physicsaccumulator = 0;
 		timesincesmoke = 0;
 		pausedByUser = false;
-		lastPause = !pausedByUser;
-		wasAlreadyPaused = pausedByUser;
 		padActivated = false;
 		debugTower = false;
 		debugBox2D = false;
@@ -288,14 +290,10 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		// activate background music
 		musicBackground.setLooping(true);
 		musicBackground.setVolume(0.75f);
-		soundCar.setLooping(true);
-		soundCar.setVolume(1f);
+		musicCar.setLooping(true);
+		musicCar.setVolume(1f);
 
 		// things to do in developer mode and not
-		soundOn = preferencesManager.getSoundEfectsOn();
-		lastSound = !soundOn;
-		musicOn = preferencesManager.getMusicOn();
-		lastMusic = !musicOn;
 
 		// load level
 		loadLevel(levelNumber);
@@ -325,7 +323,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		level = levels[levelNumber];
 
 		// TODO Place this at the correct position
-		if (preferencesManager.getSoundEfectsOn()) {
+		if (preferencesManager.getSoundEffectsOn()) {
 			soundCarStart.play();
 		}
 
@@ -415,6 +413,30 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 			tower.activateRange(false);
 	}
 
+	public void toggleMusic() {
+		if (preferencesManager.getMusicOn() && !pausedByUser) {
+			musicBackground.play();
+		} else {
+			musicBackground.pause();
+		}
+	}
+
+	public void toggleSoundEffects() {
+		if (preferencesManager.getSoundEffectsOn() && !pausedByUser) {
+			musicCar.play();
+			soundCarStart.resume();
+			soundGetMoney.resume();
+			Tower.setSoundOn(true);
+		} else {
+			soundGetMoney.pause();
+			musicCar.pause();
+			soundCarStart.pause();
+			Tower.setSoundOn(false);
+		}
+		for (final Tower tower : towers)
+			tower.updateSound();
+	}
+
 	@Override
 	protected void handleInput() {
 		if (paused || !assetsLoaded) {
@@ -434,11 +456,13 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		if (controllerToggleMusicPressed || Gdx.input.isKeyJustPressed(Keys.M)) {
 			controllerToggleMusicPressed = false;
 			preferencesManager.setMusicOn(!preferencesManager.getMusicOn());
+			toggleMusic();
 		}
 		// Turn sound effects on/off
 		if (controllerToggleSoundEffectsPressed || Gdx.input.isKeyJustPressed(Keys.U)) {
 			controllerToggleSoundEffectsPressed = false;
-			preferencesManager.setSoundEffectsOn(!preferencesManager.getSoundEfectsOn());
+			preferencesManager.setSoundEffectsOn(!preferencesManager.getSoundEffectsOn());
+			toggleSoundEffects();
 		}
 
 		// If escape or back is pressed go back to the menu state
@@ -458,15 +482,31 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		if (controllerToggleManualPausePressed || Gdx.input.isKeyJustPressed(Keys.P)) {
 			controllerToggleManualPausePressed = false;
 			pausedByUser = !pausedByUser;
+			toggleMusic();
+			toggleSoundEffects();
 		}
 
 		if (pausedByUser) {
-			// When the game was manually paused by the user skip other inputs
+			// When the game was manually paused by the user skip the rest of this method
 			return;
 		}
 
 		// Update the cursor position
-		cursorPosition.set(GameStateManager.getMousePosition(camera));
+
+		// > Use the cursor that was updated last
+		Vector3 newMouseCursorPosition = GameStateManager.getMousePosition(camera);
+		final boolean mouseCursorWasMoved = !newMouseCursorPosition.cpy().sub(previousMouseCursorPosition).isZero(0.1f);
+		if (mouseCursorWasMoved) {
+			previousMouseCursorPosition.set(newMouseCursorPosition);
+			timeStampMouseCursorPositionWasChanged = new Date().getTime();
+			Gdx.app.debug("test", MainGame.getCurrentTimeStampLogString() + "mouse timestamp was changed");
+		}
+		Gdx.app.debug("test", MainGame.getCurrentTimeStampLogString() + "mouse (" + timeStampMouseCursorPositionWasChanged + ") > controller (" + controllerCallbackPlayState.getTimeStampControllerCursorPositionWasChanged() + "): " + (timeStampMouseCursorPositionWasChanged > controllerCallbackPlayState.getTimeStampControllerCursorPositionWasChanged()));
+		if (timeStampMouseCursorPositionWasChanged > controllerCallbackPlayState.getTimeStampControllerCursorPositionWasChanged()) {
+			cursorPosition.set(newMouseCursorPosition);
+		} else {
+			cursorPosition.set(controllerCallbackPlayState.getControllerCursorPositionPlaceTower());
+		}
 
 		// Check for additional debug inputs when in developer mode
 		if (MainGame.DEVELOPER_MODE) {
@@ -476,7 +516,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		// Car control
 		SteerCarLeftRight controllerSteerCarLeftRight = controllerCallbackPlayState.getSteerCarLeftRight();
 		SteerCarForwardsBackwards controllerSteerForwardsBackwards = controllerCallbackPlayState.getSteerCarForwardsBackwards();
-
 		if (Gdx.input.isKeyPressed(Keys.W) || Gdx.input.isKeyPressed(Keys.UP) || controllerSteerForwardsBackwards == SteerCarForwardsBackwards.FORWARDS) {
 			car.accelarate();
 		}
@@ -508,9 +547,21 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 			towerMenu.selectTower(3, cursorPosition, enemies);
 		}
 
-		// build tower if in building mode
-		if (Gdx.input.justTouched() && buildingtower != null)
-			buildTowerIfAllowed(true);
+		// Move tower
+		/*
+		if (((this.padPos.x + padPos.x >= 0) && (this.padPos.x + padPos.x <= MainGame.GAME_WIDTH * PIXEL_TO_METER))
+				&& ((this.padPos.y + padPos.y >= 0) && (
+				this.padPos.y + padPos.y <= MainGame.GAME_HEIGHT * PIXEL_TO_METER))) {
+			this.padPos.mulAdd(padPos, 1);
+		}*/
+
+		// Build tower if in building mode and a click or select key was pressed
+		if (Gdx.input.justTouched() || Gdx.input.isKeyJustPressed(Keys.ENTER) || Gdx.input.isKeyJustPressed(Keys.SPACE)
+				|| controllerSelectKeyWasPressed) {
+			if (buildingtower != null) {
+				buildTowerIfAllowed(true);
+			}
+		}
 	}
 
 	private void debugInputs() {
@@ -624,63 +675,8 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	@Override
 	protected void update(float deltaTime) {
 
-		// if the pause settings change
-		if (lastPause != pausedByUser) {
-			lastPause = pausedByUser;
-			// pause or resume all sounds
-			if (pausedByUser) {
-				if (soundOn) {
-					soundGetMoney.pause();
-					soundCar.pause();
-					soundCarStart.pause();
-				}
-				if (musicOn)
-					musicBackground.pause();
-			} else {
-				if (soundOn) {
-					soundCar.play();
-					soundCarStart.resume();
-					soundGetMoney.resume();
-				}
-				if (musicOn)
-					musicBackground.play();
-			}
-		}
-
 		if (pausedByUser)
 			return;
-
-		// if the sound settings change
-		if (lastSound != soundOn) {
-			lastSound = soundOn;
-			preferencesManager.setSoundEffectsOn(soundOn);
-			// turn tower sound on and of
-			Tower.setSoundOn(soundOn);
-			for (final Tower tower : towers)
-				tower.updateSound();
-			// turn background music on/off
-			if (soundOn) {
-				soundCar.play();
-				soundCarStart.resume();
-				soundGetMoney.resume();
-			} else {
-				soundGetMoney.pause();
-				soundCar.pause();
-				soundCarStart.pause();
-			}
-		}
-
-		// if the sound settings change
-		if (lastMusic != musicOn) {
-			lastMusic = musicOn;
-			preferencesManager.setMusicOn(musicOn);
-			// turn background music on/off
-			if (musicOn) {
-				musicBackground.play();
-			} else {
-				musicBackground.pause();
-			}
-		}
 
 		// minimize time for wave text - only if it's not pause
 		timeToDisplayWaveTextInS -= deltaTime;
@@ -1140,7 +1136,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		musicBackground.dispose();
 		splatt.dispose();
 		soundGetMoney.dispose();
-		soundCar.dispose();
+		musicCar.dispose();
 		soundVictory.dispose();
 		shapeRenderer.dispose();
 
@@ -1209,7 +1205,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	@Override
 	public void collisionCallbackCarEnemy(final Car car, final Enemy enemy) {
 		// if the new health after the hit is smaller than 0 play kill sound
-		if ((!enemy.isBodyDeleted() && car.hitEnemy(enemy) <= 0) && soundOn)
+		if ((!enemy.isBodyDeleted() && car.hitEnemy(enemy) <= 0) && preferencesManager.getSoundEffectsOn())
 			splatt.play(1, MathUtils.random(0.5f, 2f), 0);
 	}
 
@@ -1246,7 +1242,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 					- scoreBoard.getCurrentTime() * 2);
 			scoreBoard.newLap((fastBonus > 0) ? lapmoney + fastBonus : lapmoney);
 			// play cash sound if sound activated
-			if (soundOn)
+			if (preferencesManager.getSoundEffectsOn())
 				soundGetMoney.play(1);
 
 			if (tutorialState == 1)
@@ -1309,7 +1305,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	private void loadNextLevel() {
 		Gdx.app.debug("play_state:loadNextLevel", MainGame.getCurrentTimeStampLogString() + "Level " + (scoreBoard.getLevel() + 1) + "was finished");
-		if (preferencesManager.getSoundEfectsOn()) {
+		if (preferencesManager.getSoundEffectsOn()) {
 			soundVictory.play();
 		}
 		// load the next level
@@ -1348,7 +1344,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		// Mark enemy as to be deleted
 		enemy.setDelete(true);
 		// If sound effects are on play the damage sound
-		if (preferencesManager.getSoundEfectsOn()) {
+		if (preferencesManager.getSoundEffectsOn()) {
 			soundDamage.play(1, MathUtils.random(1f, 1.1f), 0f);
 		}
 		// Spawn a smoke
@@ -1373,6 +1369,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	@Override
 	public void controllerCallbackPlaceTowerCursorPositionChanged(Vector3 padPos) {
 		// TODO Try to make this better
+		/*
 		if (!padActivated)
 			return;
 
@@ -1384,6 +1381,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 		if (buildingtower != null)
 			buildingtower.update(0, this.padPos);
+		*/
 	}
 
 	/*
@@ -1434,6 +1432,11 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		Gdx.app.debug("play_state:controllerCallbackClickBackButton",
 				MainGame.getCurrentTimeStampLogString());
 		controllerBackKeyWasPressed = true;
+	}
+
+	@Override
+	public Vector3 getCurrentMouseCursorPosition() {
+		return GameStateManager.getMousePosition(camera);
 	}
 
 	@Override

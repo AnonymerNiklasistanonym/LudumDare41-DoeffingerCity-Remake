@@ -3,28 +3,31 @@ package com.mygdx.game.controller.play_state;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.controller.ControllerInputMapping;
-import com.mygdx.game.gamestate.states.elements.HighscoreSelectCharacterDisplayInputState;
-import jdk.tools.jmod.Main;
+import java.util.Date;
 
 public class ControllerCallbackPlayState implements ControllerListener {
 
+  /**
+   * TODO Define this in MainGame if it works
+   */
+  private static final float PIXEL_TO_METER = 0.05f;
   /**
    * Class that implements the controller callbacks
    */
   private final IControllerCallbackPlayState controllerCallbackClass;
   private static final float THRESHOLD_CONTROLLER_ACCELERATE_CAR_AXIS_INPUT = 0.3f;
   private static final float THRESHOLD_CONTROLLER_STEER_CAR_AXIS_INPUT = 0.3f;
+  private static final float CONTROLLER_CURSOR_SPEED_MODIFIER = 0.25f;
 
-  private final float steerCar = 0;
-  private final Vector3 padPlaceTowerPosition = new Vector3();
-  private final Vector2 steerCarLeftRight = new Vector2();
+  private final Vector2 cursorPositionPlaceTower = new Vector2();
+  private float steerCarLeftRight;
   private final Vector2 steerCarForwardsBackwards = new Vector2();
+  private long timeStampControllerCursorPositionWasChanged = 0;
 
   public ControllerCallbackPlayState(
       IControllerCallbackPlayState controllerCallbackClass) {
@@ -62,9 +65,8 @@ public class ControllerCallbackPlayState implements ControllerListener {
   }
 
   public SteerCarLeftRight getSteerCarLeftRight() {
-    float leftRightValue = steerCarLeftRight.x;
-    if (Math.abs(leftRightValue) > THRESHOLD_CONTROLLER_STEER_CAR_AXIS_INPUT) {
-      return (leftRightValue < 0) ? SteerCarLeftRight.LEFT : SteerCarLeftRight.RIGHT;
+    if (Math.abs(steerCarLeftRight) > THRESHOLD_CONTROLLER_STEER_CAR_AXIS_INPUT) {
+      return (steerCarLeftRight < 0) ? SteerCarLeftRight.LEFT : SteerCarLeftRight.RIGHT;
     }
     return SteerCarLeftRight.NOTHING;
   }
@@ -77,12 +79,31 @@ public class ControllerCallbackPlayState implements ControllerListener {
     return SteerCarForwardsBackwards.NOTHING;
   }
 
+  public Vector3 getControllerCursorPositionPlaceTower() {
+    /*
+    if (combinedCursor.x < 0) {
+      combinedCursor.x = 0;
+    } else if (combinedCursor.x >= MainGame.GAME_WIDTH * PIXEL_TO_METER) {
+      combinedCursor.x = MainGame.GAME_WIDTH * PIXEL_TO_METER;
+    }
+
+    if (combinedCursor.y < 0) {
+      combinedCursor.y = 0;
+    } else if (combinedCursor.y >= MainGame.GAME_HEIGHT * PIXEL_TO_METER) {
+      combinedCursor.y = MainGame.GAME_HEIGHT * PIXEL_TO_METER;
+    }*/
+
+    return new Vector3(cursorPositionPlaceTower, 0);
+  }
+
   @Override
   public boolean axisMoved(Controller controller, int axisCode, float value) {
     Gdx.app.debug("controller_callback_play_state:axisMoved",
         MainGame.getCurrentTimeStampLogString() + "controller axis moved " + axisCode + " ("
             + ControllerInputMapping.getControllerAxis(controller, axisCode).name()
             + ") with the a value " + value);
+    Vector3 currentMouseCursor, combinedCursor;
+    Vector2 newControllerCursor;
     switch (ControllerInputMapping.getControllerAxis(controller, axisCode)) {
       case AXIS_LT:
         steerCarForwardsBackwards.set(value, steerCarForwardsBackwards.y);
@@ -91,14 +112,30 @@ public class ControllerCallbackPlayState implements ControllerListener {
         steerCarForwardsBackwards.set(steerCarForwardsBackwards.x, value);
         break;
       case AXIS_LEFT_PAD_HORIZONTAL:
-        steerCarLeftRight.set(value, steerCarLeftRight.y);
+        steerCarLeftRight = value;
         break;
       case AXIS_LEFT_PAD_VERTICAL:
         // Ignore input
         break;
       case AXIS_RIGHT_PAD_HORIZONTAL:
+        newControllerCursor = cursorPositionPlaceTower.cpy().mulAdd(new Vector2(value, 0), CONTROLLER_CURSOR_SPEED_MODIFIER);
+        if ((newControllerCursor.x > 0) && (newControllerCursor.x <= MainGame.GAME_WIDTH * PIXEL_TO_METER)) {
+          Gdx.app.debug("controller_callback_play_state:axisMoved",
+              MainGame.getCurrentTimeStampLogString() + "update x direction to " + newControllerCursor.x);
+            timeStampControllerCursorPositionWasChanged = new Date().getTime();
+          Gdx.app.debug("test", MainGame.getCurrentTimeStampLogString() + "controller timestamp was changed");
+          cursorPositionPlaceTower.set(newControllerCursor);
+        }
+        break;
       case AXIS_RIGHT_PAD_VERTICAL:
-        // TODO controllerCallbackClass.controllerCallbackPlaceTowerCursorPositionChanged();
+        newControllerCursor = cursorPositionPlaceTower.cpy().mulAdd(new Vector2(0, -value), CONTROLLER_CURSOR_SPEED_MODIFIER);
+        if ((newControllerCursor.y > 0) && (newControllerCursor.y <= MainGame.GAME_HEIGHT * PIXEL_TO_METER)) {
+          Gdx.app.debug("controller_callback_play_state:axisMoved",
+              MainGame.getCurrentTimeStampLogString() + "update y direction to " + newControllerCursor.y);
+          timeStampControllerCursorPositionWasChanged = new Date().getTime();
+          Gdx.app.debug("test", MainGame.getCurrentTimeStampLogString() + "controller timestamp was changed");
+          cursorPositionPlaceTower.set(newControllerCursor);
+        }
         break;
       default:
         // not important
@@ -149,19 +186,31 @@ public class ControllerCallbackPlayState implements ControllerListener {
     }
   }
 
+  private static final float DEBUG_RENDER_BAR_WIDTH = 10;
+
   public void drawDebugInput(final ShapeRenderer shapeRenderer) {
     // Draw backgrounds
-    shapeRenderer.setColor(0.5f, 0.5f, 0.5f, 1);
-    shapeRenderer.rect((float) 26, 20, 10, 1);
     shapeRenderer.setColor(0, 0, 0, 1);
-    shapeRenderer.rect((float) 26, 22, 10, 1);
+    // > left/right
+    shapeRenderer.rect((float) 26, 22, DEBUG_RENDER_BAR_WIDTH, 1);
+    // > forwards/backwards
+    shapeRenderer.rect((float) 26, 20, DEBUG_RENDER_BAR_WIDTH, 1);
+
     // Draw values
-    shapeRenderer.setColor(1, 1, 0, 1);
-    shapeRenderer.rect(26 + 5, 20, (steerCarForwardsBackwards.x * 5), 0.5f);
-    shapeRenderer.rect(26, 20, (steerCarForwardsBackwards.y * 5), 0.5f);
+    // > left/right
     shapeRenderer.setColor(0, 1, 0, 1);
-    shapeRenderer.rect(26, 20.5f, 10f / 2  + ((steerCarForwardsBackwards.x - steerCarForwardsBackwards.y) * 5), 0.5f);
-    shapeRenderer.rect(26, 22, 10f / 2  + (steerCarLeftRight.x * 5), 1);
+    shapeRenderer.rect(26, 22, DEBUG_RENDER_BAR_WIDTH / 2  + (steerCarLeftRight * DEBUG_RENDER_BAR_WIDTH / 2), 1);
+    // > forwards/backwards
+    // >> Draw the separate input value sources
+    shapeRenderer.setColor(1, 1, 0, 1);
+    shapeRenderer.rect(26 + 5, 20, (steerCarForwardsBackwards.x * DEBUG_RENDER_BAR_WIDTH / 2), 0.5f);
+    shapeRenderer.rect(26, 20, (steerCarForwardsBackwards.y * DEBUG_RENDER_BAR_WIDTH / 2), 0.5f);
+    // >> Draw the collective input value source
+    shapeRenderer.setColor(0, 1, 0, 1);
+    shapeRenderer.rect(26, 20.5f, DEBUG_RENDER_BAR_WIDTH / 2 + ((steerCarForwardsBackwards.x - steerCarForwardsBackwards.y) * DEBUG_RENDER_BAR_WIDTH / 2), 0.5f);
   }
 
+  public long getTimeStampControllerCursorPositionWasChanged() {
+    return timeStampControllerCursorPositionWasChanged;
+  }
 }

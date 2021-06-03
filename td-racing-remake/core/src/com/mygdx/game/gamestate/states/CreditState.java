@@ -89,7 +89,7 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
     // Turn sound effects on/off
     if (controllerToggleSoundEffectsPressed || Gdx.input.isKeyJustPressed(Keys.U)) {
       controllerToggleSoundEffectsPressed = false;
-      preferencesManager.setSoundEffectsOn(!preferencesManager.getSoundEfectsOn());
+      preferencesManager.setSoundEffectsOn(!preferencesManager.getSoundEffectsOn());
     }
 
     // If a button is touched or the space or enter key is currently pressed or any controller
