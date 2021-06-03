@@ -178,8 +178,10 @@ public class ControllerCallbackPlayState implements ControllerListener {
           break;
         case BUTTON_X:
           controllerCallbackClass.controllerCallbackToggleMusic();
+          break;
         case BUTTON_Y:
           controllerCallbackClass.controllerCallbackToggleSoundEffects();
+          break;
         default:
           // not important
       }
