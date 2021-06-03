@@ -24,7 +24,7 @@ public class ControllerCallbackPlayState implements ControllerListener {
   private static final float THRESHOLD_CONTROLLER_STEER_CAR_AXIS_INPUT = 0.3f;
   private static final float CONTROLLER_CURSOR_SPEED_MODIFIER = 0.25f;
 
-  private final Vector2 cursorPositionPlaceTower = new Vector2();
+  private final Vector2 cursorPositionPlaceTower = new Vector2(MainGame.GAME_WIDTH / 2f * PIXEL_TO_METER, MainGame.GAME_HEIGHT / 2f * PIXEL_TO_METER);
   private float steerCarLeftRight;
   private final Vector2 steerCarForwardsBackwards = new Vector2();
   private long timeStampControllerCursorPositionWasChanged = 0;
