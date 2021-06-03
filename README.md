@@ -1,6 +1,13 @@
 # LudumDare41-DoeffingerCity-Remake
 
-A remake of the original https://github.com/AnonymerNiklasistanonym/LudumDare41-DoeffingerCity
+A remake of [LudumDare41-DoeffingerCity](https://github.com/AnonymerNiklasistanonym/LudumDare41-DoeffingerCity)/[itch.io](https://thecze.itch.io/tnt)
+
+Tracks ‘n Towers is a Tower Defense/Racing game.
+Zombies are coming for your lovely trailer and you have to defend it to survive.
+Finish laps to earn cash to build towers and use your Road Warrior car to mow down hundreds of Zombies.
+The faster you finish a lap the more bonus money you will earn!
+
+Go kill some Zombies!
 
 ## TODO:
 
@@ -13,6 +20,7 @@ A remake of the original https://github.com/AnonymerNiklasistanonym/LudumDare41-
 - [ ] Optimize performance and frame rate
   - [ ] Allow more than 60fps (the physics engine currently seems to have some problems with more fps)
 - [ ] Add script and test if the project still runs and builds(!) on Windows
+- [ ] Update level loader to only load the `levelInfo.csv` file at the start and get all the resources (like how many waves, which map file, ... besides the enemy info) from it and only ever load the current level
 
 ## Controls
 
