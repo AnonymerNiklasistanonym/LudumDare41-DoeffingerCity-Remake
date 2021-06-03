@@ -2,14 +2,34 @@
 
 A remake of the original https://github.com/AnonymerNiklasistanonym/LudumDare41-DoeffingerCity
 
-TODO:
+## TODO:
 
 - [x] Get the old project running with Java 8
-- [x] Get the old project running on Android
+  - libGDX HTML and Android 6.0 backwards compatibility only allows using some of the Java 8 features
+- [ ] Get the project running on Android
+  - Touch controls or controller support needs to tested
 - [ ] Update Controller implementation to be fun to use
+  - It was updated but the tower building integration still needs some work to be more fun
 - [ ] Optimize performance and frame rate
-- [ ] Make desktop project run and build on Linux and Windows
-- [ ] Add [Android] touch controls to make it playable on this platform (try to do this on the web app too)
+  - [ ] Allow more than 60fps (the physics engine currently seems to have some problems with more fps)
+- [ ] Add script and test if the project still runs and builds(!) on Windows
+
+## Controls
+
+| Action | Keyboard | XBox 360/One Controller |
+| --- | --- | --- |
+| Car > Accelerate | `W` / `Up` | Right trigger `RT` |
+| Car > Brake | `S` / `Down` | Left trigger `LT` |
+| Car > Steer left | `A` / `Left` | Left pad to the left |
+| Car > Steer right | `D` / `Right` | Left pad to the right |
+| Fullscreen toggle | `F11` | `RB` / `LB` button |
+| Exit (in menu), go back or stop bulding a tower | `Escape` | `Back` button |
+| Select tower | `1`,`2`,`3`,`4` | Bottom left pad (1=up, 2=right, 3=down, 4=left) |
+| Move tower if selected | Move mouse | Right pad |
+| Build tower if selected | Left mouse click | `A` button |
+| Toggle sounds | `U` | `Y` button |
+| Toggle music | `M` | `X` button |
+| Toggle pause | `P` | `Start` button |
 
 ## Setup
 
@@ -193,3 +213,9 @@ You can either just run the command `make` in the directory to export a desktop 
   # (most likely http://0.0.0.0:8000/) and append the name of the html directory
   # (for example http://0.0.0.0:8000/html-1.0/) to view it in your browser.
   ```
+
+## Used Software
+
+- Originally the Java (6 because of libGDX at the time) code was written and debugged using [Eclipse Java Oxygen](https://www.eclipse.org/oxygen/) 
+- To create the bounding maps for the box2D physics the [box2d-editor](https://code.google.com/archive/p/box2d-editor/downloads) was used
+- To create the Bitmap fonts the program [Hiero](https://libgdx.badlogicgames.com/tools.html) was used
