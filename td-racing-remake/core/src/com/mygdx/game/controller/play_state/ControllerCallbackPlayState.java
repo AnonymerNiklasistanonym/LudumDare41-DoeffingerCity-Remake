@@ -1,5 +1,7 @@
 package com.mygdx.game.controller.play_state;
 
+import com.mygdx.game.gamestate.states.PlayState;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
@@ -13,10 +15,6 @@ import java.util.Date;
 public class ControllerCallbackPlayState implements ControllerListener {
 
   /**
-   * TODO Define this in MainGame if it works
-   */
-  private static final float PIXEL_TO_METER = 0.05f;
-  /**
    * Class that implements the controller callbacks
    */
   private final IControllerCallbackPlayState controllerCallbackClass;
@@ -24,7 +22,7 @@ public class ControllerCallbackPlayState implements ControllerListener {
   private static final float THRESHOLD_CONTROLLER_STEER_CAR_AXIS_INPUT = 0.3f;
   private static final float CONTROLLER_CURSOR_SPEED_MODIFIER = 0.25f;
 
-  private final Vector2 cursorPositionPlaceTower = new Vector2(MainGame.GAME_WIDTH / 2f * PIXEL_TO_METER, MainGame.GAME_HEIGHT / 2f * PIXEL_TO_METER);
+  private final Vector2 cursorPositionPlaceTower = new Vector2(MainGame.GAME_WIDTH / 2f * PlayState.PIXEL_TO_METER, MainGame.GAME_HEIGHT / 2f * PlayState.PIXEL_TO_METER);
   private float steerCarLeftRight;
   private final Vector2 steerCarForwardsBackwards = new Vector2();
   private long timeStampControllerCursorPositionWasChanged = 0;
@@ -79,21 +77,8 @@ public class ControllerCallbackPlayState implements ControllerListener {
     return SteerCarForwardsBackwards.NOTHING;
   }
 
-  public Vector3 getControllerCursorPositionPlaceTower() {
-    /*
-    if (combinedCursor.x < 0) {
-      combinedCursor.x = 0;
-    } else if (combinedCursor.x >= MainGame.GAME_WIDTH * PIXEL_TO_METER) {
-      combinedCursor.x = MainGame.GAME_WIDTH * PIXEL_TO_METER;
-    }
-
-    if (combinedCursor.y < 0) {
-      combinedCursor.y = 0;
-    } else if (combinedCursor.y >= MainGame.GAME_HEIGHT * PIXEL_TO_METER) {
-      combinedCursor.y = MainGame.GAME_HEIGHT * PIXEL_TO_METER;
-    }*/
-
-    return new Vector3(cursorPositionPlaceTower, 0);
+  public Vector2 getControllerCursorPositionPlaceTower() {
+    return cursorPositionPlaceTower;
   }
 
   @Override
@@ -119,7 +104,7 @@ public class ControllerCallbackPlayState implements ControllerListener {
         break;
       case AXIS_RIGHT_PAD_HORIZONTAL:
         newControllerCursor = cursorPositionPlaceTower.cpy().mulAdd(new Vector2(value, 0), CONTROLLER_CURSOR_SPEED_MODIFIER);
-        if ((newControllerCursor.x > 0) && (newControllerCursor.x <= MainGame.GAME_WIDTH * PIXEL_TO_METER)) {
+        if ((newControllerCursor.x > 0) && (newControllerCursor.x <= MainGame.GAME_WIDTH * PlayState.PIXEL_TO_METER)) {
           Gdx.app.debug("controller_callback_play_state:axisMoved",
               MainGame.getCurrentTimeStampLogString() + "update x direction to " + newControllerCursor.x);
             timeStampControllerCursorPositionWasChanged = new Date().getTime();
@@ -129,7 +114,7 @@ public class ControllerCallbackPlayState implements ControllerListener {
         break;
       case AXIS_RIGHT_PAD_VERTICAL:
         newControllerCursor = cursorPositionPlaceTower.cpy().mulAdd(new Vector2(0, -value), CONTROLLER_CURSOR_SPEED_MODIFIER);
-        if ((newControllerCursor.y > 0) && (newControllerCursor.y <= MainGame.GAME_HEIGHT * PIXEL_TO_METER)) {
+        if ((newControllerCursor.y > 0) && (newControllerCursor.y <= MainGame.GAME_HEIGHT * PlayState.PIXEL_TO_METER)) {
           Gdx.app.debug("controller_callback_play_state:axisMoved",
               MainGame.getCurrentTimeStampLogString() + "update y direction to " + newControllerCursor.y);
           timeStampControllerCursorPositionWasChanged = new Date().getTime();

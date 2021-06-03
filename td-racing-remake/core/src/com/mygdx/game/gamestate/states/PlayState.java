@@ -64,7 +64,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	// TODO Make that and the physics implementation variable from this value so that the fps can
 	// TODO be set to other values like for example 240
-	public static int foregroundFps = 60;
+	public final static int foregroundFps = 60;
 
 	// Identify collision entities
 	public final static short PLAYER_BOX = 0x1; // 0001
@@ -87,7 +87,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	private Tower buildingtower;
 	private Checkpoint[] checkpoints;
-	private CollisionListener collis;
+	private final CollisionListener collis;
 	private World world;
 	private Car car;
 	private FinishLine finishline;
@@ -95,11 +95,10 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	private Map map;
 	private Box2DDebugRenderer debugRender;
 	private String waveText;
-	private Vector3 padPos;
-	private Vector2 trailerpos;
+	private final Vector2 trailerpos;
 	private float tutorialtimer, physicsaccumulator, timeToDisplayWaveTextInS;
 	private boolean pausedByUser, debugBox2D, debugCollision, debugDistance,
-			debugWay, unlockAllTowers, padActivated, debugTower;
+			debugWay, unlockAllTowers, debugTower;
 	private int tutorialState, checkPointsCleared, speedFactor;
 
 
@@ -107,22 +106,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	 * Tracker if a controller manual pause key was pressed
 	 */
 	private boolean controllerToggleManualPausePressed = false;
-	/**
-	 * Tracker if a controller key to accelerate the car was pressed
-	 */
-	private boolean controllerAccelerateCarPressed = false;
-	/**
-	 * Tracker if a controller key to brake the car was pressed
-	 */
-	private boolean controllerBrakeCarPressed = false;
-	/**
-	 * Tracker if a controller key to steer the car to the left was pressed
-	 */
-	private boolean controllerSteerLeftPressed = false;
-	/**
-	 * Tracker if a controller key to steer the car to the right was pressed
-	 */
-	private boolean controllerSteerRightPressed = false;
 	/**
 	 * Tracker which tower was selected by a controller to build key (see controllerSelectTowerPressed)
 	 */
@@ -132,7 +115,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	 */
 	private boolean controllerSelectTowerPressed = false;
 
-	private Vector3 previousMouseCursorPosition = new Vector3();
+	private final Vector3 previousMouseCursorPosition = new Vector3();
 	private long timeStampMouseCursorPositionWasChanged = 0;
 
 	private final ControllerCallbackPlayState controllerCallbackPlayState;
@@ -140,6 +123,8 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	public PlayState(final GameStateManager gameStateManager, final int levelNumber) {
 		super(gameStateManager, STATE_NAME);
 
+		// Set fps
+		Gdx.graphics.setVSync(true);
 		Gdx.graphics.setForegroundFPS(foregroundFps);
 
 		// scale used font correctly
@@ -264,7 +249,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		physicsaccumulator = 0;
 		timesincesmoke = 0;
 		pausedByUser = false;
-		padActivated = false;
 		debugTower = false;
 		debugBox2D = false;
 		debugCollision = false;
@@ -283,7 +267,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		checkpoints = new Checkpoint[4];
 		shapeRenderer = new ShapeRenderer();
 		trailerpos = new Vector2(0, 0);
-		padPos = new Vector3(MainGame.GAME_WIDTH * PIXEL_TO_METER / 2, MainGame.GAME_HEIGHT * PIXEL_TO_METER, 0);
 		trailerSmokes = new Array<Sprite>();
 		enemiesDead = new Array<Enemy>();
 
@@ -325,6 +308,9 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		// TODO Place this at the correct position
 		if (preferencesManager.getSoundEffectsOn()) {
 			soundCarStart.play();
+		}
+		if (preferencesManager.getMusicOn()) {
+			musicBackground.play();
 		}
 
 		// TODO Rewrite most of the next 2 sections
@@ -505,7 +491,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		if (timeStampMouseCursorPositionWasChanged > controllerCallbackPlayState.getTimeStampControllerCursorPositionWasChanged()) {
 			cursorPosition.set(newMouseCursorPosition);
 		} else {
-			cursorPosition.set(controllerCallbackPlayState.getControllerCursorPositionPlaceTower());
+			cursorPosition.set(controllerCallbackPlayState.getControllerCursorPositionPlaceTower(), 0);
 		}
 
 		// Check for additional debug inputs when in developer mode
@@ -702,7 +688,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 			stopBuilding();
 		} else {
 			startBuilding(buildingtower);
-			buildingtower.update(deltaTime, padActivated ? padPos : cursorPosition);
+			buildingtower.update(deltaTime, cursorPosition);
 			buildTowerIfAllowed(false);
 		}
 
@@ -1352,61 +1338,9 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	}
 
 	@Override
-	public void controllerCallbackSteerCar(boolean left) {
-		if (left) {
-			controllerSteerLeftPressed = true;
-		} else {
-			controllerSteerRightPressed = true;
-		}
-	}
-
-	@Override
 	public void controllerCallbackSelectTowerToBuild(int towerId) {
 		controllerSelectTowerId = towerId;
 		controllerSelectTowerPressed = true;
-	}
-
-	@Override
-	public void controllerCallbackPlaceTowerCursorPositionChanged(Vector3 padPos) {
-		// TODO Try to make this better
-		/*
-		if (!padActivated)
-			return;
-
-		if (((this.padPos.x + padPos.x >= 0) && (this.padPos.x + padPos.x <= MainGame.GAME_WIDTH * PIXEL_TO_METER))
-				&& ((this.padPos.y + padPos.y >= 0) && (
-				this.padPos.y + padPos.y <= MainGame.GAME_HEIGHT * PIXEL_TO_METER))) {
-			this.padPos.mulAdd(padPos, 1);
-		}
-
-		if (buildingtower != null)
-			buildingtower.update(0, this.padPos);
-		*/
-	}
-
-	/*
-	@Override
-	public void controllerCallbackStartBuildingMode(final int towerId) {
-		// TODO Update controller integration
-		if (towerId == -1) {
-			// stop building
-			padActivated = false;
-			stopBuilding();
-		} else {
-			padActivated = towerMenu.selectTower(towerId, padPos, enemies);
-		}
-	}*/
-
-	@Override
-	public void controllerCallbackAccelerateCar(final boolean forwards) {
-		Gdx.app.debug("play_state:controllerCallbackAccelerateCar",
-				MainGame.getCurrentTimeStampLogString() + "(forwards=" + forwards + ")");
-		// TODO Update controller integration
-		if (forwards) {
-			controllerAccelerateCarPressed = true;
-		} else {
-			controllerBrakeCarPressed = false;
-		}
 	}
 
 	@Override
@@ -1432,11 +1366,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		Gdx.app.debug("play_state:controllerCallbackClickBackButton",
 				MainGame.getCurrentTimeStampLogString());
 		controllerBackKeyWasPressed = true;
-	}
-
-	@Override
-	public Vector3 getCurrentMouseCursorPosition() {
-		return GameStateManager.getMousePosition(camera);
 	}
 
 	@Override
