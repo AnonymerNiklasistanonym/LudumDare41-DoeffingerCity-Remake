@@ -19,16 +19,17 @@ public class HighscoreEntry implements Disposable {
   public static BitmapFont fontText;
   private final Sprite spriteEntry;
   private final String name;
-  private final int place, score, level;
-  private final float fontXNumber, fontYNumber, fontXName, fontYName, fontXScore, fontYScore, fontXLevel, fontYLevel;
-  private final String textPlace, textName, textScore, textLevel;
+  private final int place, score, level, laps;
+  private final float fontXNumber, fontYNumber, fontXName, fontYName, fontXScore, fontYScore, fontXLevel, fontYLevel, fontXLaps, fontYLaps;
+  private final String textPlace, textName, textScore, textLevel, textLaps;
 
-  public HighscoreEntry(final int place, final int score, final int level, final String name,
+  public HighscoreEntry(final int place, final int score, final int level, final int laps, final String name,
       final AssetManager assetManager,
       final float xPosition, final float yPosition) {
     this.place = place;
     this.score = score;
     this.level = level;
+    this.laps = laps;
     this.name = name;
 
     fontText = assetManager.get(ASSET_MANAGER_ID_FONT, BitmapFont.class);
@@ -48,11 +49,14 @@ public class HighscoreEntry implements Disposable {
     fontYScore = yPositionText;
     fontXLevel = fontXScore + (float) MainGame.GAME_WIDTH / 3.75f;
     fontYLevel = yPositionText;
+    fontXLaps = fontXScore + (float) MainGame.GAME_WIDTH / 3.75f;
+    fontYLaps = yPositionText - 30;
 
     textPlace = "" + place + ".";
     textName = name;
     textScore = "" + (name.equals("------") ? "-" : score);
     textLevel = "(LEVEL " + (name.equals("------") ? "-" : (level + 1)) + ")";
+    textLaps = "(LAPS " + (name.equals("------") ? "-" : laps) + ")";
   }
 
   public void draw(final SpriteBatch spriteBatch) {
@@ -64,6 +68,7 @@ public class HighscoreEntry implements Disposable {
     fontText.draw(spriteBatch, textScore, fontXScore, fontYScore);
     fontText.getData().setScale(fontScale / 3);
     fontText.draw(spriteBatch, textLevel, fontXLevel, fontYLevel);
+    fontText.draw(spriteBatch, textLaps, fontXLaps, fontYLaps);
   }
 
   @Override

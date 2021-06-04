@@ -15,6 +15,7 @@ public class PreferencesManager {
   private static final String PREFERENCE_HIGHSCORE_NAME_STRING_BASE = "HIGHSCORE_NAME_STRING_";
   private static final String PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE = "HIGHSCORE_SCORE_VALUE_";
   private static final String PREFERENCE_HIGHSCORE_LEVEL_VALUE_BASE = "HIGHSCORE_LEVEL_VALUE_";
+  private static final String PREFERENCE_HIGHSCORE_LAPS_VALUE_BASE = "HIGHSCORE_LAPS_VALUE_";
   private static final String PREFERENCE_ALREADY_LAUNCHED_BOOL = "ALREADY_LAUNCHED_BOOL";
   private static final String PREFERENCE_LAST_HIGHSCORE_NAME_STRING = "LAST_HIGHSCORE_NAME_STRING";
   private static final String PREFERENCES_ID = "td-racing-ludum-dare-41";
@@ -101,14 +102,6 @@ public class PreferencesManager {
     prefs.flush();
   }
 
-  public void saveHighscore(String[] names, int[] scores) {
-    for (int i = 0; i < NUMBER_HIGHSCORE_ENTRIES; i++) {
-      prefs.putString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + i, names[i]).putInteger(
-          PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i, scores[i]);
-    }
-    prefs.flush();
-  }
-
   /**
    * Reset all preferences
    */
@@ -122,6 +115,7 @@ public class PreferencesManager {
       entries[i] = new HighscoreEntry(
           prefs.getInteger(PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i),
           prefs.getInteger(PREFERENCE_HIGHSCORE_LEVEL_VALUE_BASE + i),
+          prefs.getInteger(PREFERENCE_HIGHSCORE_LAPS_VALUE_BASE + i),
           prefs.getString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + i)
       );
     }
@@ -144,16 +138,22 @@ public class PreferencesManager {
     return prefs.getBoolean(PREFERENCE_SOUND_EFFECTS_ON_BOOL, true);
   }
 
-  public void saveHighscore(String name, int score) {
+  public void saveHighscore(String name, int score, int level, int laps) {
+    Gdx.app.debug("preferences_manager:saveHighscore",
+        MainGame.getCurrentTimeStampLogString() + "save score (" + score + ") from \"" + name + "\" [level=" + level + ",laps=" + laps + "]");
     setHighscoreName(name);
     final HighscoreEntry[] entries = retrieveHighscore();
     for (int i = 0; i < entries.length; i++) {
       if (entries[i].getScore() < score) {
         prefs.putString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + i, name);
         prefs.putInteger(PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i, score);
+        prefs.putInteger(PREFERENCE_HIGHSCORE_LEVEL_VALUE_BASE + i, level);
+        prefs.putInteger(PREFERENCE_HIGHSCORE_LAPS_VALUE_BASE + i, laps);
         for (int j = i + 1; j < entries.length; j++) {
           prefs.putString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + j, entries[j - 1].getName());
           prefs.putInteger(PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + j, entries[j - 1].getScore());
+          prefs.putInteger(PREFERENCE_HIGHSCORE_LEVEL_VALUE_BASE + i, entries[j - 1].getLevel());
+          prefs.putInteger(PREFERENCE_HIGHSCORE_LAPS_VALUE_BASE + i, entries[j - 1].getLaps());
         }
         prefs.flush();
         return;
@@ -163,7 +163,7 @@ public class PreferencesManager {
 
   public boolean scoreIsInTop5(final int score) {
     for (final HighscoreEntry entry : retrieveHighscore()) {
-      Gdx.app.debug("preferences_manager",
+      Gdx.app.debug("preferences_manager:scoreIsInTop5",
           MainGame.getCurrentTimeStampLogString() + "score (" + score + ") > existing entry ("
               + entry.getScore() + ")");
       if (entry.getScore() < score) {
@@ -187,6 +187,10 @@ public class PreferencesManager {
      */
     private final int level;
     /**
+     * The laps value
+     */
+    private final int laps;
+    /**
      * The name of the person that set the score
      */
     private final String name;
@@ -197,9 +201,10 @@ public class PreferencesManager {
      * @param score The score value
      * @param name  The name of the person that set the score
      */
-    HighscoreEntry(final int score, final int level, final String name) {
+    HighscoreEntry(final int score, final int level, final int laps, final String name) {
       this.score = score;
       this.level = level;
+      this.laps = laps;
       this.name = name;
     }
 
@@ -209,6 +214,10 @@ public class PreferencesManager {
 
     public int getLevel() {
       return level;
+    }
+
+    public int getLaps() {
+      return laps;
     }
 
     public String getName() {

@@ -127,7 +127,7 @@ public class GameOverState extends GameState implements IControllerCallbackGener
       // Toggle full screen when full screen keys are pressed
       if (controllerToggleFullScreenPressed || Gdx.input.isKeyJustPressed(Keys.F11)) {
         controllerToggleFullScreenPressed = false;
-        GameStateManager.toggleFullScreen();
+        gameStateManager.toggleFullScreen();
       }
     }
 
@@ -356,10 +356,10 @@ public class GameOverState extends GameState implements IControllerCallbackGener
         MainGame.getCurrentTimeStampLogString() + "\"" + menuButtonId + "\"");
     switch (menuButtonId) {
       case PLAY_AGAIN_ID:
-        gameStateManager.setGameState(new LoadingState(gameStateManager, 1));
+        gameStateManager.setGameState(new PlayState(gameStateManager, 1));
         break;
       case PLAY_LEVEL_AGAIN_ID:
-        gameStateManager.setGameState(new LoadingState(gameStateManager, level));
+        gameStateManager.setGameState(new PlayState(gameStateManager, level));
         break;
       case HIGHSCORE_ID:
         gameStateManager.setGameState(new HighscoreListState(gameStateManager));

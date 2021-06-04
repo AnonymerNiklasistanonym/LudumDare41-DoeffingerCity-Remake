@@ -39,6 +39,8 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
    * Variable tzo keep track of the achieved score
    */
   private final int score;
+  private final int level;
+  private final int laps;
   /**
    * Variable for the texture of the game won background
    */
@@ -53,9 +55,11 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
    *
    * @param gameStateManager The global game state manager
    */
-  public GameWonState(GameStateManager gameStateManager, final int score) {
+  public GameWonState(GameStateManager gameStateManager, final int score, final int level, final int laps) {
     super(gameStateManager, STATE_NAME);
     this.score = score;
+    this.level = level;
+    this.laps = laps;
 
     // Initialize game camera/canvas
     camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
@@ -81,7 +85,7 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
       // Toggle full screen when full screen keys are pressed
       if (controllerToggleFullScreenPressed || Gdx.input.isKeyJustPressed(Keys.F11)) {
         controllerToggleFullScreenPressed = false;
-        GameStateManager.toggleFullScreen();
+        gameStateManager.toggleFullScreen();
       }
     }
 
@@ -91,7 +95,7 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
         .isKeyJustPressed(Keys.SPACE) || Gdx.input.isKeyJustPressed(Keys.ESCAPE)
         || controllerAnyKeyWasPressed || Gdx.input.isCatchKey(Keys.BACK)) {
       if (preferencesManager.scoreIsInTop5(score)) {
-        gameStateManager.setGameState(new CreateHighscoreEntryState(gameStateManager, score, true));
+        gameStateManager.setGameState(new CreateHighscoreEntryState(gameStateManager, score, level, laps, true));
       } else {
         gameStateManager.setGameState(new CreditState(gameStateManager, true));
       }

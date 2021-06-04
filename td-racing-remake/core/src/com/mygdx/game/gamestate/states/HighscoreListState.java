@@ -61,7 +61,7 @@ public class HighscoreListState extends GameState implements IControllerCallback
     highscoreEntries = new HighscoreEntry[5];
     for (int i = 0; i < 5; i++) {
       highscoreEntries[i] = new HighscoreEntry(i + 1, entries[i].getScore(), entries[i].getLevel(),
-          entries[i].getName(),
+          entries[i].getLaps(), entries[i].getName(),
           assetManager, (float) MainGame.GAME_WIDTH / 2,
           (float) MainGame.GAME_HEIGHT / 6 * (5 - i));
     }
@@ -78,7 +78,7 @@ public class HighscoreListState extends GameState implements IControllerCallback
       // Toggle full screen when full screen keys are pressed
       if (controllerToggleFullScreenPressed || Gdx.input.isKeyJustPressed(Keys.F11)) {
         controllerToggleFullScreenPressed = false;
-        GameStateManager.toggleFullScreen();
+        gameStateManager.toggleFullScreen();
       }
     }
 

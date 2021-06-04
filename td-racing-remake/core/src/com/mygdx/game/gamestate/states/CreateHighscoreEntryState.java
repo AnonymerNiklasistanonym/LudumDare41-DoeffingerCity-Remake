@@ -22,13 +22,15 @@ public class CreateHighscoreEntryState extends GameState implements
 
   private static final String STATE_NAME = "CreateHighscoreEntry";
   private static final String highscoreText = "YOU REACHED THE TOP 5!";
+  private static final String ASSET_ID_YOU_REACHED_TOP_5_FONT = MainGame.getGameFontFilePath("cornerstone_upper_case_big");
   /**
    * Variable for the font scale of the credits text
    */
-  private static final float fontScaleYouReachedTop5 = 0.65f;
+  private static final float FONT_SCALE_YOU_REACHED_TOP_5 = 0.65f;
   private final ShapeRenderer shapeRenderer;
   private final String scoreText;
   private final int score;
+  private final int laps;
   private final ControllerListener controllerCallbackCreateHighscoreEntryState;
   private final boolean goToCreditStage;
   private final int level;
@@ -42,12 +44,13 @@ public class CreateHighscoreEntryState extends GameState implements
   private BitmapFont fontYouReachedTop5;
 
   public CreateHighscoreEntryState(GameStateManager gameStateManager, final int score,
-      final int level,
+      final int level, final int laps,
       final boolean goToCreditStage) {
     super(gameStateManager, STATE_NAME);
 
     this.score = score;
     this.level = level;
+    this.laps = laps;
     this.goToCreditStage = goToCreditStage;
     scoreText = "" + score;
 
@@ -60,7 +63,7 @@ public class CreateHighscoreEntryState extends GameState implements
     // Load assets that are not necessary to be available just yet
     assetManager
         .load(HighscoreSelectCharacterDisplay.ASSET_MANAGER_ID_CHARACTER_FONT, BitmapFont.class);
-    assetManager.load(MainGame.getGameFontFilePath("cornerstone_upper_case_big"), BitmapFont.class);
+    assetManager.load(ASSET_ID_YOU_REACHED_TOP_5_FONT, BitmapFont.class);
 
     // Register controller callback so that controller input can be managed
     controllerCallbackCreateHighscoreEntryState = new ControllerCallbackCreateHighscoreEntryState(
@@ -68,14 +71,14 @@ public class CreateHighscoreEntryState extends GameState implements
     Controllers.addListener(controllerCallbackCreateHighscoreEntryState);
   }
 
-  public CreateHighscoreEntryState(GameStateManager gameStateManager, final int score,
+  public CreateHighscoreEntryState(GameStateManager gameStateManager, final int score, final int laps,
       final boolean goToCreditStage) {
-    this(gameStateManager, score, 0, goToCreditStage);
+    this(gameStateManager, score, 0, laps, goToCreditStage);
   }
 
   @Override
   protected void handleInput() {
-    GameStateManager.toggleFullScreen(true);
+    gameStateManager.toggleFullScreen();
 
     if (Gdx.input.isKeyJustPressed(Keys.LEFT) || Gdx.input.isKeyJustPressed(Keys.A)
         || controllerLeftKeyWasPressed) {
@@ -148,9 +151,8 @@ public class CreateHighscoreEntryState extends GameState implements
                   : HighscoreSelectCharacterDisplayInputState.ACTIVE);
         }
 
-        fontYouReachedTop5 = assetManager
-            .get(MainGame.getGameFontFilePath("cornerstone_upper_case_big"));
-        fontYouReachedTop5.getData().setScale(fontScaleYouReachedTop5);
+        fontYouReachedTop5 = assetManager.get(ASSET_ID_YOU_REACHED_TOP_5_FONT);
+        fontYouReachedTop5.getData().setScale(FONT_SCALE_YOU_REACHED_TOP_5);
         fontYouReachedTop5.setUseIntegerPositions(false);
         highscoreTextPosition = GameStateManager.calculateCenteredTextPosition(fontYouReachedTop5,
             highscoreText, MainGame.GAME_WIDTH, (float) MainGame.GAME_HEIGHT / 3 * 5);
@@ -203,7 +205,7 @@ public class CreateHighscoreEntryState extends GameState implements
     for (final HighscoreSelectCharacterDisplay highscoreCharacterButton : highscoreCharacterButtons) {
       name.append(highscoreCharacterButton.getCurrentSelectedCharacter());
     }
-    preferencesManager.saveHighscore(name.toString(), this.score);
+    preferencesManager.saveHighscore(name.toString(), this.score, this.level, this.laps);
     if (goToCreditStage) {
       gameStateManager.setGameState(new CreditState(gameStateManager, true));
     } else {

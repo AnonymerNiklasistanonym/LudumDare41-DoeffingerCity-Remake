@@ -65,23 +65,16 @@ public class GameStateManager {
   /**
    * Toggle full screen
    */
-  public static void toggleFullScreen() {
-    toggleFullScreen(false);
-  }
-
-  /**
-   * Toggle full screen on press of the given standardized key
-   */
-  public static void toggleFullScreen(final boolean useStandardizedKey) {
-    if (!useStandardizedKey || Gdx.input.isKeyJustPressed(standardizedFullScreenToggleKey)) {
-      new PreferencesManager().setFullscreen(!Gdx.graphics.isFullscreen());
-      if (Gdx.graphics.isFullscreen()) {
-        Gdx.graphics.setWindowedMode(MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
-      } else {
-        Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
-      }
+  public void toggleFullScreen() {
+    preferencesManager.setFullscreen(!Gdx.graphics.isFullscreen());
+    if (Gdx.graphics.isFullscreen()) {
+      Gdx.graphics.setWindowedMode(MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
+    } else {
+      Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
     }
   }
+
+
 
   /**
    * Get the current mouse position

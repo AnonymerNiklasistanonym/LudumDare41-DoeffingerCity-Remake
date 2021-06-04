@@ -3,6 +3,7 @@ package com.mygdx.game.gamestate.states;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.controllers.Controllers;
@@ -55,12 +56,64 @@ import com.mygdx.game.objects.towers.LaserTower;
 import com.mygdx.game.objects.towers.MgTower;
 import com.mygdx.game.objects.towers.SniperTower;
 import com.mygdx.game.unsorted.Node;
+import java.lang.Thread.State;
 import java.util.Date;
 
 public class PlayState extends GameState implements CollisionCallbackInterface, IControllerCallbackPlayState,
 		ScoreBoardCallbackInterface, EnemyCallbackInterface {
 
 	private final static String STATE_NAME = "Play";
+	private final static String TEXT_LOADING = "LOADING";
+
+	private final static String ASSET_ID_CAR_TEXTURE = MainGame.getGameCarFilePath("standard");
+	private final static String ASSET_ID_FINISH_LINE_TEXTURE = MainGame.getGameMapFilePath("finish_line");
+	private final static String ASSET_ID_PIT_STOP_TEXTURE = MainGame.getGameMapFilePath("pit_stop");
+	private final static String ASSET_ID_SMOKE_TEXTURE = MainGame.getGameMapFilePath("smoke");
+
+	private final static String ASSET_ID_TOWER_CANNON_TEXTURE = MainGame.getGameButtonFilePath("tower_cannon");
+	private final static String ASSET_ID_TOWER_LASER_TEXTURE = MainGame.getGameButtonFilePath("tower_laser");
+	private final static String ASSET_ID_TOWER_SNIPER_TEXTURE = MainGame.getGameButtonFilePath("tower_sniper");
+	private final static String ASSET_ID_TOWER_FLAME_TEXTURE = MainGame.getGameButtonFilePath("tower_flame");
+
+	private static final String ASSET_ID_TOWER_CANNON_BOTTOM_TEXTURE = MainGame.getGameTowerFilePath("cannon_bottom");
+	private static final String ASSET_ID_TOWER_CANNON_UPPER_TEXTURE = MainGame.getGameTowerFilePath("cannon_upper");
+	private static final String ASSET_ID_TOWER_CANNON_FIRING_TEXTURE = MainGame.getGameTowerFilePath("cannon_firing");
+	private static final String ASSET_ID_TOWER_SNIPER_BOTTOM_TEXTURE = MainGame.getGameTowerFilePath("sniper_bottom");
+	private static final String ASSET_ID_TOWER_SNIPER_UPPER_TEXTURE = MainGame.getGameTowerFilePath("sniper_upper");
+	private static final String ASSET_ID_TOWER_SNIPER_FIRING_TEXTURE = MainGame.getGameTowerFilePath("sniper_firing");
+	private static final String ASSET_ID_TOWER_LASER_BOTTOM_TEXTURE = MainGame.getGameTowerFilePath("laser_bottom");
+	private static final String ASSET_ID_TOWER_LASER_UPPER_TEXTURE = MainGame.getGameTowerFilePath("laser_upper");
+	private static final String ASSET_ID_TOWER_LASER_FIRING_TEXTURE = MainGame.getGameTowerFilePath("laser_firing");
+	private static final String ASSET_ID_TOWER_FLAME_BOTTOM_TEXTURE = MainGame.getGameTowerFilePath("flame_bottom");
+	private static final String ASSET_ID_TOWER_FLAME_UPPER_TEXTURE = MainGame.getGameTowerFilePath("flame_upper");
+	private static final String ASSET_ID_TOWER_FLAME_FIRING_TEXTURE = MainGame.getGameTowerFilePath("flame_firing");
+	private static final String ASSET_ID_TOWER_FLAME_FIRE_TEXTURE = MainGame.getGameTowerFilePath("flame_fire");
+
+	private static final String ASSET_ID_ENEMY_SMALL_NORMAL_TEXTURE = MainGame.getGameZombieFilePath("standard");
+	private static final String ASSET_ID_ENEMY_SMALL_DEAD_TEXTURE = MainGame.getGameZombieFilePath("standard_dead");
+	private static final String ASSET_ID_ENEMY_FAT_NORMAL_TEXTURE = MainGame.getGameZombieFilePath("fat");
+	private static final String ASSET_ID_ENEMY_FAT_DEAD_TEXTURE = MainGame.getGameZombieFilePath("fat_dead");
+	private static final String ASSET_ID_ENEMY_SPIDER_NORMAL_TEXTURE = MainGame.getGameZombieFilePath("spider");
+	private static final String ASSET_ID_ENEMY_SPIDER_DEAD_TEXTURE = MainGame.getGameZombieFilePath("spider_dead");
+	private static final String ASSET_ID_ENEMY_BICYCLE_NORMAL_TEXTURE = MainGame.getGameZombieFilePath("bicycle");
+	private static final String ASSET_ID_ENEMY_BICYCLE_DEAD_TEXTURE = MainGame.getGameZombieFilePath("bicycle_dead");
+	private static final String ASSET_ID_ENEMY_LINCOLN_NORMAL_TEXTURE = MainGame.getGameZombieFilePath("lincoln");
+	private static final String ASSET_ID_ENEMY_LINCOLN_DEAD_TEXTURE = MainGame.getGameZombieFilePath("lincoln_dead");
+	private static final String ASSET_ID_ENEMY_BLOOD_TEXTURE = MainGame.getGameZombieFilePath("blood");
+	private static final String ASSET_ID_ENEMY_BLOOD_GREEN_TEXTURE = MainGame.getGameZombieFilePath("blood_green");
+
+	private static final String ASSET_ID_TOWER_CANNON_SOUND = MainGame.getGameSoundFilePath("tower_cannon");
+	private static final String ASSET_ID_TOWER_SNIPER_SOUND = MainGame.getGameSoundFilePath("tower_sniper");
+	private static final String ASSET_ID_TOWER_LASER_SOUND = MainGame.getGameSoundFilePath("tower_laser", true);
+	private static final String ASSET_ID_TOWER_FLAME_SOUND = MainGame.getGameSoundFilePath("tower_flame");
+
+	private static final String ASSET_ID_THEME_MUSIC = MainGame.getGameMusicFilePath("theme");
+	private static final String ASSET_ID_CAR_ENGINE_MUSIC = MainGame.getGameSoundFilePath("car_engine", true);
+	private static final String ASSET_ID_CAR_ENGINE_START_SOUND = MainGame.getGameSoundFilePath("car_engine_start", true);
+	private static final String ASSET_ID_SPLATT_SOUND = MainGame.getGameSoundFilePath("splatt");
+	private static final String ASSET_ID_CASH_SOUND = MainGame.getGameSoundFilePath("cash");
+	private static final String ASSET_ID_VICTORY_SOUND = MainGame.getGameSoundFilePath("victory");
+	private static final String ASSET_ID_TRAILER_DAMAGE_SOUND = MainGame.getGameSoundFilePath("trailer_damage");
 
 	// TODO Make that and the physics implementation variable from this value so that the fps can
 	// TODO be set to other values like for example 240
@@ -73,17 +126,26 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	public final static float PIXEL_TO_METER = 0.05f;
 	public final static float METER_TO_PIXEL = 20f;
 
-	private final Music musicBackground, musicCar;
-	private final Sound splatt, soundGetMoney, soundCarStart, soundVictory, soundDamage;
+	private Music musicBackground;
+	private Music musicCar;
+	private Sound splatt;
+	private Sound soundGetMoney;
+	private Sound soundCarStart;
+	private Sound soundVictory;
+	private Sound soundDamage;
 	private final ScoreBoard scoreBoard;
 	private final Array<Enemy> enemies, enemiesDead;
 	private final Array<Tower> towers;
 	private final Array<Sprite> trailerSmokes;
 	private float timesincesmoke;
-	private final Sprite spritePitStop, spriteCar, spriteFinishLine, spriteSmoke;
+	private Sprite spritePitStop;
+	private Sprite spriteCar;
+	private Sprite spriteFinishLine;
+	private Sprite spriteSmoke;
 	private final ShapeRenderer shapeRenderer;
 	private final Level[] levels;
 	private Level level;
+	private Texture backgroundLoading;
 
 	private Tower buildingtower;
 	private Checkpoint[] checkpoints;
@@ -100,7 +162,8 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	private boolean pausedByUser, debugBox2D, debugCollision, debugDistance,
 			debugWay, unlockAllTowers, debugTower;
 	private int tutorialState, checkPointsCleared, speedFactor;
-
+	private final Vector2 loadingTextPosition = new Vector2();
+	private String loadingText;
 
 	/**
 	 * Tracker if a controller manual pause key was pressed
@@ -117,128 +180,105 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	private final Vector3 previousMouseCursorPosition = new Vector3();
 	private long timeStampMouseCursorPositionWasChanged = 0;
+	private final BitmapFont fontLoading, fontText;
+	private static final float fontScaleLoading = 0.5f;
+	private static final float fontScaleText = 0.1f;
 
 	private final ControllerCallbackPlayState controllerCallbackPlayState;
 
+	private Thread threadLoadFirstLevel;
+
+	private final int levelNumber;
+
+	private boolean levelLoaded = false;
+
 	public PlayState(final GameStateManager gameStateManager, final int levelNumber) {
 		super(gameStateManager, STATE_NAME);
+		this.levelNumber = levelNumber;
+
+		// Sets this camera to an orthographic projection, centered at (viewportWidth/2,
+		// viewportHeight/2), with the y-axis pointing up or down.
+		camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
 
 		// Set fps
 		Gdx.graphics.setVSync(true);
 		Gdx.graphics.setForegroundFPS(foregroundFps);
 
-		// scale used font correctly
-		MainGame.font70.getData().setScale(0.10f);
+		// Load assets used for rendering the loading screen
 		assetManager.load(MainGame.getGameFontFilePath("cornerstone_70"), BitmapFont.class);
+		assetManager.load(MainGame.getGameFontFilePath("cornerstone_upper_case_big"), BitmapFont.class);
+		assetManager.load(MainGame.getGameBackgroundFilePath("loading"), Texture.class);
+		assetManager.load(MainGame.getGameLogoFilePath("tnt"), Texture.class);
+		// Finish loading of resources that are necessary for the loading screen
+		assetManager.finishLoading();
+		// Get assets used for rendering the loading screen
+		fontLoading = assetManager.get(MainGame.getGameFontFilePath("cornerstone_upper_case_big"));
+		fontLoading.setUseIntegerPositions(false);
+		fontLoading.getData().setScale(fontScaleLoading);
+		backgroundLoading = assetManager.get(MainGame.getGameBackgroundFilePath("loading"));
+
+		// scale used font correctly
+		fontText = assetManager.get(MainGame.getGameFontFilePath("cornerstone_70"));
+		fontText.getData().setScale(fontScaleText);
 
 		// set static dependencies
 		Enemy.callbackInterface = this;
 
 		// create sprite(s)
-		spriteCar = createScaledSprite("car/car_standard.png");
-		spriteFinishLine = createScaledSprite("map/map_finish_line.png");
-		spritePitStop = createScaledSprite("map/map_pit_stop.png");
-		spriteSmoke = createScaledSprite("map/map_smoke.png");
-		assetManager.load(MainGame.getGameCarFilePath("standard"), Texture.class);
-		assetManager.load(MainGame.getGameMapFilePath("finish_line"), Texture.class);
-		assetManager.load(MainGame.getGameMapFilePath("pit_stop"), Texture.class);
-		assetManager.load(MainGame.getGameMapFilePath("smoke"), Texture.class);
+		assetManager.load(ASSET_ID_CAR_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_FINISH_LINE_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_PIT_STOP_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_SMOKE_TEXTURE, Texture.class);
 
 		// set textures (tower buttons)
-		TowerMenu.cannonButton = new Texture(Gdx.files.internal("button/button_tower_cannon.png"));
-		TowerMenu.laserButton = new Texture(Gdx.files.internal("button/button_tower_laser.png"));
-		TowerMenu.sniperButton = new Texture(Gdx.files.internal("button/button_tower_sniper.png"));
-		TowerMenu.flameButton = new Texture(Gdx.files.internal("button/button_tower_flame.png"));
-		assetManager.load(MainGame.getGameButtonFilePath("tower_cannon"), Texture.class);
-		assetManager.load(MainGame.getGameButtonFilePath("tower_laser"), Texture.class);
-		assetManager.load(MainGame.getGameButtonFilePath("tower_sniper"), Texture.class);
-		assetManager.load(MainGame.getGameButtonFilePath("tower_flame"), Texture.class);
+		assetManager.load(ASSET_ID_TOWER_CANNON_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_TOWER_LASER_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_TOWER_SNIPER_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_TOWER_FLAME_TEXTURE, Texture.class);
 
 		// set textures (towers)
-		MgTower.groundTower = new Texture(Gdx.files.internal("tower/tower_cannon_bottom.png"));
-		MgTower.upperTower = new Texture(Gdx.files.internal("tower/tower_cannon_upper.png"));
-		MgTower.towerFiring = new Texture(Gdx.files.internal("tower/tower_cannon_firing.png"));
-		SniperTower.groundTower = new Texture(Gdx.files.internal("tower/tower_sniper_bottom.png"));
-		SniperTower.upperTower = new Texture(Gdx.files.internal("tower/tower_sniper_upper.png"));
-		SniperTower.towerFiring = new Texture(Gdx.files.internal("tower/tower_sniper_firing.png"));
-		LaserTower.groundTower = new Texture(Gdx.files.internal("tower/tower_laser_bottom.png"));
-		LaserTower.upperTower = new Texture(Gdx.files.internal("tower/tower_laser_upper.png"));
-		LaserTower.towerFiring = new Texture(Gdx.files.internal("tower/tower_laser_firing.png"));
-		FireTower.groundTower = new Texture(Gdx.files.internal("tower/tower_flame_bottom.png"));
-		FireTower.upperTower = new Texture(Gdx.files.internal("tower/tower_flame_upper.png"));
-		FireTower.towerFiring = new Texture(Gdx.files.internal("tower/tower_flame_firing.png"));
-		FireTower.tflame = new Texture(Gdx.files.internal("tower/tower_flame_fire.png"));
-		assetManager.load(MainGame.getGameTowerFilePath("cannon_bottom"), Texture.class);
-		assetManager.load(MainGame.getGameTowerFilePath("cannon_upper"), Texture.class);
-		assetManager.load(MainGame.getGameTowerFilePath("cannon_firing"), Texture.class);
-		assetManager.load(MainGame.getGameTowerFilePath("sniper_bottom"), Texture.class);
-		assetManager.load(MainGame.getGameTowerFilePath("sniper_upper"), Texture.class);
-		assetManager.load(MainGame.getGameTowerFilePath("sniper_firing"), Texture.class);
-		assetManager.load(MainGame.getGameTowerFilePath("laser_bottom"), Texture.class);
-		assetManager.load(MainGame.getGameTowerFilePath("laser_upper"), Texture.class);
-		assetManager.load(MainGame.getGameTowerFilePath("laser_firing"), Texture.class);
-		assetManager.load(MainGame.getGameTowerFilePath("flame_bottom"), Texture.class);
-		assetManager.load(MainGame.getGameTowerFilePath("flame_upper"), Texture.class);
-		assetManager.load(MainGame.getGameTowerFilePath("flame_firing"), Texture.class);
-		assetManager.load(MainGame.getGameTowerFilePath("flame_fire"), Texture.class);
+		assetManager.load(ASSET_ID_TOWER_CANNON_BOTTOM_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_TOWER_CANNON_UPPER_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_TOWER_CANNON_FIRING_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_TOWER_SNIPER_BOTTOM_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_TOWER_SNIPER_UPPER_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_TOWER_SNIPER_FIRING_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_TOWER_LASER_BOTTOM_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_TOWER_LASER_UPPER_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_TOWER_LASER_FIRING_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_TOWER_FLAME_BOTTOM_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_TOWER_FLAME_UPPER_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_TOWER_FLAME_FIRING_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_TOWER_FLAME_FIRE_TEXTURE, Texture.class);
 
 		// set textures (enemies)
-		EnemySmall.normalTexture = new Texture(Gdx.files.internal("zombie/zombie_standard.png"));
-		EnemySmall.deadTexture = new Texture(Gdx.files.internal("zombie/zombie_standard_dead.png"));
-		EnemySmall.damageTexture = new Texture(Gdx.files.internal("zombie/zombie_blood.png"));
-		EnemyFat.normalTexture = new Texture(Gdx.files.internal("zombie/zombie_fat.png"));
-		EnemyFat.deadTexture = new Texture(Gdx.files.internal("zombie/zombie_fat_dead.png"));
-		EnemyFat.damageTexture = new Texture(Gdx.files.internal("zombie/zombie_blood.png"));
-		EnemySpider.normalTexture = new Texture(Gdx.files.internal("zombie/zombie_spider.png"));
-		EnemySpider.deadTexture = new Texture(Gdx.files.internal("zombie/zombie_spider_dead.png"));
-		EnemySpider.damageTexture = new Texture(Gdx.files.internal("zombie/zombie_blood_green.png"));
-		EnemyBicycle.normalTexture = new Texture(Gdx.files.internal("zombie/zombie_bicycle.png"));
-		EnemyBicycle.deadTexture = new Texture(Gdx.files.internal("zombie/zombie_bicycle_dead.png"));
-		EnemyBicycle.damageTexture = new Texture(Gdx.files.internal("zombie/zombie_blood.png"));
-		EnemyLincoln.normalTexture = new Texture(Gdx.files.internal("zombie/zombie_lincoln.png"));
-		EnemyLincoln.deadTexture = new Texture(Gdx.files.internal("zombie/zombie_lincoln_dead.png"));
-		EnemyLincoln.damageTexture = new Texture(Gdx.files.internal("zombie/zombie_blood.png"));
-		assetManager.load(MainGame.getGameZombieFilePath("blood"), Texture.class);
-		assetManager.load(MainGame.getGameZombieFilePath("blood_green"), Texture.class);
-		assetManager.load(MainGame.getGameZombieFilePath("standard"), Texture.class);
-		assetManager.load(MainGame.getGameZombieFilePath("standard_dead"), Texture.class);
-		assetManager.load(MainGame.getGameZombieFilePath("fat"), Texture.class);
-		assetManager.load(MainGame.getGameZombieFilePath("fat_dead"), Texture.class);
-		assetManager.load(MainGame.getGameZombieFilePath("bicycle"), Texture.class);
-		assetManager.load(MainGame.getGameZombieFilePath("bicycle_dead"), Texture.class);
-		assetManager.load(MainGame.getGameZombieFilePath("spider"), Texture.class);
-		assetManager.load(MainGame.getGameZombieFilePath("spider_dead"), Texture.class);
-		assetManager.load(MainGame.getGameZombieFilePath("lincoln"), Texture.class);
-		assetManager.load(MainGame.getGameZombieFilePath("lincoln_dead"), Texture.class);
+		assetManager.load(ASSET_ID_ENEMY_SMALL_NORMAL_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_ENEMY_SMALL_DEAD_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_ENEMY_FAT_NORMAL_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_ENEMY_FAT_DEAD_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_ENEMY_SPIDER_NORMAL_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_ENEMY_SPIDER_DEAD_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_ENEMY_BICYCLE_NORMAL_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_ENEMY_BICYCLE_DEAD_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_ENEMY_LINCOLN_NORMAL_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_ENEMY_LINCOLN_DEAD_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_ENEMY_BLOOD_TEXTURE, Texture.class);
+		assetManager.load(ASSET_ID_ENEMY_BLOOD_GREEN_TEXTURE, Texture.class);
 
 		// set audio files (towers)
-		MgTower.soundShoot = Gdx.audio.newSound(Gdx.files.internal("sound/sound_tower_cannon.wav"));
-		SniperTower.soundShoot = Gdx.audio.newSound(Gdx.files.internal("sound/sound_tower_sniper.wav"));
-		LaserTower.soundShoot = Gdx.audio.newSound(Gdx.files.internal("sound/sound_tower_laser.mp3"));
-		FireTower.soundShoot = Gdx.audio.newSound(Gdx.files.internal("sound/sound_tower_flame.wav"));
-		assetManager.load(MainGame.getGameSoundFilePath("tower_cannon"), Sound.class);
-		assetManager.load(MainGame.getGameSoundFilePath("tower_sniper"), Sound.class);
-		assetManager.load(MainGame.getGameSoundFilePath("tower_laser", true), Sound.class);
-		assetManager.load(MainGame.getGameSoundFilePath("tower_flame"), Sound.class);
+		assetManager.load(ASSET_ID_TOWER_CANNON_SOUND, Sound.class);
+		assetManager.load(ASSET_ID_TOWER_SNIPER_SOUND, Sound.class);
+		assetManager.load(ASSET_ID_TOWER_LASER_SOUND, Sound.class);
+		assetManager.load(ASSET_ID_TOWER_FLAME_SOUND, Sound.class);
 
 		// set audio files (other)
-		musicBackground = Gdx.audio.newMusic(Gdx.files.internal("music/music_theme.mp3"));
-		musicCar = Gdx.audio.newMusic(Gdx.files.internal("sound/sound_car_engine.mp3"));
-		splatt = Gdx.audio.newSound(Gdx.files.internal("sound/sound_splatt.wav"));
-		soundGetMoney = Gdx.audio.newSound(Gdx.files.internal("sound/sound_cash.wav"));
-		soundCarStart = Gdx.audio.newSound(Gdx.files.internal("sound/sound_car_engine_start.mp3"));
-		soundVictory = Gdx.audio.newSound(Gdx.files.internal("sound/sound_victory.wav"));
-		soundDamage = Gdx.audio.newSound(Gdx.files.internal("sound/sound_trailer_damage.wav"));
-		assetManager.load(MainGame.getGameMusicFilePath("theme"), Music.class);
-		assetManager.load(MainGame.getGameSoundFilePath("car_engine", true), Sound.class);
-		assetManager.load(MainGame.getGameSoundFilePath("car_engine_start", true), Sound.class);
-		assetManager.load(MainGame.getGameSoundFilePath("splatt"), Sound.class);
-		assetManager.load(MainGame.getGameSoundFilePath("cash"), Sound.class);
-		assetManager.load(MainGame.getGameSoundFilePath("victory"), Sound.class);
-		assetManager.load(MainGame.getGameSoundFilePath("trailer_damage"), Sound.class);
-		// Sets this camera to an orthographic projection, centered at (viewportWidth/2,
-		// viewportHeight/2), with the y-axis pointing up or down.
-		camera.setToOrtho(false, MainGame.GAME_WIDTH * PIXEL_TO_METER, MainGame.GAME_HEIGHT * PIXEL_TO_METER);
+		assetManager.load(ASSET_ID_THEME_MUSIC, Music.class);
+		assetManager.load(ASSET_ID_CAR_ENGINE_MUSIC, Music.class);
+		assetManager.load(ASSET_ID_CAR_ENGINE_START_SOUND, Sound.class);
+		assetManager.load(ASSET_ID_SPLATT_SOUND, Sound.class);
+		assetManager.load(ASSET_ID_CASH_SOUND, Sound.class);
+		assetManager.load(ASSET_ID_VICTORY_SOUND, Sound.class);
+		assetManager.load(ASSET_ID_TRAILER_DAMAGE_SOUND, Sound.class);
 
 		// instantiate global fields
 		speedFactor = 1;
@@ -270,23 +310,13 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		trailerSmokes = new Array<Sprite>();
 		enemiesDead = new Array<Enemy>();
 
-		// activate background music
-		musicBackground.setLooping(true);
-		musicBackground.setVolume(0.75f);
-		musicCar.setLooping(true);
-		musicCar.setVolume(1f);
-
-		// things to do in developer mode and not
-
-		// load level
-		loadLevel(levelNumber);
-
 		// Register controller callback so that controller input can be managed
 		controllerCallbackPlayState = new ControllerCallbackPlayState(this);
 		Controllers.addListener(controllerCallbackPlayState);
 	}
 
 	private void loadLevel(int levelNumber) {
+		levelLoaded = false;
 		long time = System.currentTimeMillis();
 		Gdx.app.debug("play_state:loadLevel", MainGame.getCurrentTimeStampLogString() + "Load Level #" + levelNumber);
 		// set/save level number
@@ -298,7 +328,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 		// If the level number is bigger than the level number the game was won
 		if (levelNumber > this.levels.length) {
-			gameStateManager.setGameState(new GameWonState(gameStateManager, scoreBoard.getScore()));
+			gameStateManager.setGameState(new GameWonState(gameStateManager, scoreBoard.getScore(), scoreBoard.getLevel(), scoreBoard.getLaps()));
 			return;
 		}
 		// TODO Find out why the level number needs to be decremented
@@ -352,12 +382,14 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 		// Update the scoreboard because a new level was loaded
 		scoreBoard.resetNewLevelLoaded();
+		levelLoaded = true;
 
 		Gdx.app.debug("play_state:loadLevel", MainGame.getCurrentTimeStampLogString() + "Level #" + (levelNumber + 1) + " was loaded in " + (System.currentTimeMillis() - time) + "ms");
 	}
 
-	private static Sprite createScaledSprite(String location) {
-		final Sprite s = new Sprite(new Texture(Gdx.files.internal(location)));
+	private static Sprite createScaledSprite(AssetManager assetManager, String location) {
+		final Texture texture = assetManager.get(location);
+		final Sprite s = new Sprite(texture);
 		s.setSize(s.getWidth() * PIXEL_TO_METER, s.getHeight() * PIXEL_TO_METER);
 		s.setOriginCenter();
 		return s;
@@ -400,6 +432,9 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	}
 
 	public void toggleMusic() {
+		if (!assetsLoaded) {
+			return;
+		}
 		if (preferencesManager.getMusicOn() && !pausedByUser) {
 			musicBackground.play();
 		} else {
@@ -408,6 +443,9 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	}
 
 	public void toggleSoundEffects() {
+		if (!assetsLoaded) {
+			return;
+		}
 		if (preferencesManager.getSoundEffectsOn() && !pausedByUser) {
 			musicCar.play();
 			soundCarStart.resume();
@@ -434,7 +472,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 			// Toggle full screen when full screen keys are pressed (desktop only)
 			if (controllerToggleFullScreenPressed || Gdx.input.isKeyJustPressed(Keys.F11)) {
 				controllerToggleFullScreenPressed = false;
-				GameStateManager.toggleFullScreen();
+				gameStateManager.toggleFullScreen();
 			}
 		}
 
@@ -658,9 +696,9 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	@Override
 	protected void update(float deltaTime) {
-
-		if (pausedByUser)
+		if (pausedByUser || !assetsLoaded || !levelLoaded) {
 			return;
+		}
 
 		// minimize time for wave text - only if it's not pause
 		timeToDisplayWaveTextInS -= deltaTime;
@@ -769,7 +807,10 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	@Override
 	public void render(final SpriteBatch spriteBatch) {
-
+		if (paused) {
+			// When the game is paused don't render anything
+			return;
+		}
 		if (assetManager.update()) {
 			if (!assetsLoaded) {
 				float progress = assetManager.getProgress() * 100;
@@ -778,151 +819,236 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 								+ progress + "%");
 				assetsLoaded = true;
 
-				// TODO Load assets via the asset manager
+				// Sets this camera to an orthographic projection, centered at (viewportWidth/2,
+				// viewportHeight/2), with the y-axis pointing up or down.
+				camera.setToOrtho(false, MainGame.GAME_WIDTH * PIXEL_TO_METER, MainGame.GAME_HEIGHT * PIXEL_TO_METER);
 
-				// TODO Set up everything that needed assets to set up
+				// create sprite(s)
+				spriteCar = createScaledSprite(assetManager, ASSET_ID_CAR_TEXTURE);
+				spriteFinishLine = createScaledSprite(assetManager, ASSET_ID_FINISH_LINE_TEXTURE);
+				spritePitStop = createScaledSprite(assetManager, ASSET_ID_PIT_STOP_TEXTURE);
+				spriteSmoke = createScaledSprite(assetManager, ASSET_ID_SMOKE_TEXTURE);
+
+				// set textures (tower buttons)
+				TowerMenu.cannonButton = assetManager.get(ASSET_ID_TOWER_CANNON_TEXTURE);
+				TowerMenu.laserButton = assetManager.get(ASSET_ID_TOWER_LASER_TEXTURE);
+				TowerMenu.sniperButton = assetManager.get(ASSET_ID_TOWER_SNIPER_TEXTURE);
+				TowerMenu.flameButton = assetManager.get(ASSET_ID_TOWER_FLAME_TEXTURE);
+
+				// set textures (towers)
+				MgTower.groundTower = assetManager.get(ASSET_ID_TOWER_CANNON_BOTTOM_TEXTURE);
+				MgTower.upperTower = assetManager.get(ASSET_ID_TOWER_CANNON_UPPER_TEXTURE);
+				MgTower.towerFiring = assetManager.get(ASSET_ID_TOWER_CANNON_FIRING_TEXTURE);
+				SniperTower.groundTower = assetManager.get(ASSET_ID_TOWER_SNIPER_BOTTOM_TEXTURE);
+				SniperTower.upperTower = assetManager.get(ASSET_ID_TOWER_SNIPER_UPPER_TEXTURE);
+				SniperTower.towerFiring = assetManager.get(ASSET_ID_TOWER_SNIPER_FIRING_TEXTURE);
+				LaserTower.groundTower = assetManager.get(ASSET_ID_TOWER_LASER_BOTTOM_TEXTURE);
+				LaserTower.upperTower = assetManager.get(ASSET_ID_TOWER_LASER_UPPER_TEXTURE);
+				LaserTower.towerFiring = assetManager.get(ASSET_ID_TOWER_LASER_FIRING_TEXTURE);
+				FireTower.groundTower = assetManager.get(ASSET_ID_TOWER_FLAME_BOTTOM_TEXTURE);
+				FireTower.upperTower = assetManager.get(ASSET_ID_TOWER_FLAME_UPPER_TEXTURE);
+				FireTower.towerFiring = assetManager.get(ASSET_ID_TOWER_FLAME_FIRING_TEXTURE);
+				FireTower.tflame = assetManager.get(ASSET_ID_TOWER_FLAME_FIRE_TEXTURE);
+
+				// set textures (enemies)
+				EnemySmall.normalTexture = assetManager.get(ASSET_ID_ENEMY_SMALL_NORMAL_TEXTURE);
+				EnemySmall.deadTexture = assetManager.get(ASSET_ID_ENEMY_SMALL_DEAD_TEXTURE);
+				EnemySmall.damageTexture = assetManager.get(ASSET_ID_ENEMY_BLOOD_TEXTURE);
+				EnemyFat.normalTexture = assetManager.get(ASSET_ID_ENEMY_FAT_NORMAL_TEXTURE);
+				EnemyFat.deadTexture = assetManager.get(ASSET_ID_ENEMY_FAT_DEAD_TEXTURE);
+				EnemyFat.damageTexture = assetManager.get(ASSET_ID_ENEMY_BLOOD_TEXTURE);
+				EnemySpider.normalTexture = assetManager.get(ASSET_ID_ENEMY_SPIDER_NORMAL_TEXTURE);
+				EnemySpider.deadTexture = assetManager.get(ASSET_ID_ENEMY_SPIDER_DEAD_TEXTURE);
+				EnemySpider.damageTexture = assetManager.get(ASSET_ID_ENEMY_BLOOD_GREEN_TEXTURE);
+				EnemyBicycle.normalTexture = assetManager.get(ASSET_ID_ENEMY_BICYCLE_NORMAL_TEXTURE);
+				EnemyBicycle.deadTexture = assetManager.get(ASSET_ID_ENEMY_BICYCLE_DEAD_TEXTURE);
+				EnemyBicycle.damageTexture = assetManager.get(ASSET_ID_ENEMY_BLOOD_TEXTURE);
+				EnemyLincoln.normalTexture = assetManager.get(ASSET_ID_ENEMY_LINCOLN_NORMAL_TEXTURE);
+				EnemyLincoln.deadTexture = assetManager.get(ASSET_ID_ENEMY_LINCOLN_DEAD_TEXTURE);
+				EnemyLincoln.damageTexture = assetManager.get(ASSET_ID_ENEMY_BLOOD_TEXTURE);
+
+				// set audio files (towers)
+				MgTower.soundShoot = assetManager.get(ASSET_ID_TOWER_CANNON_SOUND);
+				SniperTower.soundShoot = assetManager.get(ASSET_ID_TOWER_SNIPER_SOUND);
+				LaserTower.soundShoot = assetManager.get(ASSET_ID_TOWER_LASER_SOUND);
+				FireTower.soundShoot = assetManager.get(ASSET_ID_TOWER_FLAME_SOUND);
+
+				// set audio files (other)
+				musicBackground = assetManager.get(ASSET_ID_THEME_MUSIC);
+				musicCar = assetManager.get(ASSET_ID_CAR_ENGINE_MUSIC);
+				splatt = assetManager.get(ASSET_ID_SPLATT_SOUND);
+				soundGetMoney = assetManager.get(ASSET_ID_CASH_SOUND);
+				soundCarStart = assetManager.get(ASSET_ID_CAR_ENGINE_START_SOUND);
+				soundVictory = assetManager.get(ASSET_ID_VICTORY_SOUND);
+				soundDamage = assetManager.get(ASSET_ID_TRAILER_DAMAGE_SOUND);
+
+				// activate background music
+				musicBackground.setLooping(true);
+				musicBackground.setVolume(0.75f);
+				musicCar.setLooping(true);
+				musicCar.setVolume(1f);
+
+				// load level
+				loadLevel(levelNumber);
+			} else {
+				// set projection matrices
+				spriteBatch.setProjectionMatrix(camera.combined);
+				shapeRenderer.setProjectionMatrix(spriteBatch.getProjectionMatrix());
+
+				// draw map
+				spriteBatch.begin();
+				map.draw(spriteBatch);
+				spriteBatch.end();
+
+				// draw transparent tower range shapes
+				Gdx.gl.glEnable(GL20.GL_BLEND);
+				Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+				shapeRenderer.begin(ShapeType.Filled);
+				for (final Tower tower : towers)
+					tower.drawRange(shapeRenderer);
+				if (buildingtower != null)
+					buildingtower.drawRange(shapeRenderer, new Color(1, 0, 0, 0.4f));
+				if (MainGame.DEVELOPER_MODE) {
+					if (debugTower) {
+						for (final Tower tower : towers)
+							tower.drawTarget(shapeRenderer);
+					}
+				}
+				shapeRenderer.end();
+				Gdx.gl.glDisable(GL20.GL_BLEND);
+
+				// draw enemies
+				spriteBatch.begin();
+				for (final Enemy e : enemiesDead)
+					e.draw(spriteBatch);
+				for (final Enemy e : enemies)
+					e.draw(spriteBatch);
+				spriteBatch.end();
+
+				// draw enemy health bars
+				shapeRenderer.begin(ShapeType.Filled);
+				for (final Enemy e : enemies)
+					e.drawHealthBar(shapeRenderer);
+				shapeRenderer.end();
+
+				// draw car and tower menu
+				spriteBatch.begin();
+				car.draw(spriteBatch);
+				towerMenu.draw(spriteBatch);
+
+				// draw normal tower / tower ground
+				for (final Tower tower : towers)
+					tower.draw(spriteBatch);
+				spriteBatch.end();
+
+				// draw tower shooting lines
+				shapeRenderer.begin(ShapeType.Filled);
+				for (final Tower tower : towers)
+					tower.drawLine(shapeRenderer);
+				shapeRenderer.end();
+
+				// draw if shooting tower shooting top else normal top
+				spriteBatch.begin();
+				for (final Tower tower : towers)
+					tower.drawUpperBuddy(spriteBatch);
+
+				// draw smoke from damaged trailer
+				for (Sprite s : trailerSmokes) {
+					s.draw(spriteBatch);
+				}
+
+				// draw building tower on top of them all
+				if (buildingtower != null) {
+					buildingtower.draw(spriteBatch);
+					buildingtower.drawUpperBuddy(spriteBatch);
+				}
+
+				// draw pitStop and score board above the rest
+				spritePitStop.draw(spriteBatch);
+				scoreBoard.draw(spriteBatch);
+
+				// render tutorial
+				renderTutorial(spriteBatch);
+
+				// draw pause overlay
+				if (pausedByUser) {
+					spriteBatch.end();
+					Gdx.gl.glEnable(GL20.GL_BLEND);
+					Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+					shapeRenderer.begin(ShapeType.Filled);
+					shapeRenderer.setColor(new Color(0.1f, 0.1f, 0.1f, 0.4f));
+					shapeRenderer.rect(0, 0, MainGame.GAME_WIDTH * PIXEL_TO_METER,
+							MainGame.GAME_HEIGHT * PIXEL_TO_METER);
+					drawPlayerHealthBar(shapeRenderer);
+					shapeRenderer.end();
+					Gdx.gl.glDisable(GL20.GL_BLEND);
+					spriteBatch.begin();
+				}
+
+				// draw centered pause or custom wave text
+				if (pausedByUser || timeToDisplayWaveTextInS > 0) {
+					final Vector2 wavePosition = GameStateManager.calculateCenteredTextPosition(fontText,
+							pausedByUser ? "PAUSE" : waveText, MainGame.GAME_WIDTH * PIXEL_TO_METER,
+							MainGame.GAME_HEIGHT * PIXEL_TO_METER);
+					fontText.draw(spriteBatch, pausedByUser ? "PAUSE" : waveText, wavePosition.x, wavePosition.y);
+				}
+				spriteBatch.end();
+
+				// render health bar
+				shapeRenderer.begin(ShapeType.Filled);
+				drawPlayerHealthBar(shapeRenderer);
+				shapeRenderer.end();
+
+				// render also the following if in developer mode
+				if (MainGame.DEVELOPER_MODE) {
+					spriteBatch.begin();
+
+					MainGame.font.setColor(1, 1, 1, 1);
+					MainGame.font.getData().setScale(PIXEL_TO_METER);
+					MainGame.font.draw(spriteBatch, "FPS: " + Gdx.graphics.getFramesPerSecond(), 30, 35.5f);
+
+					if (debugCollision)
+						renderDebugCollision(spriteBatch);
+					if (debugDistance)
+						renderDebugEntfernung(spriteBatch);
+					if (debugWay)
+						renderDebugWay(spriteBatch);
+
+					spriteBatch.end();
+
+					if (debugBox2D)
+						debugRender.render(world, camera.combined);
+
+					shapeRenderer.begin(ShapeType.Filled);
+					controllerCallbackPlayState.drawDebugInput(shapeRenderer);
+					shapeRenderer.end();
+				}
 			}
 		} else {
-			// display loading information
+			// Render loading information
 			float progress = assetManager.getProgress() * 100;
 			if (progress != assetsLoadedLastProgress) {
+				loadingText = TEXT_LOADING + " " + Math.floor(progress);
+				loadingTextPosition.set(GameStateManager.calculateCenteredTextPosition(fontLoading, loadingText,
+						MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT));
 				assetsLoadedLastProgress = progress;
 				Gdx.app.debug("play_state:render",
 						MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
 								+ progress + "%");
 			}
-		}
 
-		// set projection matrices
-		spriteBatch.setProjectionMatrix(camera.combined);
-		shapeRenderer.setProjectionMatrix(spriteBatch.getProjectionMatrix());
-
-		// draw map
-		spriteBatch.begin();
-		map.draw(spriteBatch);
-		spriteBatch.end();
-
-		// draw transparent tower range shapes
-		Gdx.gl.glEnable(GL20.GL_BLEND);
-		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-		shapeRenderer.begin(ShapeType.Filled);
-		for (final Tower tower : towers)
-			tower.drawRange(shapeRenderer);
-		if (buildingtower != null)
-			buildingtower.drawRange(shapeRenderer, new Color(1, 0, 0, 0.4f));
-		if (MainGame.DEVELOPER_MODE) {
-			if (debugTower) {
-				for (final Tower tower : towers)
-					tower.drawTarget(shapeRenderer);
-			}
-		}
-		shapeRenderer.end();
-		Gdx.gl.glDisable(GL20.GL_BLEND);
-
-		// draw enemies
-		spriteBatch.begin();
-		for (final Enemy e : enemiesDead)
-			e.draw(spriteBatch);
-		for (final Enemy e : enemies)
-			e.draw(spriteBatch);
-		spriteBatch.end();
-
-		// draw enemy health bars
-		shapeRenderer.begin(ShapeType.Filled);
-		for (final Enemy e : enemies)
-			e.drawHealthBar(shapeRenderer);
-		shapeRenderer.end();
-
-		// draw car and tower menu
-		spriteBatch.begin();
-		car.draw(spriteBatch);
-		towerMenu.draw(spriteBatch);
-
-		// draw normal tower / tower ground
-		for (final Tower tower : towers)
-			tower.draw(spriteBatch);
-		spriteBatch.end();
-
-		// draw tower shooting lines
-		shapeRenderer.begin(ShapeType.Filled);
-		for (final Tower tower : towers)
-			tower.drawLine(shapeRenderer);
-		shapeRenderer.end();
-
-		// draw if shooting tower shooting top else normal top
-		spriteBatch.begin();
-		for (final Tower tower : towers)
-			tower.drawUpperBuddy(spriteBatch);
-
-		// draw smoke from damaged trailer
-		for (Sprite s : trailerSmokes) {
-			s.draw(spriteBatch);
-		}
-
-		// draw building tower on top of them all
-		if (buildingtower != null) {
-			buildingtower.draw(spriteBatch);
-			buildingtower.drawUpperBuddy(spriteBatch);
-		}
-
-		// draw pitStop and score board above the rest
-		spritePitStop.draw(spriteBatch);
-		scoreBoard.draw(spriteBatch);
-
-		// render tutorial
-		renderTutorial(spriteBatch);
-
-		// draw pause overlay
-		if (pausedByUser) {
-			spriteBatch.end();
-			Gdx.gl.glEnable(GL20.GL_BLEND);
-			Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-			shapeRenderer.begin(ShapeType.Filled);
-			shapeRenderer.setColor(new Color(0.1f, 0.1f, 0.1f, 0.4f));
-			shapeRenderer.rect(0, 0, MainGame.GAME_WIDTH * PIXEL_TO_METER, MainGame.GAME_HEIGHT * PIXEL_TO_METER);
-			drawPlayerHealthBar(shapeRenderer);
-			shapeRenderer.end();
-			Gdx.gl.glDisable(GL20.GL_BLEND);
 			spriteBatch.begin();
-		}
+			spriteBatch.setProjectionMatrix(camera.combined);
 
-		// draw centered pause or custom wave text
-		if (pausedByUser || timeToDisplayWaveTextInS > 0) {
-			final Vector2 wavePosition = GameStateManager.calculateCenteredTextPosition(MainGame.font70,
-					pausedByUser ? "PAUSE" : waveText, MainGame.GAME_WIDTH * PIXEL_TO_METER,
-					MainGame.GAME_HEIGHT * PIXEL_TO_METER);
-			MainGame.font70.draw(spriteBatch, pausedByUser ? "PAUSE" : waveText, wavePosition.x, wavePosition.y);
-		}
-		spriteBatch.end();
+			// draw loading screen
+			spriteBatch.draw(backgroundLoading, 0, 0);
 
-		// render health bar
-		shapeRenderer.begin(ShapeType.Filled);
-		drawPlayerHealthBar(shapeRenderer);
-		shapeRenderer.end();
-
-		// render also the following if in developer mode
-		if (MainGame.DEVELOPER_MODE) {
-			spriteBatch.begin();
-
-			MainGame.font.setColor(1, 1, 1, 1);
-			MainGame.font.getData().setScale(PIXEL_TO_METER);
-			MainGame.font.draw(spriteBatch, "FPS: " + Gdx.graphics.getFramesPerSecond(), 30, 35.5f);
-
-			if (debugCollision)
-				renderDebugCollision(spriteBatch);
-			if (debugDistance)
-				renderDebugEntfernung(spriteBatch);
-			if (debugWay)
-				renderDebugWay(spriteBatch);
+			// draw loading text
+			fontLoading.draw(spriteBatch, loadingText, loadingTextPosition.x, loadingTextPosition.y);
 
 			spriteBatch.end();
-
-			if (debugBox2D)
-				debugRender.render(world, camera.combined);
-
-			shapeRenderer.begin(ShapeType.Filled);
-			controllerCallbackPlayState.drawDebugInput(shapeRenderer);
-			shapeRenderer.end();
+			Gdx.app.debug("play_state:render",
+					MainGame.getCurrentTimeStampLogString() + "render loading screen");
 		}
 	}
 

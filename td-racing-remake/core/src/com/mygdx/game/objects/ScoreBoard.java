@@ -171,6 +171,10 @@ public class ScoreBoard {
 		return level;
 	}
 
+	public int getLaps() {
+		return lapNumber;
+	}
+
 	public void addScore(int i) {
 		score += i;
 	}

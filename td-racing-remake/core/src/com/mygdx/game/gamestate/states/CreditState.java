@@ -72,7 +72,7 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
       // Toggle full screen when full screen keys are pressed
       if (controllerToggleFullScreenPressed || Gdx.input.isKeyJustPressed(Keys.F11)) {
         controllerToggleFullScreenPressed = false;
-        GameStateManager.toggleFullScreen();
+        gameStateManager.toggleFullScreen();
       }
     }
 
