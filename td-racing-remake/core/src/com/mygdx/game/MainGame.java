@@ -10,10 +10,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Scaling;
 import com.mygdx.game.file.LevelInfoCsvFile;
+import com.mygdx.game.file.LevelWaveCsvFile;
 import com.mygdx.game.gamestate.GameStateManager;
 import com.mygdx.game.gamestate.states.MenuState;
 import com.mygdx.game.preferences.PreferencesManager;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -231,12 +233,20 @@ public class MainGame implements ApplicationListener {
     gameStateManager = new GameStateManager(assetManager, preferencesManager);
 
     // Test of new level info reader (delete later)
-    HashMap<Integer, LevelInfoCsvFile> levelInfo = LevelInfoCsvFile
-        .readLevelInfoFromCsvFile(Gdx.files.internal("level/levelInfo.csv"));
-    for (HashMap.Entry<Integer, LevelInfoCsvFile> entry : levelInfo.entrySet()) {
-      Gdx.app.debug("testing",
-          MainGame.getCurrentTimeStampLogString() + entry.getKey() + ": " + entry.getValue()
-              .toString());
+    ArrayList<LevelInfoCsvFile> levelInfo = LevelInfoCsvFile
+        .readCsvFile(Gdx.files.internal("level/level_info.csv"));
+    for (LevelInfoCsvFile entry : levelInfo) {
+      Gdx.app.debug("testing", MainGame.getCurrentTimeStampLogString() + entry.toString());
+      ArrayList<LevelWaveCsvFile> waveInfo = LevelWaveCsvFile
+          .readCsvFile(Gdx.files.internal("level/level_0" + entry.levelNumber + "_waves.csv"));
+      Gdx.app.debug("testing", MainGame.getCurrentTimeStampLogString() + "waves:");
+      try {
+        for (LevelWaveCsvFile wave : waveInfo) {
+          Gdx.app.debug("testing", MainGame.getCurrentTimeStampLogString() + wave.toString());
+        }
+      } catch (NullPointerException exception) {
+        exception.printStackTrace();
+      }
     }
 
     // Switch to the menu state

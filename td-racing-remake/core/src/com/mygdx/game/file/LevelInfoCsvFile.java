@@ -2,6 +2,8 @@ package com.mygdx.game.file;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.file.generic.CsvFileHandler;
+import com.mygdx.game.file.generic.CsvFileRecord;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -18,15 +20,15 @@ public class LevelInfoCsvFile {
   public final Vector2 healthBarPosition;
   public final Vector2 pitStopPosition;
 
-  public final HashMap<Integer, Vector2> checkpointPositions;
-  public final HashMap<Integer, Boolean> towerUnlocked;
+  public final ArrayList<Vector2> checkpointPositions;
+  public final ArrayList<Boolean> towerUnlocked;
 
   public LevelInfoCsvFile(int levelNumber, String mapName,
       int moneyPerLap, int timeBonus, Vector2 carStartPosition, Vector2 enemySpawnPosition,
       Vector2 finishLinePosition, Vector2 healthBarPosition,
       Vector2 pitStopPosition,
-      HashMap<Integer, Vector2> checkpointPositions,
-      HashMap<Integer, Boolean> towerUnlocked) {
+      ArrayList<Vector2> checkpointPositions,
+      ArrayList<Boolean> towerUnlocked) {
     this.levelNumber = levelNumber;
     this.mapName = mapName;
     this.moneyPerLap = moneyPerLap;
@@ -40,22 +42,22 @@ public class LevelInfoCsvFile {
     this.towerUnlocked = towerUnlocked;
   }
 
-  public static HashMap<Integer, LevelInfoCsvFile> readLevelInfoFromCsvFile(FileHandle fileHandle) {
+  public static ArrayList<LevelInfoCsvFile> readCsvFile(FileHandle fileHandle) {
     ArrayList<CsvFileRecord> csvFileRecords = CsvFileHandler.readCsvFile(fileHandle);
 
-    HashMap<Integer, LevelInfoCsvFile> levelInfo = new HashMap<>();
+    ArrayList<LevelInfoCsvFile> levelInfo = new ArrayList<>();
     for (CsvFileRecord record : csvFileRecords) {
 
       final int levelNumber = Integer.parseInt(record.get("Level"));
 
       int indexCheckpoint = 1;
-      HashMap<Integer, Vector2> checkpointPositions = new HashMap<>();
+      ArrayList<Vector2> checkpointPositions = new ArrayList<>();
       while (indexCheckpoint != -1) {
         try {
           Vector2 checkpointPosition = new Vector2(
               Float.parseFloat(record.get("Checkpoint " + indexCheckpoint + " position x")),
               Float.parseFloat(record.get("Checkpoint " + indexCheckpoint + " position y")));
-          checkpointPositions.put(indexCheckpoint, checkpointPosition);
+          checkpointPositions.add(checkpointPosition);
           indexCheckpoint++;
         } catch (IllegalArgumentException exception) {
           indexCheckpoint = -1;
@@ -63,19 +65,19 @@ public class LevelInfoCsvFile {
       }
 
       int indexTowerUnlocked = 1;
-      HashMap<Integer, Boolean> towerUnlocked = new HashMap<>();
+      ArrayList<Boolean> towerUnlocked = new ArrayList<>();
       while (indexTowerUnlocked != -1) {
         try {
           boolean singleTowerUnlocked = record.get("Tower " + indexTowerUnlocked + " unlocked")
               .equals("TRUE");
-          towerUnlocked.put(indexTowerUnlocked, singleTowerUnlocked);
+          towerUnlocked.add(singleTowerUnlocked);
           indexTowerUnlocked++;
         } catch (IllegalArgumentException exception) {
           indexTowerUnlocked = -1;
         }
       }
 
-      levelInfo.put(levelNumber, new LevelInfoCsvFile(
+      levelInfo.add(new LevelInfoCsvFile(
           levelNumber,
           record.get("Map name"),
           Integer.parseInt(record.get("Money per lap")),

@@ -14,8 +14,8 @@ import com.mygdx.game.controller.create_highscore_entry.ControllerCallbackCreate
 import com.mygdx.game.controller.create_highscore_entry.IControllerCallbackCreateHighscoreEntryState;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
-import com.mygdx.game.gamestate.states.elements.HighscoreSelectCharacterDisplay;
-import com.mygdx.game.gamestate.states.elements.HighscoreSelectCharacterDisplayInputState;
+import com.mygdx.game.gamestate.elements.HighscoreSelectCharacterDisplay;
+import com.mygdx.game.gamestate.elements.HighscoreSelectCharacterDisplayInputState;
 
 public class CreateHighscoreEntryState extends GameState implements
     IControllerCallbackCreateHighscoreEntryState {

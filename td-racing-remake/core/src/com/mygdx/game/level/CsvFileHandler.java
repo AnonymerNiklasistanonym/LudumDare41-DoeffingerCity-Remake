@@ -13,8 +13,8 @@ public class CsvFileHandler {
 	public static FileHandle[] getAllLevelFiles() {
 		// TODO Load levelInfo.csv and determine by that what levels exist and which to load, this is so wrong
 		// return Gdx.files.internal("./bin/level").list();
-		return new FileHandle[] { Gdx.files.internal("level/level_01.csv"), Gdx.files.internal("level/level_02.csv"),
-				Gdx.files.internal("level/level_03.csv") };
+		return new FileHandle[] { Gdx.files.internal("level/level_01_waves.csv"), Gdx.files.internal("level/level_02_waves.csv"),
+				Gdx.files.internal("level/level_03_waves.csv") };
 	}
 
 	/**

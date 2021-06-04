@@ -1,4 +1,4 @@
-package com.mygdx.game.gamestate.states.elements;
+package com.mygdx.game.gamestate.elements;
 
 public enum HighscoreSelectCharacterDisplayInputState {
   NOT_ACTIVE,

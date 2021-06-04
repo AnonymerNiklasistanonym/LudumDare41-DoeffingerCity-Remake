@@ -1,4 +1,4 @@
-package com.mygdx.game.file;
+package com.mygdx.game.file.generic;
 
 import com.badlogic.gdx.files.FileHandle;
 import java.util.ArrayList;

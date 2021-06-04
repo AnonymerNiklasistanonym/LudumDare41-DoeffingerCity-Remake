@@ -485,9 +485,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		if (mouseCursorWasMoved) {
 			previousMouseCursorPosition.set(newMouseCursorPosition);
 			timeStampMouseCursorPositionWasChanged = new Date().getTime();
-			Gdx.app.debug("test", MainGame.getCurrentTimeStampLogString() + "mouse timestamp was changed");
 		}
-		Gdx.app.debug("test", MainGame.getCurrentTimeStampLogString() + "mouse (" + timeStampMouseCursorPositionWasChanged + ") > controller (" + controllerCallbackPlayState.getTimeStampControllerCursorPositionWasChanged() + "): " + (timeStampMouseCursorPositionWasChanged > controllerCallbackPlayState.getTimeStampControllerCursorPositionWasChanged()));
 		if (timeStampMouseCursorPositionWasChanged > controllerCallbackPlayState.getTimeStampControllerCursorPositionWasChanged()) {
 			cursorPosition.set(newMouseCursorPosition);
 		} else {

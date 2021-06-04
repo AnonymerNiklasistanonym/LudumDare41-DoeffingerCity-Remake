@@ -12,7 +12,7 @@ import com.mygdx.game.controller.generic.one_click.ControllerCallbackGenericOneC
 import com.mygdx.game.controller.generic.one_click.IControllerCallbackGenericOneClick;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
-import com.mygdx.game.gamestate.states.elements.HighscoreEntry;
+import com.mygdx.game.gamestate.elements.HighscoreEntry;
 import com.mygdx.game.preferences.PreferencesManager;
 
 public class HighscoreListState extends GameState implements IControllerCallbackGenericOneClick {
