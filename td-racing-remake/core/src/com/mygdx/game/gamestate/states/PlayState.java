@@ -65,6 +65,11 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	private final static String STATE_NAME = "Play";
 	private final static String TEXT_LOADING = "LOADING";
 
+	private static final String ASSET_ID_TEXT_FONT = MainGame.getGameFontFilePath("cornerstone_70");
+
+	private static final String ASSET_ID_TEXT_LOADING_FONT = MainGame.getGameFontFilePath("cornerstone_upper_case_big");
+	private static final String ASSET_ID_BACKGROUND_LOADING_TEXTURE = MainGame.getGameBackgroundFilePath("loading");
+
 	private final static String ASSET_ID_CAR_TEXTURE = MainGame.getGameCarFilePath("standard");
 	private final static String ASSET_ID_FINISH_LINE_TEXTURE = MainGame.getGameMapFilePath("finish_line");
 	private final static String ASSET_ID_PIT_STOP_TEXTURE = MainGame.getGameMapFilePath("pit_stop");
@@ -205,20 +210,19 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		Gdx.graphics.setForegroundFPS(foregroundFps);
 
 		// Load assets used for rendering the loading screen
-		assetManager.load(MainGame.getGameFontFilePath("cornerstone_70"), BitmapFont.class);
-		assetManager.load(MainGame.getGameFontFilePath("cornerstone_upper_case_big"), BitmapFont.class);
-		assetManager.load(MainGame.getGameBackgroundFilePath("loading"), Texture.class);
-		assetManager.load(MainGame.getGameLogoFilePath("tnt"), Texture.class);
+		assetManager.load(ASSET_ID_TEXT_FONT, BitmapFont.class);
+		assetManager.load(ASSET_ID_TEXT_LOADING_FONT, BitmapFont.class);
+		assetManager.load(ASSET_ID_BACKGROUND_LOADING_TEXTURE, Texture.class);
 		// Finish loading of resources that are necessary for the loading screen
 		assetManager.finishLoading();
 		// Get assets used for rendering the loading screen
-		fontLoading = assetManager.get(MainGame.getGameFontFilePath("cornerstone_upper_case_big"));
+		fontLoading = assetManager.get(ASSET_ID_TEXT_LOADING_FONT);
 		fontLoading.setUseIntegerPositions(false);
 		fontLoading.getData().setScale(fontScaleLoading);
-		backgroundLoading = assetManager.get(MainGame.getGameBackgroundFilePath("loading"));
+		backgroundLoading = assetManager.get(ASSET_ID_BACKGROUND_LOADING_TEXTURE);
 
 		// scale used font correctly
-		fontText = assetManager.get(MainGame.getGameFontFilePath("cornerstone_70"));
+		fontText = assetManager.get(ASSET_ID_TEXT_FONT);
 		fontText.getData().setScale(fontScaleText);
 
 		// set static dependencies
@@ -1255,56 +1259,60 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 			Gdx.app.debug("play_state:dispose", "- " + loadedAsset);
 		}
 
-		assetManager.unload(MainGame.getGameFontFilePath("cornerstone_70"));
-		assetManager.unload(MainGame.getGameCarFilePath("standard"));
-		assetManager.unload(MainGame.getGameMapFilePath("finish_line"));
-		assetManager.unload(MainGame.getGameMapFilePath("pit_stop"));
-		assetManager.unload(MainGame.getGameMapFilePath("smoke"));
+		assetManager.unload(ASSET_ID_TEXT_FONT);
 
-		assetManager.unload(MainGame.getGameButtonFilePath("tower_cannon"));
-		assetManager.unload(MainGame.getGameButtonFilePath("tower_laser"));
-		assetManager.unload(MainGame.getGameButtonFilePath("tower_sniper"));
-		assetManager.unload(MainGame.getGameButtonFilePath("tower_flame"));
+		assetManager.unload(ASSET_ID_TEXT_LOADING_FONT);
+		assetManager.unload(ASSET_ID_BACKGROUND_LOADING_TEXTURE);
 
-		assetManager.unload(MainGame.getGameTowerFilePath("cannon_bottom"));
-		assetManager.unload(MainGame.getGameTowerFilePath("cannon_upper"));
-		assetManager.unload(MainGame.getGameTowerFilePath("cannon_firing"));
-		assetManager.unload(MainGame.getGameTowerFilePath("sniper_bottom"));
-		assetManager.unload(MainGame.getGameTowerFilePath("sniper_upper"));
-		assetManager.unload(MainGame.getGameTowerFilePath("sniper_firing"));
-		assetManager.unload(MainGame.getGameTowerFilePath("laser_bottom"));
-		assetManager.unload(MainGame.getGameTowerFilePath("laser_upper"));
-		assetManager.unload(MainGame.getGameTowerFilePath("laser_firing"));
-		assetManager.unload(MainGame.getGameTowerFilePath("flame_bottom"));
-		assetManager.unload(MainGame.getGameTowerFilePath("flame_upper"));
-		assetManager.unload(MainGame.getGameTowerFilePath("flame_firing"));
-		assetManager.unload(MainGame.getGameTowerFilePath("flame_fire"));
+		assetManager.unload(ASSET_ID_CAR_TEXTURE);
+		assetManager.unload(ASSET_ID_FINISH_LINE_TEXTURE);
+		assetManager.unload(ASSET_ID_PIT_STOP_TEXTURE);
+		assetManager.unload(ASSET_ID_SMOKE_TEXTURE);
 
-		assetManager.unload(MainGame.getGameZombieFilePath("blood"));
-		assetManager.unload(MainGame.getGameZombieFilePath("blood_green"));
-		assetManager.unload(MainGame.getGameZombieFilePath("standard"));
-		assetManager.unload(MainGame.getGameZombieFilePath("standard_dead"));
-		assetManager.unload(MainGame.getGameZombieFilePath("fat"));
-		assetManager.unload(MainGame.getGameZombieFilePath("fat_dead"));
-		assetManager.unload(MainGame.getGameZombieFilePath("bicycle"));
-		assetManager.unload(MainGame.getGameZombieFilePath("bicycle_dead"));
-		assetManager.unload(MainGame.getGameZombieFilePath("spider"));
-		assetManager.unload(MainGame.getGameZombieFilePath("spider_dead"));
-		assetManager.unload(MainGame.getGameZombieFilePath("lincoln"));
-		assetManager.unload(MainGame.getGameZombieFilePath("lincoln_dead"));
+		assetManager.unload(ASSET_ID_TOWER_CANNON_TEXTURE);
+		assetManager.unload(ASSET_ID_TOWER_LASER_TEXTURE);
+		assetManager.unload(ASSET_ID_TOWER_SNIPER_TEXTURE);
+		assetManager.unload(ASSET_ID_TOWER_FLAME_TEXTURE);
+		assetManager.unload(ASSET_ID_TOWER_CANNON_BOTTOM_TEXTURE);
+		assetManager.unload(ASSET_ID_TOWER_CANNON_UPPER_TEXTURE);
+		assetManager.unload(ASSET_ID_TOWER_CANNON_FIRING_TEXTURE);
+		assetManager.unload(ASSET_ID_TOWER_SNIPER_BOTTOM_TEXTURE);
+		assetManager.unload(ASSET_ID_TOWER_SNIPER_UPPER_TEXTURE);
+		assetManager.unload(ASSET_ID_TOWER_SNIPER_FIRING_TEXTURE);
+		assetManager.unload(ASSET_ID_TOWER_LASER_BOTTOM_TEXTURE);
+		assetManager.unload(ASSET_ID_TOWER_LASER_UPPER_TEXTURE);
+		assetManager.unload(ASSET_ID_TOWER_LASER_FIRING_TEXTURE);
+		assetManager.unload(ASSET_ID_TOWER_FLAME_BOTTOM_TEXTURE);
+		assetManager.unload(ASSET_ID_TOWER_FLAME_UPPER_TEXTURE);
+		assetManager.unload(ASSET_ID_TOWER_FLAME_FIRING_TEXTURE);
+		assetManager.unload(ASSET_ID_TOWER_FLAME_FIRE_TEXTURE);
 
-		assetManager.unload(MainGame.getGameSoundFilePath("tower_cannon"));
-		assetManager.unload(MainGame.getGameSoundFilePath("tower_sniper"));
-		assetManager.unload(MainGame.getGameSoundFilePath("tower_laser", true));
-		assetManager.unload(MainGame.getGameSoundFilePath("tower_flame"));
+		assetManager.unload(ASSET_ID_ENEMY_SMALL_NORMAL_TEXTURE);
+		assetManager.unload(ASSET_ID_ENEMY_SMALL_DEAD_TEXTURE);
+		assetManager.unload(ASSET_ID_ENEMY_FAT_NORMAL_TEXTURE);
+		assetManager.unload(ASSET_ID_ENEMY_FAT_DEAD_TEXTURE);
+		assetManager.unload(ASSET_ID_ENEMY_SPIDER_NORMAL_TEXTURE);
+		assetManager.unload(ASSET_ID_ENEMY_SPIDER_DEAD_TEXTURE);
+		assetManager.unload(ASSET_ID_ENEMY_BICYCLE_NORMAL_TEXTURE);
+		assetManager.unload(ASSET_ID_ENEMY_BICYCLE_DEAD_TEXTURE);
+		assetManager.unload(ASSET_ID_ENEMY_LINCOLN_NORMAL_TEXTURE);
+		assetManager.unload(ASSET_ID_ENEMY_LINCOLN_DEAD_TEXTURE);
+		assetManager.unload(ASSET_ID_ENEMY_BLOOD_TEXTURE);
+		assetManager.unload(ASSET_ID_ENEMY_BLOOD_GREEN_TEXTURE);
 
-		assetManager.unload(MainGame.getGameMusicFilePath("theme"));
-		assetManager.unload(MainGame.getGameSoundFilePath("car_engine", true));
-		assetManager.unload(MainGame.getGameSoundFilePath("car_engine_start", true));
-		assetManager.unload(MainGame.getGameSoundFilePath("splatt"));
-		assetManager.unload(MainGame.getGameSoundFilePath("cash"));
-		assetManager.unload(MainGame.getGameSoundFilePath("victory"));
-		assetManager.unload(MainGame.getGameSoundFilePath("trailer_damage"));
+		assetManager.unload(ASSET_ID_TOWER_CANNON_SOUND);
+		assetManager.unload(ASSET_ID_TOWER_SNIPER_SOUND);
+		assetManager.unload(ASSET_ID_TOWER_LASER_SOUND);
+		assetManager.unload(ASSET_ID_TOWER_FLAME_SOUND);
+
+		assetManager.unload(ASSET_ID_THEME_MUSIC);
+		assetManager.unload(ASSET_ID_CAR_ENGINE_MUSIC);
+
+		assetManager.unload(ASSET_ID_CAR_ENGINE_START_SOUND);
+		assetManager.unload(ASSET_ID_SPLATT_SOUND);
+		assetManager.unload(ASSET_ID_CASH_SOUND);
+		assetManager.unload(ASSET_ID_VICTORY_SOUND);
+		assetManager.unload(ASSET_ID_TRAILER_DAMAGE_SOUND);
 
 		Gdx.app.debug("play_state:dispose", "Loaded assets after unloading are:");
 		for (final String loadedAsset : assetManager.getAssetNames()) {
@@ -1440,7 +1448,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		// If the user got a top 5 score go to the high score create entry state otherwise go to the game over state
 		if (preferencesManager.scoreIsInTop5(scoreBoard.getScore()))
 			gameStateManager.setGameState(
-					new CreateHighscoreEntryState(gameStateManager, scoreBoard.getScore(), scoreBoard.getLevel(), false));
+					new CreateHighscoreEntryState(gameStateManager, scoreBoard.getScore(), scoreBoard.getLevel(), scoreBoard.getLaps(), false));
 		else {
 			gameStateManager.setGameState(new GameOverState(gameStateManager, scoreBoard.getLevel()));
 		}

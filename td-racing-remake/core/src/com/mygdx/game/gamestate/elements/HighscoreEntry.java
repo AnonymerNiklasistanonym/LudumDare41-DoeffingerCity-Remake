@@ -23,7 +23,8 @@ public class HighscoreEntry implements Disposable {
   private final float fontXNumber, fontYNumber, fontXName, fontYName, fontXScore, fontYScore, fontXLevel, fontYLevel, fontXLaps, fontYLaps;
   private final String textPlace, textName, textScore, textLevel, textLaps;
 
-  public HighscoreEntry(final int place, final int score, final int level, final int laps, final String name,
+  public HighscoreEntry(final int place, final int score, final int level, final int laps,
+      final String name,
       final AssetManager assetManager,
       final float xPosition, final float yPosition) {
     this.place = place;
@@ -49,7 +50,7 @@ public class HighscoreEntry implements Disposable {
     fontYScore = yPositionText;
     fontXLevel = fontXScore + (float) MainGame.GAME_WIDTH / 3.75f;
     fontYLevel = yPositionText;
-    fontXLaps = fontXScore + (float) MainGame.GAME_WIDTH / 3.75f;
+    fontXLaps = fontXLevel;
     fontYLaps = yPositionText - 30;
 
     textPlace = "" + place + ".";

@@ -1,5 +1,6 @@
 package com.mygdx.game.gamestate.states;
 
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.controllers.ControllerListener;
@@ -22,7 +23,8 @@ public class CreateHighscoreEntryState extends GameState implements
 
   private static final String STATE_NAME = "CreateHighscoreEntry";
   private static final String highscoreText = "YOU REACHED THE TOP 5!";
-  private static final String ASSET_ID_YOU_REACHED_TOP_5_FONT = MainGame.getGameFontFilePath("cornerstone_upper_case_big");
+  private static final String ASSET_ID_YOU_REACHED_TOP_5_FONT = MainGame
+      .getGameFontFilePath("cornerstone_upper_case_big");
   /**
    * Variable for the font scale of the credits text
    */
@@ -71,14 +73,26 @@ public class CreateHighscoreEntryState extends GameState implements
     Controllers.addListener(controllerCallbackCreateHighscoreEntryState);
   }
 
-  public CreateHighscoreEntryState(GameStateManager gameStateManager, final int score, final int laps,
-      final boolean goToCreditStage) {
-    this(gameStateManager, score, 0, laps, goToCreditStage);
-  }
-
   @Override
   protected void handleInput() {
-    gameStateManager.toggleFullScreen();
+    if (Gdx.app.getType() == ApplicationType.Desktop) {
+      // Toggle full screen when full screen keys are pressed (desktop only)
+      if (controllerToggleFullScreenPressed || Gdx.input.isKeyJustPressed(Keys.F11)) {
+        controllerToggleFullScreenPressed = false;
+        gameStateManager.toggleFullScreen();
+      }
+    }
+
+    // Turn music on/off
+    if (controllerToggleMusicPressed || Gdx.input.isKeyJustPressed(Keys.M)) {
+      controllerToggleMusicPressed = false;
+      preferencesManager.setMusicOn(!preferencesManager.getMusicOn());
+    }
+    // Turn sound effects on/off
+    if (controllerToggleSoundEffectsPressed || Gdx.input.isKeyJustPressed(Keys.U)) {
+      controllerToggleSoundEffectsPressed = false;
+      preferencesManager.setSoundEffectsOn(!preferencesManager.getSoundEffectsOn());
+    }
 
     if (Gdx.input.isKeyJustPressed(Keys.LEFT) || Gdx.input.isKeyJustPressed(Keys.A)
         || controllerLeftKeyWasPressed) {

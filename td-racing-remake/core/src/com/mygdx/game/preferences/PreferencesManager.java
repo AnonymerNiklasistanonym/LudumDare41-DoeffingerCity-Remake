@@ -82,10 +82,10 @@ public class PreferencesManager {
     final HighscoreEntry[] entries = retrieveHighscore();
     for (int i = 0; i < entries.length; i++) {
       if (entries[i].getName() == null || entries[i].getName().equals("")) {
-        prefs.putString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + i, "NOBODY");
-      }
-      if (entries[i].getScore() < 0) {
+        prefs.putString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + i, "------");
         prefs.putInteger(PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i, 0);
+        prefs.putInteger(PREFERENCE_HIGHSCORE_LEVEL_VALUE_BASE + i, 0);
+        prefs.putInteger(PREFERENCE_HIGHSCORE_LAPS_VALUE_BASE + i, 0);
       }
     }
     prefs.flush();
@@ -96,8 +96,10 @@ public class PreferencesManager {
    */
   public void resetHighscore() {
     for (int i = 0; i < NUMBER_HIGHSCORE_ENTRIES; i++) {
-      prefs.putString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + i, "------").putInteger(
-          PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i, 0);
+      prefs.putString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + i, "------")
+          .putInteger(PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i, 0)
+          .putInteger(PREFERENCE_HIGHSCORE_LEVEL_VALUE_BASE + i, 0)
+          .putInteger(PREFERENCE_HIGHSCORE_LAPS_VALUE_BASE + i, 0);
     }
     prefs.flush();
   }
@@ -112,6 +114,13 @@ public class PreferencesManager {
   public HighscoreEntry[] retrieveHighscore() {
     final HighscoreEntry[] entries = new HighscoreEntry[NUMBER_HIGHSCORE_ENTRIES];
     for (int i = 0; i < entries.length; i++) {
+      Gdx.app.debug("preferences_manager:retrieveHighscore",
+          MainGame.getCurrentTimeStampLogString() + "-> Retrieve score (" + prefs
+              .getInteger(PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i) + ") from \"" + prefs
+              .getString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + i) + "\" [level=" + prefs
+              .getInteger(PREFERENCE_HIGHSCORE_LEVEL_VALUE_BASE + i) + ",laps=" + prefs
+              .getInteger(PREFERENCE_HIGHSCORE_LAPS_VALUE_BASE + i) + "]");
+
       entries[i] = new HighscoreEntry(
           prefs.getInteger(PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i),
           prefs.getInteger(PREFERENCE_HIGHSCORE_LEVEL_VALUE_BASE + i),
@@ -120,10 +129,6 @@ public class PreferencesManager {
       );
     }
     return entries;
-  }
-
-  public void setSoundEffectsOn(final boolean soundEffectsOn) {
-    prefs.putBoolean(PREFERENCE_SOUND_EFFECTS_ON_BOOL, soundEffectsOn).flush();
   }
 
   public boolean getMusicOn() {
@@ -138,9 +143,14 @@ public class PreferencesManager {
     return prefs.getBoolean(PREFERENCE_SOUND_EFFECTS_ON_BOOL, true);
   }
 
+  public void setSoundEffectsOn(final boolean soundEffectsOn) {
+    prefs.putBoolean(PREFERENCE_SOUND_EFFECTS_ON_BOOL, soundEffectsOn).flush();
+  }
+
   public void saveHighscore(String name, int score, int level, int laps) {
     Gdx.app.debug("preferences_manager:saveHighscore",
-        MainGame.getCurrentTimeStampLogString() + "save score (" + score + ") from \"" + name + "\" [level=" + level + ",laps=" + laps + "]");
+        MainGame.getCurrentTimeStampLogString() + "save score (" + score + ") from \"" + name
+            + "\" [level=" + level + ",laps=" + laps + "]");
     setHighscoreName(name);
     final HighscoreEntry[] entries = retrieveHighscore();
     for (int i = 0; i < entries.length; i++) {
@@ -152,8 +162,8 @@ public class PreferencesManager {
         for (int j = i + 1; j < entries.length; j++) {
           prefs.putString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + j, entries[j - 1].getName());
           prefs.putInteger(PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + j, entries[j - 1].getScore());
-          prefs.putInteger(PREFERENCE_HIGHSCORE_LEVEL_VALUE_BASE + i, entries[j - 1].getLevel());
-          prefs.putInteger(PREFERENCE_HIGHSCORE_LAPS_VALUE_BASE + i, entries[j - 1].getLaps());
+          prefs.putInteger(PREFERENCE_HIGHSCORE_LEVEL_VALUE_BASE + j, entries[j - 1].getLevel());
+          prefs.putInteger(PREFERENCE_HIGHSCORE_LAPS_VALUE_BASE + j, entries[j - 1].getLaps());
         }
         prefs.flush();
         return;
