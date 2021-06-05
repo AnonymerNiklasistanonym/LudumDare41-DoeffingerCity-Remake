@@ -93,19 +93,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	private static final String ASSET_ID_TOWER_FLAME_FIRING_TEXTURE = MainGame.getGameTowerFilePath("flame_firing");
 	private static final String ASSET_ID_TOWER_FLAME_FIRE_TEXTURE = MainGame.getGameTowerFilePath("flame_fire");
 
-	private static final String ASSET_ID_ENEMY_SMALL_NORMAL_TEXTURE = MainGame.getGameZombieFilePath("standard");
-	private static final String ASSET_ID_ENEMY_SMALL_DEAD_TEXTURE = MainGame.getGameZombieFilePath("standard_dead");
-	private static final String ASSET_ID_ENEMY_FAT_NORMAL_TEXTURE = MainGame.getGameZombieFilePath("fat");
-	private static final String ASSET_ID_ENEMY_FAT_DEAD_TEXTURE = MainGame.getGameZombieFilePath("fat_dead");
-	private static final String ASSET_ID_ENEMY_SPIDER_NORMAL_TEXTURE = MainGame.getGameZombieFilePath("spider");
-	private static final String ASSET_ID_ENEMY_SPIDER_DEAD_TEXTURE = MainGame.getGameZombieFilePath("spider_dead");
-	private static final String ASSET_ID_ENEMY_BICYCLE_NORMAL_TEXTURE = MainGame.getGameZombieFilePath("bicycle");
-	private static final String ASSET_ID_ENEMY_BICYCLE_DEAD_TEXTURE = MainGame.getGameZombieFilePath("bicycle_dead");
-	private static final String ASSET_ID_ENEMY_LINCOLN_NORMAL_TEXTURE = MainGame.getGameZombieFilePath("lincoln");
-	private static final String ASSET_ID_ENEMY_LINCOLN_DEAD_TEXTURE = MainGame.getGameZombieFilePath("lincoln_dead");
-	private static final String ASSET_ID_ENEMY_BLOOD_TEXTURE = MainGame.getGameZombieFilePath("blood");
-	private static final String ASSET_ID_ENEMY_BLOOD_GREEN_TEXTURE = MainGame.getGameZombieFilePath("blood_green");
-
 	private static final String ASSET_ID_TOWER_CANNON_SOUND = MainGame.getGameSoundFilePath("tower_cannon");
 	private static final String ASSET_ID_TOWER_SNIPER_SOUND = MainGame.getGameSoundFilePath("tower_sniper");
 	private static final String ASSET_ID_TOWER_LASER_SOUND = MainGame.getGameSoundFilePath("tower_laser", true);
@@ -254,18 +241,21 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		assetManager.load(ASSET_ID_TOWER_FLAME_FIRE_TEXTURE, Texture.class);
 
 		// set textures (enemies)
-		assetManager.load(ASSET_ID_ENEMY_SMALL_NORMAL_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_ENEMY_SMALL_DEAD_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_ENEMY_FAT_NORMAL_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_ENEMY_FAT_DEAD_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_ENEMY_SPIDER_NORMAL_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_ENEMY_SPIDER_DEAD_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_ENEMY_BICYCLE_NORMAL_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_ENEMY_BICYCLE_DEAD_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_ENEMY_LINCOLN_NORMAL_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_ENEMY_LINCOLN_DEAD_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_ENEMY_BLOOD_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_ENEMY_BLOOD_GREEN_TEXTURE, Texture.class);
+		assetManager.load(EnemyBicycle.ASSET_ID_TEXTURE_ALIVE, Texture.class);
+		assetManager.load(EnemyBicycle.ASSET_ID_TEXTURE_DAMAGE, Texture.class);
+		assetManager.load(EnemyBicycle.ASSET_ID_TEXTURE_DEAD, Texture.class);
+		assetManager.load(EnemyFat.ASSET_ID_TEXTURE_ALIVE, Texture.class);
+		assetManager.load(EnemyFat.ASSET_ID_TEXTURE_DAMAGE, Texture.class);
+		assetManager.load(EnemyFat.ASSET_ID_TEXTURE_DEAD, Texture.class);
+		assetManager.load(EnemySmall.ASSET_ID_TEXTURE_ALIVE, Texture.class);
+		assetManager.load(EnemySmall.ASSET_ID_TEXTURE_DAMAGE, Texture.class);
+		assetManager.load(EnemySmall.ASSET_ID_TEXTURE_DEAD, Texture.class);
+		assetManager.load(EnemySpider.ASSET_ID_TEXTURE_ALIVE, Texture.class);
+		assetManager.load(EnemySpider.ASSET_ID_TEXTURE_DAMAGE, Texture.class);
+		assetManager.load(EnemySpider.ASSET_ID_TEXTURE_DEAD, Texture.class);
+		assetManager.load(EnemyLincoln.ASSET_ID_TEXTURE_ALIVE, Texture.class);
+		assetManager.load(EnemyLincoln.ASSET_ID_TEXTURE_DAMAGE, Texture.class);
+		assetManager.load(EnemyLincoln.ASSET_ID_TEXTURE_DEAD, Texture.class);
 
 		// set audio files (towers)
 		assetManager.load(ASSET_ID_TOWER_CANNON_SOUND, Sound.class);
@@ -594,27 +584,27 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 		// manually instantiate enemies
 		if (Gdx.input.isKeyJustPressed(Keys.F)) {
-			final Enemy enemy = new EnemySmall(map.getSpawnPosition(), world, map, 0);
+			final Enemy enemy = new EnemySmall(map.getSpawnPosition(), world, assetManager, map, 0);
 			enemy.activateEnemy();
 			enemies.add(enemy);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.G)) {
-			final Enemy enemy = new EnemyFat(map.getSpawnPosition(), world, map, 0);
+			final Enemy enemy = new EnemyFat(map.getSpawnPosition(), world, assetManager, map, 0);
 			enemy.activateEnemy();
 			enemies.add(enemy);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.H)) {
-			final Enemy enemy = new EnemyBicycle(map.getSpawnPosition(), world, map, 0);
+			final Enemy enemy = new EnemyBicycle(map.getSpawnPosition(), world, assetManager, map, 0);
 			enemy.activateEnemy();
 			enemies.add(enemy);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.J)) {
-			final Enemy enemy = new EnemyLincoln(map.getSpawnPosition(), world, map, 0);
+			final Enemy enemy = new EnemyLincoln(map.getSpawnPosition(), world, assetManager, map, 0);
 			enemy.activateEnemy();
 			enemies.add(enemy);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.K)) {
-			final Enemy enemy = new EnemySpider(map.getSpawnPosition(), world, map, 0);
+			final Enemy enemy = new EnemySpider(map.getSpawnPosition(), world, assetManager, map, 0);
 			enemy.activateEnemy();
 			enemies.add(enemy);
 		}
@@ -849,23 +839,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 				FireTower.upperTower = assetManager.get(ASSET_ID_TOWER_FLAME_UPPER_TEXTURE);
 				FireTower.towerFiring = assetManager.get(ASSET_ID_TOWER_FLAME_FIRING_TEXTURE);
 				FireTower.tflame = assetManager.get(ASSET_ID_TOWER_FLAME_FIRE_TEXTURE);
-
-				// set textures (enemies)
-				EnemySmall.normalTexture = assetManager.get(ASSET_ID_ENEMY_SMALL_NORMAL_TEXTURE);
-				EnemySmall.deadTexture = assetManager.get(ASSET_ID_ENEMY_SMALL_DEAD_TEXTURE);
-				EnemySmall.damageTexture = assetManager.get(ASSET_ID_ENEMY_BLOOD_TEXTURE);
-				EnemyFat.normalTexture = assetManager.get(ASSET_ID_ENEMY_FAT_NORMAL_TEXTURE);
-				EnemyFat.deadTexture = assetManager.get(ASSET_ID_ENEMY_FAT_DEAD_TEXTURE);
-				EnemyFat.damageTexture = assetManager.get(ASSET_ID_ENEMY_BLOOD_TEXTURE);
-				EnemySpider.normalTexture = assetManager.get(ASSET_ID_ENEMY_SPIDER_NORMAL_TEXTURE);
-				EnemySpider.deadTexture = assetManager.get(ASSET_ID_ENEMY_SPIDER_DEAD_TEXTURE);
-				EnemySpider.damageTexture = assetManager.get(ASSET_ID_ENEMY_BLOOD_GREEN_TEXTURE);
-				EnemyBicycle.normalTexture = assetManager.get(ASSET_ID_ENEMY_BICYCLE_NORMAL_TEXTURE);
-				EnemyBicycle.deadTexture = assetManager.get(ASSET_ID_ENEMY_BICYCLE_DEAD_TEXTURE);
-				EnemyBicycle.damageTexture = assetManager.get(ASSET_ID_ENEMY_BLOOD_TEXTURE);
-				EnemyLincoln.normalTexture = assetManager.get(ASSET_ID_ENEMY_LINCOLN_NORMAL_TEXTURE);
-				EnemyLincoln.deadTexture = assetManager.get(ASSET_ID_ENEMY_LINCOLN_DEAD_TEXTURE);
-				EnemyLincoln.damageTexture = assetManager.get(ASSET_ID_ENEMY_BLOOD_TEXTURE);
 
 				// set audio files (towers)
 				MgTower.soundShoot = assetManager.get(ASSET_ID_TOWER_CANNON_SOUND);
@@ -1249,18 +1222,21 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 				ASSET_ID_TOWER_FLAME_UPPER_TEXTURE,
 				ASSET_ID_TOWER_FLAME_FIRING_TEXTURE,
 				ASSET_ID_TOWER_FLAME_FIRE_TEXTURE,
-				ASSET_ID_ENEMY_SMALL_NORMAL_TEXTURE,
-				ASSET_ID_ENEMY_SMALL_DEAD_TEXTURE,
-				ASSET_ID_ENEMY_FAT_NORMAL_TEXTURE,
-				ASSET_ID_ENEMY_FAT_DEAD_TEXTURE,
-				ASSET_ID_ENEMY_SPIDER_NORMAL_TEXTURE,
-				ASSET_ID_ENEMY_SPIDER_DEAD_TEXTURE,
-				ASSET_ID_ENEMY_BICYCLE_NORMAL_TEXTURE,
-				ASSET_ID_ENEMY_BICYCLE_DEAD_TEXTURE,
-				ASSET_ID_ENEMY_LINCOLN_NORMAL_TEXTURE,
-				ASSET_ID_ENEMY_LINCOLN_DEAD_TEXTURE,
-				ASSET_ID_ENEMY_BLOOD_TEXTURE,
-				ASSET_ID_ENEMY_BLOOD_GREEN_TEXTURE,
+				EnemyBicycle.ASSET_ID_TEXTURE_ALIVE,
+				EnemyBicycle.ASSET_ID_TEXTURE_DAMAGE,
+				EnemyBicycle.ASSET_ID_TEXTURE_DEAD,
+				EnemyFat.ASSET_ID_TEXTURE_ALIVE,
+				EnemyFat.ASSET_ID_TEXTURE_DAMAGE,
+				EnemyFat.ASSET_ID_TEXTURE_DEAD,
+				EnemySmall.ASSET_ID_TEXTURE_ALIVE,
+				EnemySmall.ASSET_ID_TEXTURE_DAMAGE,
+				EnemySmall.ASSET_ID_TEXTURE_DEAD,
+				EnemySpider.ASSET_ID_TEXTURE_ALIVE,
+				EnemySpider.ASSET_ID_TEXTURE_DAMAGE,
+				EnemySpider.ASSET_ID_TEXTURE_DEAD,
+				EnemyLincoln.ASSET_ID_TEXTURE_ALIVE,
+				EnemyLincoln.ASSET_ID_TEXTURE_DAMAGE,
+				EnemyLincoln.ASSET_ID_TEXTURE_DEAD,
 				ASSET_ID_TOWER_CANNON_SOUND,
 				ASSET_ID_TOWER_SNIPER_SOUND,
 				ASSET_ID_TOWER_LASER_SOUND,
@@ -1352,7 +1328,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 				else
 					setWaveText("FINAL WAVE");
 				// create and add all enemies of the current wave to all enemies
-				enemies.addAll(currentLevelWaves.get(currentWave).createEnemies(map.getSpawnPosition(), world, map,
+				enemies.addAll(currentLevelWaves.get(currentWave).createEnemies(map.getSpawnPosition(), world, assetManager, map,
 						scoreBoard.getTime()));
 			}
 		}

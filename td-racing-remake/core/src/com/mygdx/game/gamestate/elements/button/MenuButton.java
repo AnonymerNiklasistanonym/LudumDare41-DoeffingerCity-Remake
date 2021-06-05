@@ -1,4 +1,4 @@
-package com.mygdx.game.gamestate.elements;
+package com.mygdx.game.gamestate.elements.button;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;

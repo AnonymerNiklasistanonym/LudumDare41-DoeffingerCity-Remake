@@ -1,5 +1,6 @@
 package com.mygdx.game.objects;
 
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -31,7 +32,7 @@ public abstract class Enemy implements Disposable {
 
 	private final Sprite sprite;
 	private final Sprite spriteDamage;
-	private final Texture textureDead;
+	protected final Texture textureDead, textureAlive, textureDamage;
 	private final float time;
 
 	protected float maxHealth, health, money, score, speed, damage, timeAlive, distanceToTarget, timeSinceLastNode;
@@ -47,11 +48,13 @@ public abstract class Enemy implements Disposable {
 	protected boolean activated, bodyDeleted, healthBar, tot, deleteBody, delete, leftSpawn;
 	protected final String name;
 
-	public Enemy(final String name, final Vector2 position, final World world, final Texture alive, final Texture deadsprite,
-			final Texture damagesprite, final Map map, final float time) {
+	public Enemy(final String name, final Vector2 position, final World world,
+			final AssetManager assetManager, final String textureSpriteAlive,
+			final String textureSpriteDead, final String textureSpriteDamage, final Map map,
+			final float time) {
 		this.name = name;
 		timeAlive = 0f;
-		textureDead = deadsprite;
+		textureDead = assetManager.get(textureSpriteDead);
 		deleteBody = false;
 		delete = false;
 		tot = false;
@@ -59,11 +62,13 @@ public abstract class Enemy implements Disposable {
 		hitRandom = new Vector2();
 		distanceToTarget = 0f;
 		timeSinceLastNode = 0f;
-		sprite = new Sprite(alive);
+		textureAlive = assetManager.get(textureSpriteAlive);
+		sprite = new Sprite(textureAlive);
 		sprite.setSize(sprite.getWidth() * PlayState.PIXEL_TO_METER, sprite.getHeight() * PlayState.PIXEL_TO_METER);
 		sprite.setOriginCenter();
 
-		spriteDamage = new Sprite(damagesprite);
+		textureDamage = assetManager.get(textureSpriteDamage);
+		spriteDamage = new Sprite(textureDamage);
 		spriteDamage.setSize(spriteDamage.getWidth() * PlayState.PIXEL_TO_METER,
 				spriteDamage.getHeight() * PlayState.PIXEL_TO_METER);
 		spriteDamage.setOriginCenter();

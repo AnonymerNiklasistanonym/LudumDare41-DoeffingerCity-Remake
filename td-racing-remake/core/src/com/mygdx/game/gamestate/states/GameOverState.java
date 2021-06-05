@@ -15,8 +15,8 @@ import com.mygdx.game.controller.generic.menu_button_grid.IControllerCallbackGen
 import com.mygdx.game.controller.generic.menu_button_grid.NextMenuButtonDirection;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
-import com.mygdx.game.gamestate.elements.MenuButton;
-import com.mygdx.game.gamestate.elements.MenuButtonSmall;
+import com.mygdx.game.gamestate.elements.button.MenuButton;
+import com.mygdx.game.gamestate.elements.button.MenuButtonSmall;
 import com.mygdx.game.helper.menu.HelperMenu;
 import com.mygdx.game.helper.menu.HelperMenuButtonNavigation;
 

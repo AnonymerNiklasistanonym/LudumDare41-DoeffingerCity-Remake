@@ -1,10 +1,12 @@
 package com.mygdx.game.objects.enemies;
 
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.mygdx.game.MainGame;
 import com.mygdx.game.gamestate.states.PlayState;
 import com.mygdx.game.objects.Enemy;
 import com.mygdx.game.objects.Map;
@@ -19,12 +21,13 @@ public class EnemyBicycle extends Enemy {
 	private static final boolean HEALTH_BAR = true;
 	private static final float DENSITY = 5f;
 
-	public static Texture damageTexture;
-	public static Texture deadTexture;
-	public static Texture normalTexture;
+	private static final String ENEMY_NAME = "Bicycle";
+	public static final String ASSET_ID_TEXTURE_ALIVE = MainGame.getGameZombieFilePath("bicycle");
+	public static final String ASSET_ID_TEXTURE_DEAD = MainGame.getGameZombieFilePath("bicycle_dead");
+	public static final String ASSET_ID_TEXTURE_DAMAGE = MainGame.getGameZombieFilePath("blood");
 
-	public EnemyBicycle(final Vector2 position, final World world, final Map map, final float time) {
-		super("Bicycle", position, world, normalTexture, deadTexture, damageTexture, map, time);
+	public EnemyBicycle(final Vector2 position, final World world, final AssetManager assetManager, final Map map, final float time) {
+		super(ENEMY_NAME, position, world, assetManager, ASSET_ID_TEXTURE_ALIVE, ASSET_ID_TEXTURE_DEAD, ASSET_ID_TEXTURE_DAMAGE, map, time);
 		damage = DAMAGE;
 		health = HEALTH;
 		maxHealth = HEALTH;
@@ -37,8 +40,8 @@ public class EnemyBicycle extends Enemy {
 	@Override
 	protected FixtureDef createFixture() {
 		final PolygonShape zBox = new PolygonShape();
-		zBox.setAsBox(normalTexture.getWidth() * PlayState.PIXEL_TO_METER * 0.4f,
-				normalTexture.getHeight() * PlayState.PIXEL_TO_METER * 0.4f);
+		zBox.setAsBox(textureAlive.getWidth() * PlayState.PIXEL_TO_METER * 0.4f,
+				textureAlive.getHeight() * PlayState.PIXEL_TO_METER * 0.4f);
 		final FixtureDef fdef = new FixtureDef();
 		fdef.shape = zBox;
 		fdef.density = DENSITY;

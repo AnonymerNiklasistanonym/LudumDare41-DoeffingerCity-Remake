@@ -1,5 +1,6 @@
 package com.mygdx.game.level;
 
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
@@ -29,8 +30,8 @@ public class Wave {
 			zombieWaves.get(j).check(j);
 	}
 
-	public Array<Enemy> createEnemies(final Vector2 entryPosition, final World world, final Map map,
-			final float currentTime) {
+	public Array<Enemy> createEnemies(final Vector2 entryPosition, final World world,
+			final AssetManager assetManager, final Map map, final float currentTime) {
 
 		final Array<Enemy> allEnemies = new Array<Enemy>();
 
@@ -39,30 +40,30 @@ public class Wave {
 
 			for (int j = 0; j < zombieWaves.get(wave).getSpiderZombieNumber(); j++) {
 				allEnemies.add(
-						new EnemySpider(entryPosition, world, map, currentTime + zombieWaves.get(wave).getEntryTime()
+						new EnemySpider(entryPosition, world, assetManager, map, currentTime + zombieWaves.get(wave).getEntryTime()
 								+ counter++ * zombieWaves.get(wave).getSpiderTimeDelta()));
 			}
 
 			for (int j = 0; j < zombieWaves.get(wave).getBycicleZombieNumber(); j++) {
 				allEnemies.add(
-						new EnemyBicycle(entryPosition, world, map, currentTime + zombieWaves.get(wave).getEntryTime()
+						new EnemyBicycle(entryPosition, world, assetManager, map, currentTime + zombieWaves.get(wave).getEntryTime()
 								+ counter++ * zombieWaves.get(wave).getBycicleTimeDelta()));
 			}
 
 			for (int j = 0; j < zombieWaves.get(wave).getFatZombieNumber(); j++) {
-				allEnemies.add(new EnemyFat(entryPosition, world, map, currentTime
+				allEnemies.add(new EnemyFat(entryPosition, world, assetManager, map, currentTime
 						+ zombieWaves.get(wave).getEntryTime() + counter++ * zombieWaves.get(wave).getFatTimeDelta()));
 			}
 
 			for (int j = 0; j < zombieWaves.get(wave).getSmallZombieNumber(); j++) {
 				allEnemies.add(
-						new EnemySmall(entryPosition, world, map, currentTime + zombieWaves.get(wave).getEntryTime()
+						new EnemySmall(entryPosition, world, assetManager, map, currentTime + zombieWaves.get(wave).getEntryTime()
 								+ counter++ * zombieWaves.get(wave).getSmallTimeDelta()));
 			}
 
 			for (int j = 0; j < zombieWaves.get(wave).getLincolnZombieNumber(); j++) {
 				allEnemies.add(
-						new EnemyLincoln(entryPosition, world, map, currentTime + zombieWaves.get(wave).getEntryTime()
+						new EnemyLincoln(entryPosition, world, assetManager, map, currentTime + zombieWaves.get(wave).getEntryTime()
 								+ counter++ * zombieWaves.get(wave).getLincolnTimeDelta()));
 			}
 
