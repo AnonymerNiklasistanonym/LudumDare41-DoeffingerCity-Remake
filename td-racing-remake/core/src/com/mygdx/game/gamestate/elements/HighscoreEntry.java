@@ -56,7 +56,7 @@ public class HighscoreEntry implements Disposable {
     textPlace = "" + place + ".";
     textName = name;
     textScore = "" + (name.equals("------") ? "-" : score);
-    textLevel = "(LEVEL " + (name.equals("------") ? "-" : (level + 1)) + ")";
+    textLevel = "(LEVEL " + (name.equals("------") ? "-" : level) + ")";
     textLaps = "(LAPS " + (name.equals("------") ? "-" : laps) + ")";
   }
 
