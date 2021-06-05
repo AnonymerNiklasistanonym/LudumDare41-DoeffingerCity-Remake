@@ -91,6 +91,9 @@ public class GameOverState extends GameState implements IControllerCallbackGener
    */
   private Vector2 gameOverTextPosition;
 
+  private static final String ASSET_ID_FONT_TEXT_GAME_OVER = MainGame.getGameFontFilePath("cornerstone_upper_case_big");
+  private static final String ASSET_ID_TEXTURE_BACKGROUND_GAME_OVER = MainGame.getGameBackgroundFilePath("game_over");
+
   /**
    * Constructor that creates the game over (state)
    *
@@ -107,11 +110,11 @@ public class GameOverState extends GameState implements IControllerCallbackGener
     camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
 
     // Load assets that are not necessary to be available just yet
-    assetManager.load(MainGame.getGameFontFilePath("cornerstone_upper_case_big"), BitmapFont.class);
+    assetManager.load(ASSET_ID_FONT_TEXT_GAME_OVER, BitmapFont.class);
+    assetManager.load(ASSET_ID_TEXTURE_BACKGROUND_GAME_OVER, Texture.class);
     assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_FONT, BitmapFont.class);
     assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_DEFAULT, Texture.class);
     assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED, Texture.class);
-    assetManager.load(MainGame.getGameBackgroundFilePath("game_over"), Texture.class);
 
     // Register controller callback so that controller input can be managed
     controllerCallbackGenericMenuButtonGrid = new ControllerCallbackGenericMenuButtonGrid(this);
@@ -328,19 +331,13 @@ public class GameOverState extends GameState implements IControllerCallbackGener
 
     // Reduce the reference to used resources in this state (when no object is referencing the
     // resource any more it is automatically disposed by the global asset manager)
-    Gdx.app.debug("game_over_state:dispose", "Loaded assets before unloading are:");
-    for (final String loadedAsset : assetManager.getAssetNames()) {
-      Gdx.app.debug("game_over_state:dispose", "- " + loadedAsset);
-    }
-    assetManager.unload(MainGame.getGameFontFilePath("cornerstone_upper_case_big"));
-    assetManager.unload(MenuButtonSmall.ASSET_MANAGER_ID_FONT);
-    assetManager.unload(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_DEFAULT);
-    assetManager.unload(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED);
-    assetManager.unload(MainGame.getGameBackgroundFilePath("game_over"));
-    Gdx.app.debug("game_over_state:dispose", "Loaded assets after unloading are:");
-    for (final String loadedAsset : assetManager.getAssetNames()) {
-      Gdx.app.debug("game_over_state:dispose", "- " + loadedAsset);
-    }
+    unloadAssetManagerResources(new String[]{
+        ASSET_ID_FONT_TEXT_GAME_OVER,
+        ASSET_ID_TEXTURE_BACKGROUND_GAME_OVER,
+        MenuButtonSmall.ASSET_MANAGER_ID_FONT,
+        MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_DEFAULT,
+        MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED,
+    });
   }
 
   /**

@@ -126,10 +126,11 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
     }
     if (assetManager.update()) {
       if (!assetsLoaded) {
-        Gdx.app.debug("credit_state:render",
-            MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
-                + (assetManager.getProgress() * 100) + "%");
         assetsLoaded = true;
+        Gdx.app.debug("credit_state:render",
+            MainGame.getCurrentTimeStampLogString() + "assets are loaded:");
+        getDebugOutputLoadedAssets();
+
         musicBackground = assetManager.get(ASSET_MANAGER_ID_MUSIC_THEME);
         musicBackground.setLooping(true);
         if (preferencesManager.getMusicOn()) {

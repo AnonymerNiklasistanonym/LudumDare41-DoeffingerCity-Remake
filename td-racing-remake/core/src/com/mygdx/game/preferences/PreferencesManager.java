@@ -83,9 +83,9 @@ public class PreferencesManager {
     for (int i = 0; i < entries.length; i++) {
       if (entries[i].getName() == null || entries[i].getName().equals("")) {
         prefs.putString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + i, "------");
-        prefs.putInteger(PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i, 0);
-        prefs.putInteger(PREFERENCE_HIGHSCORE_LEVEL_VALUE_BASE + i, 0);
-        prefs.putInteger(PREFERENCE_HIGHSCORE_LAPS_VALUE_BASE + i, 0);
+        prefs.putInteger(PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i, -1);
+        prefs.putInteger(PREFERENCE_HIGHSCORE_LEVEL_VALUE_BASE + i, -1);
+        prefs.putInteger(PREFERENCE_HIGHSCORE_LAPS_VALUE_BASE + i, -1);
       }
     }
     prefs.flush();
@@ -97,9 +97,9 @@ public class PreferencesManager {
   public void resetHighscore() {
     for (int i = 0; i < NUMBER_HIGHSCORE_ENTRIES; i++) {
       prefs.putString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + i, "------")
-          .putInteger(PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i, 0)
-          .putInteger(PREFERENCE_HIGHSCORE_LEVEL_VALUE_BASE + i, 0)
-          .putInteger(PREFERENCE_HIGHSCORE_LAPS_VALUE_BASE + i, 0);
+          .putInteger(PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i, -1)
+          .putInteger(PREFERENCE_HIGHSCORE_LEVEL_VALUE_BASE + i, -1)
+          .putInteger(PREFERENCE_HIGHSCORE_LAPS_VALUE_BASE + i, -1);
     }
     prefs.flush();
   }

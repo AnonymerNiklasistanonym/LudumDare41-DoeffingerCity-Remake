@@ -57,6 +57,9 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
    */
   private Sound soundVictory;
 
+  private static final String ASSET_ID_BACKGROUND_GAME_WON = MainGame.getGameBackgroundFilePath("game_won");
+  private static final String ASSET_ID_SOUND_VICTORY = MainGame.getGameSoundFilePath("victory");
+
   /**
    * Constructor that creates the game won (state)
    *
@@ -75,8 +78,8 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
     // Get asset manager from the game state manager
     assetManager = gameStateManager.getAssetManager();
     // Load assets that are not necessary to be available just yet
-    assetManager.load(MainGame.getGameBackgroundFilePath("game_won"), Texture.class);
-    assetManager.load(MainGame.getGameSoundFilePath("victory"), Sound.class);
+    assetManager.load(ASSET_ID_BACKGROUND_GAME_WON, Texture.class);
+    assetManager.load(ASSET_ID_SOUND_VICTORY, Sound.class);
 
     // Register controller callback so that controller input can be managed
     controllerCallbackGenericOneClick = new ControllerCallbackGenericOneClick(this);
@@ -125,12 +128,13 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
     }
     if (assetManager.update()) {
       if (!assetsLoaded) {
-        Gdx.app.debug("game_won_state:render",
-            MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
-                + (assetManager.getProgress() * 100) + "%");
         assetsLoaded = true;
-        backgroundGameWon = assetManager.get(MainGame.getGameBackgroundFilePath("game_won"));
-        soundVictory = assetManager.get(MainGame.getGameSoundFilePath("victory"));
+        Gdx.app.debug("game_won_state:render",
+            MainGame.getCurrentTimeStampLogString() + "assets are loaded:");
+        getDebugOutputLoadedAssets();
+
+        backgroundGameWon = assetManager.get(ASSET_ID_BACKGROUND_GAME_WON);
+        soundVictory = assetManager.get(ASSET_ID_SOUND_VICTORY);
         if (gameStateManager.getPreferencesManager().getSoundEffectsOn()) {
           soundVictory.play();
         }
@@ -159,21 +163,13 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
   public void dispose() {
     // Remove controller listener
     Controllers.removeListener(controllerCallbackGenericOneClick);
-    backgroundGameWon.dispose();
-    soundVictory.dispose();
 
     // Reduce the reference to used resources in this state (when no object is referencing the
     // resource any more it is automatically disposed by the global asset manager)
-    Gdx.app.debug("game_won_state:dispose", "Loaded assets before unloading are:");
-    for (final String loadedAsset : assetManager.getAssetNames()) {
-      Gdx.app.debug("game_won_state:dispose", "- " + loadedAsset);
-    }
-    assetManager.unload(MainGame.getGameBackgroundFilePath("game_won"));
-    assetManager.unload(MainGame.getGameSoundFilePath("victory"));
-    Gdx.app.debug("game_won_state:dispose", "Loaded assets after unloading are:");
-    for (final String loadedAsset : assetManager.getAssetNames()) {
-      Gdx.app.debug("game_won_state:dispose", "- " + loadedAsset);
-    }
+    unloadAssetManagerResources(new String[]{
+        ASSET_ID_BACKGROUND_GAME_WON,
+        ASSET_ID_SOUND_VICTORY,
+    });
   }
 
   @Override

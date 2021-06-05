@@ -42,13 +42,21 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
    * The game state name for this game state
    */
   private static final String STATE_NAME = "Menu";
+  private static final String ASSET_ID_BACKGROUND_STARS_TEXTURE = MainGame
+      .getGameBackgroundFilePath("stars");
+  private static final String ASSET_ID_LOGO_TNT_TEXTURE = MainGame.getGameLogoFilePath("tnt");
+  private static final String ASSET_MANAGER_ID_FONT_DEVELOPER_INFO = MainGame
+      .getGameFontFilePath("cornerstone");
+  private static final String TEXT_MENU_BUTTON_START = "START";
+  private static final String TEXT_MENU_BUTTON_ABOUT = "ABOUT";
+  private static final String TEXT_MENU_BUTTON_HIGHSCORES = "HIGHSCORES";
+  private static final float FONT_SCALE_DEVELOPER_INFO = 1;
   /**
    * Controller callback class that gets this class in its constructor which implements some
    * callback methods and can then be added as a controller listener which can then call the
    * interface implemented methods in this class on corresponding controller input
    */
   private final ControllerCallbackGenericMenuButtonGrid controllerCallbackGenericMenuButtonGrid;
-
   /**
    * The menu button grid where all buttons are sorted as they are displayed on the screen: `{ {
    * Button1Row1, Button2Row2 }, { Button1Row2 }, { Button1Row3, Button2Row3 } }`
@@ -62,11 +70,11 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
    * Variable for the texture of the game logo
    */
   private Texture logoTnt;
-
   /**
    * Tracker for the menu button id that was selected before the current one
    */
   private String lastSelectedMenuButtonId = START_ID;
+  private BitmapFont fontDeveloperInfo;
 
   /**
    * Constructor that creates the main menu (state)
@@ -86,8 +94,9 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
     assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_FONT, BitmapFont.class);
     assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_DEFAULT, Texture.class);
     assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED, Texture.class);
-    assetManager.load(MainGame.getGameBackgroundFilePath("stars"), Texture.class);
-    assetManager.load(MainGame.getGameLogoFilePath("tnt"), Texture.class);
+    assetManager.load(ASSET_ID_BACKGROUND_STARS_TEXTURE, Texture.class);
+    assetManager.load(ASSET_ID_LOGO_TNT_TEXTURE, Texture.class);
+    assetManager.load(ASSET_MANAGER_ID_FONT_DEVELOPER_INFO, BitmapFont.class);
 
     // Register controller callback so that controller input can be managed
     controllerCallbackGenericMenuButtonGrid = new ControllerCallbackGenericMenuButtonGrid(this);
@@ -235,6 +244,20 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
       controllerStartKeyWasPressed = false;
       controllerSelectKeyWasPressed = false;
     }
+
+    // Provide additional functionality when in developer mode
+    if (MainGame.DEVELOPER_MODE) {
+      // Reset all preferences
+      if (Gdx.input.isKeyJustPressed(Keys.R)) {
+        preferencesManager.reset();
+        // > Set fullscreen on/off based on the default preference value
+        if (preferencesManager.getFullscreen()) {
+          Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+        } else {
+          Gdx.graphics.setWindowedMode(MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
+        }
+      }
+    }
   }
 
   @Override
@@ -250,41 +273,55 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
     }
     if (assetManager.update()) {
       if (!assetsLoaded) {
-        Gdx.app.debug("menu_state:render",
-            MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
-                + (assetManager.getProgress() * 100) + "%");
         assetsLoaded = true;
-        backgroundStars = assetManager.get(MainGame.getGameBackgroundFilePath("stars"));
-        logoTnt = assetManager.get(MainGame.getGameLogoFilePath("tnt"));
+        Gdx.app.debug("menu_state:render",
+            MainGame.getCurrentTimeStampLogString() + "assets are loaded:");
+        getDebugOutputLoadedAssets();
+
+        backgroundStars = assetManager.get(ASSET_ID_BACKGROUND_STARS_TEXTURE);
+        logoTnt = assetManager.get(ASSET_ID_LOGO_TNT_TEXTURE);
 
         // Create menu buttons
         menuButtons = new MenuButton[][]{
             {
-                new MenuButtonBig(START_ID, "START", assetManager, (float) MainGame.GAME_WIDTH / 2,
+                new MenuButtonBig(START_ID, TEXT_MENU_BUTTON_START, assetManager,
+                    (float) MainGame.GAME_WIDTH / 2,
                     (float) MainGame.GAME_HEIGHT / 6 * 2.8f, true)
             },
             {
-                new MenuButtonSmall(ABOUT_ID, "ABOUT", assetManager,
+                new MenuButtonSmall(ABOUT_ID, TEXT_MENU_BUTTON_ABOUT, assetManager,
                     (float) MainGame.GAME_WIDTH / 4,
                     (float) MainGame.GAME_HEIGHT / 6 * 1),
-                new MenuButtonSmall(HIGHSCORE_ID, "HIGHSCORES", assetManager,
+                new MenuButtonSmall(HIGHSCORE_ID, TEXT_MENU_BUTTON_HIGHSCORES, assetManager,
                     (float) MainGame.GAME_WIDTH / 2 + (float) MainGame.GAME_WIDTH / 4,
                     (float) MainGame.GAME_HEIGHT / 6 * 1)
             }
         };
+
+        if (MainGame.DEVELOPER_MODE) {
+          fontDeveloperInfo = assetManager.get(ASSET_MANAGER_ID_FONT_DEVELOPER_INFO);
+          fontDeveloperInfo.setUseIntegerPositions(false);
+          fontDeveloperInfo.getData().setScale(FONT_SCALE_DEVELOPER_INFO);
+        }
       }
       // Render menu
       spriteBatch.setProjectionMatrix(camera.combined);
       spriteBatch.begin();
-
+      // > Draw menu buttons
       spriteBatch.draw(backgroundStars, 0, 0);
       for (final MenuButton[] menuButtonLine : menuButtons) {
         for (final MenuButton menuButton : menuButtonLine) {
           menuButton.draw(spriteBatch);
         }
       }
-
+      // > Draw logo
       spriteBatch.draw(logoTnt, 0, 0);
+      // > Draw additional elements when in developer mode
+      if (MainGame.DEVELOPER_MODE) {
+        fontDeveloperInfo.getData().setScale(1);
+        fontDeveloperInfo.setColor(1, 1, 1, 1);
+        fontDeveloperInfo.draw(spriteBatch, "Reset preferences: R", 10, 30);
+      }
       spriteBatch.end();
     } else {
       // Get and render loading information
@@ -320,8 +357,9 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
         MenuButtonSmall.ASSET_MANAGER_ID_FONT,
         MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_DEFAULT,
         MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED,
-        MainGame.getGameBackgroundFilePath("stars"),
-        MainGame.getGameLogoFilePath("tnt"),
+        ASSET_ID_BACKGROUND_STARS_TEXTURE,
+        ASSET_ID_LOGO_TNT_TEXTURE,
+        ASSET_MANAGER_ID_FONT_DEVELOPER_INFO,
     });
   }
 

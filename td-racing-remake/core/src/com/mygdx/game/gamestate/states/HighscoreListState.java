@@ -119,10 +119,6 @@ public class HighscoreListState extends GameState implements IControllerCallback
     }
   }
 
-  private void goBack() {
-    gameStateManager.setGameState(new MenuState(gameStateManager));
-  }
-
   @Override
   protected void update(final float deltaTime) {
     // Not necessary to do anything
@@ -136,10 +132,10 @@ public class HighscoreListState extends GameState implements IControllerCallback
     }
     if (assetManager.update()) {
       if (!assetsLoaded) {
-        Gdx.app.debug("highscore_list_state:render",
-            MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
-                + (assetManager.getProgress() * 100) + "%");
         assetsLoaded = true;
+        Gdx.app.debug("highscore_list_state:render",
+            MainGame.getCurrentTimeStampLogString() + "assets are loaded:");
+        getDebugOutputLoadedAssets();
 
         if (MainGame.DEVELOPER_MODE) {
           // set font scale to the correct size and disable to use integers for scaling

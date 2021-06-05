@@ -814,11 +814,10 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		}
 		if (assetManager.update()) {
 			if (!assetsLoaded) {
-				float progress = assetManager.getProgress() * 100;
-				Gdx.app.debug("play_state:render",
-						MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
-								+ progress + "%");
 				assetsLoaded = true;
+				Gdx.app.debug("play_state:render",
+						MainGame.getCurrentTimeStampLogString() + "assets are loaded:");
+				getDebugOutputLoadedAssets();
 
 				// Sets this camera to an orthographic projection, centered at (viewportWidth/2,
 				// viewportHeight/2), with the y-axis pointing up or down.
@@ -1048,8 +1047,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 			fontLoading.draw(spriteBatch, loadingText, loadingTextPosition.x, loadingTextPosition.y);
 
 			spriteBatch.end();
-			Gdx.app.debug("play_state:render",
-					MainGame.getCurrentTimeStampLogString() + "render loading screen");
 		}
 	}
 
@@ -1227,93 +1224,55 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		car.dispose();
 		towerMenu.dispose();
 		// dispose images, sounds and other resources
-		MgTower.groundTower.dispose();
-		MgTower.upperTower.dispose();
-		MgTower.towerFiring.dispose();
-		LaserTower.groundTower.dispose();
-		LaserTower.upperTower.dispose();
-		LaserTower.towerFiring.dispose();
-		EnemySmall.normalTexture.dispose();
-		EnemySmall.deadTexture.dispose();
-		EnemyFat.normalTexture.dispose();
-		EnemyFat.deadTexture.dispose();
-		EnemyBicycle.normalTexture.dispose();
-		EnemyBicycle.deadTexture.dispose();
-		TowerMenu.cannonButton.dispose();
-		TowerMenu.laserButton.dispose();
-		TowerMenu.flameButton.dispose();
-		MgTower.soundShoot.dispose();
-		LaserTower.soundShoot.dispose();
-		musicBackground.dispose();
-		splatt.dispose();
-		soundGetMoney.dispose();
-		musicCar.dispose();
-		soundVictory.dispose();
-
-		Gdx.app.debug("play_state:dispose", "Loaded assets before unloading are:");
-		for (final String loadedAsset : assetManager.getAssetNames()) {
-			Gdx.app.debug("play_state:dispose", "- " + loadedAsset);
-		}
-
-		assetManager.unload(ASSET_ID_TEXT_FONT);
-
-		assetManager.unload(ASSET_ID_TEXT_LOADING_FONT);
-		assetManager.unload(ASSET_ID_BACKGROUND_LOADING_TEXTURE);
-
-		assetManager.unload(ASSET_ID_CAR_TEXTURE);
-		assetManager.unload(ASSET_ID_FINISH_LINE_TEXTURE);
-		assetManager.unload(ASSET_ID_PIT_STOP_TEXTURE);
-		assetManager.unload(ASSET_ID_SMOKE_TEXTURE);
-
-		assetManager.unload(ASSET_ID_TOWER_CANNON_TEXTURE);
-		assetManager.unload(ASSET_ID_TOWER_LASER_TEXTURE);
-		assetManager.unload(ASSET_ID_TOWER_SNIPER_TEXTURE);
-		assetManager.unload(ASSET_ID_TOWER_FLAME_TEXTURE);
-		assetManager.unload(ASSET_ID_TOWER_CANNON_BOTTOM_TEXTURE);
-		assetManager.unload(ASSET_ID_TOWER_CANNON_UPPER_TEXTURE);
-		assetManager.unload(ASSET_ID_TOWER_CANNON_FIRING_TEXTURE);
-		assetManager.unload(ASSET_ID_TOWER_SNIPER_BOTTOM_TEXTURE);
-		assetManager.unload(ASSET_ID_TOWER_SNIPER_UPPER_TEXTURE);
-		assetManager.unload(ASSET_ID_TOWER_SNIPER_FIRING_TEXTURE);
-		assetManager.unload(ASSET_ID_TOWER_LASER_BOTTOM_TEXTURE);
-		assetManager.unload(ASSET_ID_TOWER_LASER_UPPER_TEXTURE);
-		assetManager.unload(ASSET_ID_TOWER_LASER_FIRING_TEXTURE);
-		assetManager.unload(ASSET_ID_TOWER_FLAME_BOTTOM_TEXTURE);
-		assetManager.unload(ASSET_ID_TOWER_FLAME_UPPER_TEXTURE);
-		assetManager.unload(ASSET_ID_TOWER_FLAME_FIRING_TEXTURE);
-		assetManager.unload(ASSET_ID_TOWER_FLAME_FIRE_TEXTURE);
-
-		assetManager.unload(ASSET_ID_ENEMY_SMALL_NORMAL_TEXTURE);
-		assetManager.unload(ASSET_ID_ENEMY_SMALL_DEAD_TEXTURE);
-		assetManager.unload(ASSET_ID_ENEMY_FAT_NORMAL_TEXTURE);
-		assetManager.unload(ASSET_ID_ENEMY_FAT_DEAD_TEXTURE);
-		assetManager.unload(ASSET_ID_ENEMY_SPIDER_NORMAL_TEXTURE);
-		assetManager.unload(ASSET_ID_ENEMY_SPIDER_DEAD_TEXTURE);
-		assetManager.unload(ASSET_ID_ENEMY_BICYCLE_NORMAL_TEXTURE);
-		assetManager.unload(ASSET_ID_ENEMY_BICYCLE_DEAD_TEXTURE);
-		assetManager.unload(ASSET_ID_ENEMY_LINCOLN_NORMAL_TEXTURE);
-		assetManager.unload(ASSET_ID_ENEMY_LINCOLN_DEAD_TEXTURE);
-		assetManager.unload(ASSET_ID_ENEMY_BLOOD_TEXTURE);
-		assetManager.unload(ASSET_ID_ENEMY_BLOOD_GREEN_TEXTURE);
-
-		assetManager.unload(ASSET_ID_TOWER_CANNON_SOUND);
-		assetManager.unload(ASSET_ID_TOWER_SNIPER_SOUND);
-		assetManager.unload(ASSET_ID_TOWER_LASER_SOUND);
-		assetManager.unload(ASSET_ID_TOWER_FLAME_SOUND);
-
-		assetManager.unload(ASSET_ID_THEME_MUSIC);
-		assetManager.unload(ASSET_ID_CAR_ENGINE_MUSIC);
-
-		assetManager.unload(ASSET_ID_CAR_ENGINE_START_SOUND);
-		assetManager.unload(ASSET_ID_SPLATT_SOUND);
-		assetManager.unload(ASSET_ID_CASH_SOUND);
-		assetManager.unload(ASSET_ID_VICTORY_SOUND);
-		assetManager.unload(ASSET_ID_TRAILER_DAMAGE_SOUND);
-
-		Gdx.app.debug("play_state:dispose", "Loaded assets after unloading are:");
-		for (final String loadedAsset : assetManager.getAssetNames()) {
-			Gdx.app.debug("play_state:dispose", "- " + loadedAsset);
-		}
+		unloadAssetManagerResources(new String[]{
+				ASSET_ID_TEXT_FONT,
+				ASSET_ID_TEXT_LOADING_FONT,
+				ASSET_ID_BACKGROUND_LOADING_TEXTURE,
+				ASSET_ID_CAR_TEXTURE,
+				ASSET_ID_FINISH_LINE_TEXTURE,
+				ASSET_ID_PIT_STOP_TEXTURE,
+				ASSET_ID_SMOKE_TEXTURE,
+				ASSET_ID_TOWER_CANNON_TEXTURE,
+				ASSET_ID_TOWER_LASER_TEXTURE,
+				ASSET_ID_TOWER_SNIPER_TEXTURE,
+				ASSET_ID_TOWER_FLAME_TEXTURE,
+				ASSET_ID_TOWER_CANNON_BOTTOM_TEXTURE,
+				ASSET_ID_TOWER_CANNON_UPPER_TEXTURE,
+				ASSET_ID_TOWER_CANNON_FIRING_TEXTURE,
+				ASSET_ID_TOWER_SNIPER_BOTTOM_TEXTURE,
+				ASSET_ID_TOWER_SNIPER_UPPER_TEXTURE,
+				ASSET_ID_TOWER_SNIPER_FIRING_TEXTURE,
+				ASSET_ID_TOWER_LASER_BOTTOM_TEXTURE,
+				ASSET_ID_TOWER_LASER_UPPER_TEXTURE,
+				ASSET_ID_TOWER_LASER_FIRING_TEXTURE,
+				ASSET_ID_TOWER_FLAME_BOTTOM_TEXTURE,
+				ASSET_ID_TOWER_FLAME_UPPER_TEXTURE,
+				ASSET_ID_TOWER_FLAME_FIRING_TEXTURE,
+				ASSET_ID_TOWER_FLAME_FIRE_TEXTURE,
+				ASSET_ID_ENEMY_SMALL_NORMAL_TEXTURE,
+				ASSET_ID_ENEMY_SMALL_DEAD_TEXTURE,
+				ASSET_ID_ENEMY_FAT_NORMAL_TEXTURE,
+				ASSET_ID_ENEMY_FAT_DEAD_TEXTURE,
+				ASSET_ID_ENEMY_SPIDER_NORMAL_TEXTURE,
+				ASSET_ID_ENEMY_SPIDER_DEAD_TEXTURE,
+				ASSET_ID_ENEMY_BICYCLE_NORMAL_TEXTURE,
+				ASSET_ID_ENEMY_BICYCLE_DEAD_TEXTURE,
+				ASSET_ID_ENEMY_LINCOLN_NORMAL_TEXTURE,
+				ASSET_ID_ENEMY_LINCOLN_DEAD_TEXTURE,
+				ASSET_ID_ENEMY_BLOOD_TEXTURE,
+				ASSET_ID_ENEMY_BLOOD_GREEN_TEXTURE,
+				ASSET_ID_TOWER_CANNON_SOUND,
+				ASSET_ID_TOWER_SNIPER_SOUND,
+				ASSET_ID_TOWER_LASER_SOUND,
+				ASSET_ID_TOWER_FLAME_SOUND,
+				ASSET_ID_THEME_MUSIC,
+				ASSET_ID_CAR_ENGINE_MUSIC,
+				ASSET_ID_CAR_ENGINE_START_SOUND,
+				ASSET_ID_SPLATT_SOUND,
+				ASSET_ID_CASH_SOUND,
+				ASSET_ID_VICTORY_SOUND,
+				ASSET_ID_TRAILER_DAMAGE_SOUND,
+		});
 	}
 
 	@Override

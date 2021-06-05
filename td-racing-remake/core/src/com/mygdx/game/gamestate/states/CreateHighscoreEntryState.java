@@ -31,21 +31,24 @@ public class CreateHighscoreEntryState extends GameState implements
    * Variable for the font scale of the credits text
    */
   private static final float FONT_SCALE_YOU_REACHED_TOP_5 = 0.65f;
+  private static final float FONT_SCALE_TEXT_SCORE = 0.65f;
+  private static final float FONT_SCALE_TEXT_LEVEL_LAPS = 0.25f;
 
   private final String scoreText;
+  private final String levelLapsText;
   private final int score;
   private final int laps;
   private final ControllerListener controllerCallbackCreateHighscoreEntryState;
   private final boolean goToCreditStage;
   private final int level;
   private HighscoreSelectCharacterDisplay[] highscoreCharacterButtons;
-  private Vector2 highscoreTextPosition, scoreTextPosition;
+  private Vector2 highscoreTextPosition, scoreTextPosition, textLevelLapsPosition;
   private int currentIndex = 0;
 
   /**
    * Variable for the font of the credits text
    */
-  private BitmapFont fontYouReachedTop5;
+  private BitmapFont fontText;
 
   public CreateHighscoreEntryState(GameStateManager gameStateManager, final int score,
       final int level, final int laps, final boolean goToCreditStage) {
@@ -55,7 +58,9 @@ public class CreateHighscoreEntryState extends GameState implements
     this.level = level;
     this.laps = laps;
     this.goToCreditStage = goToCreditStage;
-    scoreText = "" + score;
+
+    scoreText = "SCORE: " + score;
+    levelLapsText = "(LEVEL: " + level + " - LAPS: " + laps + ")";
 
     // Initialize game camera/canvas
     camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
@@ -167,14 +172,19 @@ public class CreateHighscoreEntryState extends GameState implements
                   : HighscoreSelectCharacterDisplayInputState.ACTIVE);
         }
 
-        fontYouReachedTop5 = assetManager.get(ASSET_ID_YOU_REACHED_TOP_5_FONT);
-        fontYouReachedTop5.getData().setScale(FONT_SCALE_YOU_REACHED_TOP_5);
-        fontYouReachedTop5.setUseIntegerPositions(false);
-        highscoreTextPosition = GameStateManager.calculateCenteredTextPosition(fontYouReachedTop5,
+        fontText = assetManager.get(ASSET_ID_YOU_REACHED_TOP_5_FONT);
+        fontText.setUseIntegerPositions(false);
+        fontText.getData().setScale(FONT_SCALE_YOU_REACHED_TOP_5);
+        highscoreTextPosition = GameStateManager.calculateCenteredTextPosition(fontText,
             HIGHSCORE_TEXT, MainGame.GAME_WIDTH, (float) MainGame.GAME_HEIGHT / 3 * 5);
+        fontText.getData().setScale(FONT_SCALE_TEXT_SCORE);
         scoreTextPosition = GameStateManager
-            .calculateCenteredTextPosition(fontYouReachedTop5, scoreText,
+            .calculateCenteredTextPosition(fontText, scoreText,
                 MainGame.GAME_WIDTH, (float) MainGame.GAME_HEIGHT / 3);
+        fontText.getData().setScale(FONT_SCALE_TEXT_LEVEL_LAPS);
+        textLevelLapsPosition = GameStateManager
+            .calculateCenteredTextPosition(fontText, levelLapsText,
+                MainGame.GAME_WIDTH, (float) MainGame.GAME_HEIGHT / 3 - 150);
 
         final char[] name = preferencesManager.getName();
         if (name != null && name.length == highscoreCharacterButtons.length) {
@@ -186,9 +196,13 @@ public class CreateHighscoreEntryState extends GameState implements
       // Render highscore entry
       spriteBatch.setProjectionMatrix(camera.combined);
       spriteBatch.begin();
-      fontYouReachedTop5
+      fontText.getData().setScale(FONT_SCALE_TEXT_SCORE);
+      fontText
           .draw(spriteBatch, HIGHSCORE_TEXT, highscoreTextPosition.x, highscoreTextPosition.y);
-      fontYouReachedTop5.draw(spriteBatch, scoreText, scoreTextPosition.x, scoreTextPosition.y);
+      fontText.getData().setScale(FONT_SCALE_TEXT_SCORE);
+      fontText.draw(spriteBatch, scoreText, scoreTextPosition.x, scoreTextPosition.y);
+      fontText.getData().setScale(FONT_SCALE_TEXT_LEVEL_LAPS);
+      fontText.draw(spriteBatch, levelLapsText, textLevelLapsPosition.x, textLevelLapsPosition.y);
       for (final HighscoreSelectCharacterDisplay highscoreCharacterButton : highscoreCharacterButtons) {
         highscoreCharacterButton.draw(spriteBatch);
       }
@@ -214,6 +228,13 @@ public class CreateHighscoreEntryState extends GameState implements
   @Override
   protected void dispose() {
     Controllers.removeListener(controllerCallbackCreateHighscoreEntryState);
+
+    // Reduce the reference to used resources in this state (when no object is referencing the
+    // resource any more it is automatically disposed by the global asset manager)
+    unloadAssetManagerResources(new String[]{
+        HighscoreSelectCharacterDisplay.ASSET_MANAGER_ID_CHARACTER_FONT,
+        ASSET_ID_YOU_REACHED_TOP_5_FONT,
+    });
   }
 
   private void saveHighscoreAndGoToList() {

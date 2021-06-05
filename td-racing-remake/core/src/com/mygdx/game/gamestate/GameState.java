@@ -115,15 +115,20 @@ public abstract class GameState extends ControllerCallbackVariables {
    */
   protected void unloadAssetManagerResources(final String[] resourcesToUnload) {
     Gdx.app.debug("game_state:unloadAssetManagerResources", "Loaded assets before unloading are:");
-    for (final String loadedAsset : assetManager.getAssetNames()) {
-      Gdx.app.debug("game_state:unloadAssetManagerResources", "- " + loadedAsset);
-    }
+    getDebugOutputLoadedAssets();
     for (final String resourceToUnload : resourcesToUnload) {
       assetManager.unload(resourceToUnload);
     }
     Gdx.app.debug("game_state:unloadAssetManagerResources", "Loaded assets after unloading are:");
+    getDebugOutputLoadedAssets();
+  }
+
+  protected void getDebugOutputLoadedAssets() {
     for (final String loadedAsset : assetManager.getAssetNames()) {
-      Gdx.app.debug("game_state:unloadAssetManagerResources", "- " + loadedAsset);
+      Gdx.app.debug("game_state:getLoadedAssets",
+          "- " + loadedAsset + " (" + assetManager.getReferenceCount(loadedAsset) + ", "
+              + assetManager.getAssetType(loadedAsset).getName() + ")");
+
     }
   }
 

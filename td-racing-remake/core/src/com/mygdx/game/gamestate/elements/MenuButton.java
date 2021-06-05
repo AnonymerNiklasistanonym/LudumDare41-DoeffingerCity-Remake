@@ -156,10 +156,7 @@ public abstract class MenuButton implements Disposable, IHelperMenuButton {
    * Dispose textures and fonts TODO Asset manager migration later? (https://github.com/libgdx/libgdx/wiki/Managing-your-assets)
    */
   public void disposeMedia() {
-    // Dispose loaded assets
-    textureSelected.dispose();
-    textureDefault.dispose();
-    font.dispose();
+    // No assets need to be disposed since they are all loaded via the asset manager
   }
 
 }
