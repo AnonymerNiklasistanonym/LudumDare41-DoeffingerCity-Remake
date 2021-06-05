@@ -133,9 +133,9 @@ public abstract class GameState extends ControllerCallbackVariables {
   /**
    * Draw a loading animation based on the given progress value
    *
-   * @param spriteBatch The sprite batch
+   * @param spriteBatch   The sprite batch
    * @param shapeRenderer The shape renderer
-   * @param progress The progress value (between 0 for 0% and 1 for 100%)
+   * @param progress      The progress value (between 0 for 0% and 1 for 100%)
    */
   protected void drawLoadingProgress(final SpriteBatch spriteBatch,
       final ShapeRenderer shapeRenderer, final float progress) {
@@ -144,7 +144,7 @@ public abstract class GameState extends ControllerCallbackVariables {
     shapeRenderer.begin(ShapeType.Filled);
     shapeRenderer.setColor(1, 1, 1, 1);
     shapeRenderer
-        .arc(MainGame.GAME_WIDTH / 2f, MainGame.GAME_HEIGHT / 2f, MainGame.GAME_HEIGHT / 10f, 0f,
+        .arc(camera.viewportWidth / 2f, camera.viewportHeight / 2f, camera.viewportHeight / 10f, 0f,
             360f * progress);
     shapeRenderer.end();
   }
