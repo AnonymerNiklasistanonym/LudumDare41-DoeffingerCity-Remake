@@ -4,6 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.controller.ControllerCallbackVariables;
@@ -82,16 +84,17 @@ public abstract class GameState extends ControllerCallbackVariables {
   /**
    * Update everything to the current frame
    *
-   * @param deltaTime the time span between the current frame and the last frame in seconds
+   * @param deltaTime The time span between the current frame and the last frame in seconds
    */
   protected abstract void update(final float deltaTime);
 
   /**
    * Render method
    *
-   * @param spriteBatch a batch/collection of draw calls for rendering with OpenGL
+   * @param spriteBatch   A batch/collection of draw calls for rendering with OpenGL
+   * @param shapeRenderer A helper for drawing shapes
    */
-  protected abstract void render(final SpriteBatch spriteBatch);
+  protected abstract void render(final SpriteBatch spriteBatch, final ShapeRenderer shapeRenderer);
 
   /**
    * Dispose any resource for a better memory management
@@ -125,6 +128,25 @@ public abstract class GameState extends ControllerCallbackVariables {
     for (final String loadedAsset : assetManager.getAssetNames()) {
       Gdx.app.debug("game_state:unloadAssetManagerResources", "- " + loadedAsset);
     }
+  }
+
+  /**
+   * Draw a loading animation based on the given progress value
+   *
+   * @param spriteBatch The sprite batch
+   * @param shapeRenderer The shape renderer
+   * @param progress The progress value (between 0 for 0% and 1 for 100%)
+   */
+  protected void drawLoadingProgress(final SpriteBatch spriteBatch,
+      final ShapeRenderer shapeRenderer, final float progress) {
+    spriteBatch.setProjectionMatrix(camera.combined);
+    shapeRenderer.setProjectionMatrix(spriteBatch.getProjectionMatrix());
+    shapeRenderer.begin(ShapeType.Filled);
+    shapeRenderer.setColor(1, 1, 1, 1);
+    shapeRenderer
+        .arc(MainGame.GAME_WIDTH / 2f, MainGame.GAME_HEIGHT / 2f, MainGame.GAME_HEIGHT / 10f, 0f,
+            360f * progress);
+    shapeRenderer.end();
   }
 
 }

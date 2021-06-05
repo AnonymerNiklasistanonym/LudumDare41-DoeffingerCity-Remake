@@ -1,12 +1,12 @@
 package com.mygdx.game.gamestate;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.mygdx.game.MainGame;
@@ -20,10 +20,6 @@ import java.util.Stack;
 public class GameStateManager {
 
   /**
-   * Standardized full screen toggle key
-   */
-  public static final int standardizedFullScreenToggleKey = Keys.F11;
-  /**
    * Stack of GameStates
    */
   private final Stack<GameState> gameStateStack;
@@ -34,47 +30,18 @@ public class GameStateManager {
   /**
    * Manages application wide options and preferences
    */
-  private PreferencesManager preferencesManager;
+  private final PreferencesManager preferencesManager;
 
   /**
    * Constructor that creates a new GameState stack
    */
-  public GameStateManager(final AssetManager assetManager, final PreferencesManager preferencesManager) {
+  public GameStateManager(final AssetManager assetManager,
+      final PreferencesManager preferencesManager) {
     Gdx.app.log("game_state_manager:constructor", MainGame.getCurrentTimeStampLogString());
     this.gameStateStack = new Stack<>();
     this.assetManager = assetManager;
     this.preferencesManager = preferencesManager;
   }
-
-  /**
-   * Get global asset manager
-   */
-  public AssetManager getAssetManager() {
-    Gdx.app.log("game_state_manager:getAssetManager", MainGame.getCurrentTimeStampLogString());
-    return assetManager;
-  }
-
-  /**
-   * Get global preferences manager
-   */
-  public PreferencesManager getPreferencesManager() {
-    Gdx.app.log("game_state_manager:getPreferencesManager", MainGame.getCurrentTimeStampLogString());
-    return preferencesManager;
-  }
-
-  /**
-   * Toggle full screen
-   */
-  public void toggleFullScreen() {
-    preferencesManager.setFullscreen(!Gdx.graphics.isFullscreen());
-    if (Gdx.graphics.isFullscreen()) {
-      Gdx.graphics.setWindowedMode(MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
-    } else {
-      Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
-    }
-  }
-
-
 
   /**
    * Get the current mouse position
@@ -121,6 +88,35 @@ public class GameStateManager {
           height / (text.length + 1) * (text.length - i) + temp.height / 2);
     }
     return positions;
+  }
+
+  /**
+   * Get global asset manager
+   */
+  public AssetManager getAssetManager() {
+    Gdx.app.log("game_state_manager:getAssetManager", MainGame.getCurrentTimeStampLogString());
+    return assetManager;
+  }
+
+  /**
+   * Get global preferences manager
+   */
+  public PreferencesManager getPreferencesManager() {
+    Gdx.app
+        .log("game_state_manager:getPreferencesManager", MainGame.getCurrentTimeStampLogString());
+    return preferencesManager;
+  }
+
+  /**
+   * Toggle full screen
+   */
+  public void toggleFullScreen() {
+    preferencesManager.setFullscreen(!Gdx.graphics.isFullscreen());
+    if (Gdx.graphics.isFullscreen()) {
+      Gdx.graphics.setWindowedMode(MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
+    } else {
+      Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+    }
   }
 
   /**
@@ -180,9 +176,9 @@ public class GameStateManager {
    *
    * @param spriteBatch a batch/collection of draw calls for rendering with OpenGL
    */
-  public void render(final SpriteBatch spriteBatch) {
+  public void render(final SpriteBatch spriteBatch, final ShapeRenderer shapeRenderer) {
     if (!gameStateStack.empty()) {
-      gameStateStack.peek().render(spriteBatch);
+      gameStateStack.peek().render(spriteBatch, shapeRenderer);
     } else {
       Gdx.app.error("game_state_manager:render",
           MainGame.getCurrentTimeStampLogString() + "no game state was found in stack");

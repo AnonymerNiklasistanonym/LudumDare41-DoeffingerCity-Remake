@@ -8,6 +8,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.controller.generic.one_click.ControllerCallbackGenericOneClick;
 import com.mygdx.game.controller.generic.one_click.IControllerCallbackGenericOneClick;
@@ -55,7 +56,8 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
    *
    * @param gameStateManager The global game state manager
    */
-  public GameWonState(GameStateManager gameStateManager, final int score, final int level, final int laps) {
+  public GameWonState(GameStateManager gameStateManager, final int score, final int level,
+      final int laps) {
     super(gameStateManager, STATE_NAME);
     this.score = score;
     this.level = level;
@@ -95,7 +97,8 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
         .isKeyJustPressed(Keys.SPACE) || Gdx.input.isKeyJustPressed(Keys.ESCAPE)
         || controllerAnyKeyWasPressed || Gdx.input.isCatchKey(Keys.BACK)) {
       if (preferencesManager.scoreIsInTop5(score)) {
-        gameStateManager.setGameState(new CreateHighscoreEntryState(gameStateManager, score, level, laps, true));
+        gameStateManager.setGameState(
+            new CreateHighscoreEntryState(gameStateManager, score, level, laps, true));
       } else {
         gameStateManager.setGameState(new CreditState(gameStateManager, true));
       }
@@ -108,17 +111,16 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
   }
 
   @Override
-  public void render(final SpriteBatch spriteBatch) {
+  public void render(final SpriteBatch spriteBatch, final ShapeRenderer shapeRenderer) {
     if (paused) {
       // When the game is paused don't render anything
       return;
     }
     if (assetManager.update()) {
       if (!assetsLoaded) {
-        float progress = assetManager.getProgress() * 100;
         Gdx.app.debug("game_won_state:render",
             MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
-                + progress + "%");
+                + (assetManager.getProgress() * 100) + "%");
         assetsLoaded = true;
         backgroundGameWon = assetManager.get(MainGame.getGameBackgroundFilePath("game_won"));
         soundVictory = assetManager.get(MainGame.getGameSoundFilePath("victory"));
@@ -134,14 +136,15 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
 
       spriteBatch.end();
     } else {
-      // display loading information
-      float progress = assetManager.getProgress() * 100;
+      // Get and render loading information
+      float progress = assetManager.getProgress();
       if (progress != assetsLoadedLastProgress) {
         assetsLoadedLastProgress = progress;
         Gdx.app.debug("game_won_state:render",
             MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
-                + progress + "%");
+                + (progress * 100) + "%");
       }
+      drawLoadingProgress(spriteBatch, shapeRenderer, progress);
     }
   }
 

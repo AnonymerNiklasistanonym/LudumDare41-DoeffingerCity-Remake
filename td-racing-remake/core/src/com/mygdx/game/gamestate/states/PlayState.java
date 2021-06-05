@@ -56,7 +56,6 @@ import com.mygdx.game.objects.towers.LaserTower;
 import com.mygdx.game.objects.towers.MgTower;
 import com.mygdx.game.objects.towers.SniperTower;
 import com.mygdx.game.unsorted.Node;
-import java.lang.Thread.State;
 import java.util.Date;
 
 public class PlayState extends GameState implements CollisionCallbackInterface, IControllerCallbackPlayState,
@@ -147,7 +146,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	private Sprite spriteCar;
 	private Sprite spriteFinishLine;
 	private Sprite spriteSmoke;
-	private final ShapeRenderer shapeRenderer;
 	private final Level[] levels;
 	private Level level;
 	private Texture backgroundLoading;
@@ -309,7 +307,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		towers = new Array<Tower>();
 		collis = new CollisionListener(this);
 		checkpoints = new Checkpoint[4];
-		shapeRenderer = new ShapeRenderer();
 		trailerpos = new Vector2(0, 0);
 		trailerSmokes = new Array<Sprite>();
 		enemiesDead = new Array<Enemy>();
@@ -810,7 +807,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	}
 
 	@Override
-	public void render(final SpriteBatch spriteBatch) {
+	public void render(final SpriteBatch spriteBatch, final ShapeRenderer shapeRenderer) {
 		if (paused) {
 			// When the game is paused don't render anything
 			return;
@@ -1252,7 +1249,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		soundGetMoney.dispose();
 		musicCar.dispose();
 		soundVictory.dispose();
-		shapeRenderer.dispose();
 
 		Gdx.app.debug("play_state:dispose", "Loaded assets before unloading are:");
 		for (final String loadedAsset : assetManager.getAssetNames()) {

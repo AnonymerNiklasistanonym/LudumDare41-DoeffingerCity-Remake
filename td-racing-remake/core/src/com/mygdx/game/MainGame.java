@@ -7,6 +7,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Scaling;
 import com.mygdx.game.file.LevelInfoCsvFile;
@@ -72,6 +73,10 @@ public class MainGame implements ApplicationListener {
    * A batch/collection of draw calls for rendering with OpenGL
    */
   private SpriteBatch spriteBatch;
+  /**
+   * Helps drawing shapes
+   */
+  private ShapeRenderer shapeRenderer;
   /**
    * Loads and stores assets like textures, bitmap fonts, sounds, music, ...
    */
@@ -211,7 +216,11 @@ public class MainGame implements ApplicationListener {
     // Create sprite batch
     Gdx.app.debug("main:create", getCurrentTimeStampLogString() + "create sprite batch");
     spriteBatch = new SpriteBatch();
+    // Create shape renderer
+    Gdx.app.debug("main:create", getCurrentTimeStampLogString() + "create shape renderer");
+    shapeRenderer = new ShapeRenderer();
     // Create asset manager
+    Gdx.app.debug("main:create", getCurrentTimeStampLogString() + "create asset manager");
     assetManager = new AssetManager();
 
     // Load fonts (remove when asset manager works)
@@ -260,6 +269,10 @@ public class MainGame implements ApplicationListener {
     if (spriteBatch != null) {
       spriteBatch.dispose();
     }
+    // Dispose shape renderer
+    if (shapeRenderer != null) {
+      shapeRenderer.dispose();
+    }
     // Dispose loaded assets
     if (assetManager != null) {
       assetManager.dispose();
@@ -277,7 +290,7 @@ public class MainGame implements ApplicationListener {
     gameStateManager.update(Gdx.graphics.getDeltaTime());
 
     // Render the current state
-    gameStateManager.render(spriteBatch);
+    gameStateManager.render(spriteBatch, shapeRenderer);
   }
 
   @Override

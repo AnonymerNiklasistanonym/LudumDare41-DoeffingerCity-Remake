@@ -7,6 +7,7 @@ import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.controller.generic.menu_button_grid.ControllerCallbackGenericMenuButtonGrid;
@@ -252,17 +253,16 @@ public class GameOverState extends GameState implements IControllerCallbackGener
   }
 
   @Override
-  public void render(final SpriteBatch spriteBatch) {
+  public void render(final SpriteBatch spriteBatch, final ShapeRenderer shapeRenderer) {
     if (paused) {
       // When the game is paused don't render anything
       return;
     }
     if (assetManager.update()) {
       if (!assetsLoaded) {
-        float progress = assetManager.getProgress() * 100;
         Gdx.app.debug("game_over_state:render",
             MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
-                + progress + "%");
+                + (assetManager.getProgress() * 100) + "%");
         assetsLoaded = true;
         backgroundGameOver = assetManager.get(MainGame.getGameBackgroundFilePath("game_over"));
 
@@ -308,14 +308,15 @@ public class GameOverState extends GameState implements IControllerCallbackGener
 
       spriteBatch.end();
     } else {
-      // display loading information
-      float progress = assetManager.getProgress() * 100;
+      // Get and render loading information
+      float progress = assetManager.getProgress();
       if (progress != assetsLoadedLastProgress) {
         assetsLoadedLastProgress = progress;
         Gdx.app.debug("game_over_state:render",
             MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
-                + progress + "%");
+                + (progress * 100) + "%");
       }
+      drawLoadingProgress(spriteBatch, shapeRenderer, progress);
     }
   }
 

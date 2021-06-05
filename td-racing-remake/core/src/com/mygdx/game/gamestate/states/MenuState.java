@@ -7,6 +7,7 @@ import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.controller.generic.menu_button_grid.ControllerCallbackGenericMenuButtonGrid;
 import com.mygdx.game.controller.generic.menu_button_grid.IControllerCallbackGenericMenuButtonGrid;
@@ -241,17 +242,16 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
   }
 
   @Override
-  public void render(final SpriteBatch spriteBatch) {
+  public void render(final SpriteBatch spriteBatch, final ShapeRenderer shapeRenderer) {
     if (paused) {
       // When the game is paused don't render anything
       return;
     }
     if (assetManager.update()) {
       if (!assetsLoaded) {
-        float progress = assetManager.getProgress() * 100;
         Gdx.app.debug("menu_state:render",
             MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
-                + progress + "%");
+                + (assetManager.getProgress() * 100) + "%");
         assetsLoaded = true;
         backgroundStars = assetManager.get(MainGame.getGameBackgroundFilePath("stars"));
         logoTnt = assetManager.get(MainGame.getGameLogoFilePath("tnt"));
@@ -286,14 +286,15 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
       spriteBatch.draw(logoTnt, 0, 0);
       spriteBatch.end();
     } else {
-      // display loading information
-      float progress = assetManager.getProgress() * 100;
+      // Get and render loading information
+      float progress = assetManager.getProgress();
       if (progress != assetsLoadedLastProgress) {
         assetsLoadedLastProgress = progress;
         Gdx.app.debug("menu_state:render",
             MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
-                + progress + "%");
+                + (progress * 100) + "%");
       }
+      drawLoadingProgress(spriteBatch, shapeRenderer, progress);
     }
   }
 

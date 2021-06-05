@@ -29,7 +29,6 @@ public class CreateHighscoreEntryState extends GameState implements
    * Variable for the font scale of the credits text
    */
   private static final float FONT_SCALE_YOU_REACHED_TOP_5 = 0.65f;
-  private final ShapeRenderer shapeRenderer;
   private final String scoreText;
   private final int score;
   private final int laps;
@@ -55,9 +54,6 @@ public class CreateHighscoreEntryState extends GameState implements
     this.laps = laps;
     this.goToCreditStage = goToCreditStage;
     scoreText = "" + score;
-
-    // Create a shape renderer
-    shapeRenderer = new ShapeRenderer();
 
     // Initialize game camera/canvas
     camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
@@ -142,17 +138,16 @@ public class CreateHighscoreEntryState extends GameState implements
   }
 
   @Override
-  protected void render(final SpriteBatch spriteBatch) {
+  protected void render(final SpriteBatch spriteBatch, final ShapeRenderer shapeRenderer) {
     if (paused) {
       // When the game is paused don't render anything
       return;
     }
     if (assetManager.update()) {
       if (!assetsLoaded) {
-        float progress = assetManager.getProgress() * 100;
         Gdx.app.debug("menu_state:render",
             MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
-                + progress + "%");
+                + (assetManager.getProgress() * 10) + "%");
         assetsLoaded = true;
 
         highscoreCharacterButtons = new HighscoreSelectCharacterDisplay[6];
@@ -197,21 +192,21 @@ public class CreateHighscoreEntryState extends GameState implements
       }
       shapeRenderer.end();
     } else {
-      // display loading information
-      float progress = assetManager.getProgress() * 100;
+      // Get and render loading information
+      float progress = assetManager.getProgress();
       if (progress != assetsLoadedLastProgress) {
         assetsLoadedLastProgress = progress;
         Gdx.app.debug("menu_state:render",
             MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
-                + progress + "%");
+                + (progress * 100) + "%");
       }
+      drawLoadingProgress(spriteBatch, shapeRenderer, progress);
     }
   }
 
   @Override
   protected void dispose() {
     Controllers.removeListener(controllerCallbackCreateHighscoreEntryState);
-    shapeRenderer.dispose();
   }
 
   private void saveHighscoreAndGoToList() {

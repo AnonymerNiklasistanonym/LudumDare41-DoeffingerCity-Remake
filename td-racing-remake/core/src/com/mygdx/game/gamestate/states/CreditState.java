@@ -7,6 +7,7 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.controller.generic.one_click.ControllerCallbackGenericOneClick;
@@ -25,6 +26,9 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
    * Variable for the font scale of the credits text
    */
   private static final float fontScaleCredits = 0.5f;
+  private static final String ASSET_MANAGER_ID_MUSIC_THEME = MainGame.getGameMusicFilePath("theme");
+  private static final String ASSET_MANAGER_ID_FONT_CREDITS = MainGame
+      .getGameFontFilePath("cornerstone_upper_case_big");
   private final ControllerCallbackGenericOneClick controllerCallbackGenericOneClick;
   private final boolean goToHighscoreListState;
   private Vector2[] textContentPosition;
@@ -36,8 +40,6 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
    * Variable for the font of the credits text
    */
   private BitmapFont fontCredits;
-  private static final String ASSET_MANAGER_ID_MUSIC_THEME = MainGame.getGameMusicFilePath("theme");
-  private static final String ASSET_MANAGER_ID_FONT_CREDITS = MainGame.getGameFontFilePath("cornerstone_upper_case_big");
 
   public CreditState(final GameStateManager gameStateManager) {
     this(gameStateManager, false);
@@ -111,17 +113,16 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
   }
 
   @Override
-  protected void render(final SpriteBatch spriteBatch) {
+  protected void render(final SpriteBatch spriteBatch, final ShapeRenderer shapeRenderer) {
     if (paused) {
       // When the game is paused don't render anything
       return;
     }
     if (assetManager.update()) {
       if (!assetsLoaded) {
-        float progress = assetManager.getProgress() * 100;
         Gdx.app.debug("credit_state:render",
             MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
-                + progress + "%");
+                + (assetManager.getProgress() * 100) + "%");
         assetsLoaded = true;
         musicBackground = assetManager.get(ASSET_MANAGER_ID_MUSIC_THEME);
         musicBackground.setLooping(true);
@@ -141,7 +142,7 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
       spriteBatch.setProjectionMatrix(camera.combined);
       spriteBatch.begin();
 
-      // render the text that should be displayed
+      // Render the credits (text)
       for (int i = 0; i < textCredits.length; i++) {
         fontCredits.draw(spriteBatch, textCredits[i], textContentPosition[i].x,
             textContentPosition[i].y);
@@ -149,14 +150,15 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
 
       spriteBatch.end();
     } else {
-      // display loading information
-      float progress = assetManager.getProgress() * 100;
+      // Get and render loading information
+      float progress = assetManager.getProgress();
       if (progress != assetsLoadedLastProgress) {
         assetsLoadedLastProgress = progress;
         Gdx.app.debug("credit_state:render",
             MainGame.getCurrentTimeStampLogString() + "assets are loading - progress is at "
-                + progress + "%");
+                + (progress * 100) + "%");
       }
+      drawLoadingProgress(spriteBatch, shapeRenderer, progress);
     }
   }
 
