@@ -51,9 +51,9 @@ import com.mygdx.game.objects.enemies.EnemyFat;
 import com.mygdx.game.objects.enemies.EnemyLincoln;
 import com.mygdx.game.objects.enemies.EnemySmall;
 import com.mygdx.game.objects.enemies.EnemySpider;
-import com.mygdx.game.objects.towers.FireTower;
+import com.mygdx.game.objects.towers.FlameTower;
 import com.mygdx.game.objects.towers.LaserTower;
-import com.mygdx.game.objects.towers.MgTower;
+import com.mygdx.game.objects.towers.CannonTower;
 import com.mygdx.game.objects.towers.SniperTower;
 import com.mygdx.game.unsorted.Node;
 import java.util.Date;
@@ -78,25 +78,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	private static final String ASSET_ID_TOWER_LASER_TEXTURE = MainGame.getGameButtonFilePath("tower_laser");
 	private static final String ASSET_ID_TOWER_SNIPER_TEXTURE = MainGame.getGameButtonFilePath("tower_sniper");
 	private static final String ASSET_ID_TOWER_FLAME_TEXTURE = MainGame.getGameButtonFilePath("tower_flame");
-
-	private static final String ASSET_ID_TOWER_CANNON_BOTTOM_TEXTURE = MainGame.getGameTowerFilePath("cannon_bottom");
-	private static final String ASSET_ID_TOWER_CANNON_UPPER_TEXTURE = MainGame.getGameTowerFilePath("cannon_upper");
-	private static final String ASSET_ID_TOWER_CANNON_FIRING_TEXTURE = MainGame.getGameTowerFilePath("cannon_firing");
-	private static final String ASSET_ID_TOWER_SNIPER_BOTTOM_TEXTURE = MainGame.getGameTowerFilePath("sniper_bottom");
-	private static final String ASSET_ID_TOWER_SNIPER_UPPER_TEXTURE = MainGame.getGameTowerFilePath("sniper_upper");
-	private static final String ASSET_ID_TOWER_SNIPER_FIRING_TEXTURE = MainGame.getGameTowerFilePath("sniper_firing");
-	private static final String ASSET_ID_TOWER_LASER_BOTTOM_TEXTURE = MainGame.getGameTowerFilePath("laser_bottom");
-	private static final String ASSET_ID_TOWER_LASER_UPPER_TEXTURE = MainGame.getGameTowerFilePath("laser_upper");
-	private static final String ASSET_ID_TOWER_LASER_FIRING_TEXTURE = MainGame.getGameTowerFilePath("laser_firing");
-	private static final String ASSET_ID_TOWER_FLAME_BOTTOM_TEXTURE = MainGame.getGameTowerFilePath("flame_bottom");
-	private static final String ASSET_ID_TOWER_FLAME_UPPER_TEXTURE = MainGame.getGameTowerFilePath("flame_upper");
-	private static final String ASSET_ID_TOWER_FLAME_FIRING_TEXTURE = MainGame.getGameTowerFilePath("flame_firing");
-	private static final String ASSET_ID_TOWER_FLAME_FIRE_TEXTURE = MainGame.getGameTowerFilePath("flame_fire");
-
-	private static final String ASSET_ID_TOWER_CANNON_SOUND = MainGame.getGameSoundFilePath("tower_cannon");
-	private static final String ASSET_ID_TOWER_SNIPER_SOUND = MainGame.getGameSoundFilePath("tower_sniper");
-	private static final String ASSET_ID_TOWER_LASER_SOUND = MainGame.getGameSoundFilePath("tower_laser", true);
-	private static final String ASSET_ID_TOWER_FLAME_SOUND = MainGame.getGameSoundFilePath("tower_flame");
 
 	private static final String ASSET_ID_THEME_MUSIC = MainGame.getGameMusicFilePath("theme");
 	private static final String ASSET_ID_CAR_ENGINE_MUSIC = MainGame.getGameSoundFilePath("car_engine", true);
@@ -226,19 +207,19 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		assetManager.load(ASSET_ID_TOWER_FLAME_TEXTURE, Texture.class);
 
 		// set textures (towers)
-		assetManager.load(ASSET_ID_TOWER_CANNON_BOTTOM_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_TOWER_CANNON_UPPER_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_TOWER_CANNON_FIRING_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_TOWER_SNIPER_BOTTOM_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_TOWER_SNIPER_UPPER_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_TOWER_SNIPER_FIRING_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_TOWER_LASER_BOTTOM_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_TOWER_LASER_UPPER_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_TOWER_LASER_FIRING_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_TOWER_FLAME_BOTTOM_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_TOWER_FLAME_UPPER_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_TOWER_FLAME_FIRING_TEXTURE, Texture.class);
-		assetManager.load(ASSET_ID_TOWER_FLAME_FIRE_TEXTURE, Texture.class);
+		assetManager.load(CannonTower.ASSET_ID_TEXTURE_BOTTOM, Texture.class);
+		assetManager.load(CannonTower.ASSET_ID_TEXTURE_UPPER, Texture.class);
+		assetManager.load(CannonTower.ASSET_ID_TEXTURE_FIRING, Texture.class);
+		assetManager.load(LaserTower.ASSET_ID_TEXTURE_BOTTOM, Texture.class);
+		assetManager.load(LaserTower.ASSET_ID_TEXTURE_UPPER, Texture.class);
+		assetManager.load(LaserTower.ASSET_ID_TEXTURE_FIRING, Texture.class);
+		assetManager.load(SniperTower.ASSET_ID_TEXTURE_BOTTOM, Texture.class);
+		assetManager.load(SniperTower.ASSET_ID_TEXTURE_UPPER, Texture.class);
+		assetManager.load(SniperTower.ASSET_ID_TEXTURE_FIRING, Texture.class);
+		assetManager.load(FlameTower.ASSET_ID_TEXTURE_BOTTOM, Texture.class);
+		assetManager.load(FlameTower.ASSET_ID_TEXTURE_UPPER, Texture.class);
+		assetManager.load(FlameTower.ASSET_ID_TEXTURE_FIRING, Texture.class);
+		assetManager.load(FlameTower.ASSET_ID_TEXTURE_FLAME, Texture.class);
 
 		// set textures (enemies)
 		assetManager.load(EnemyBicycle.ASSET_ID_TEXTURE_ALIVE, Texture.class);
@@ -258,10 +239,10 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		assetManager.load(EnemyLincoln.ASSET_ID_TEXTURE_DEAD, Texture.class);
 
 		// set audio files (towers)
-		assetManager.load(ASSET_ID_TOWER_CANNON_SOUND, Sound.class);
-		assetManager.load(ASSET_ID_TOWER_SNIPER_SOUND, Sound.class);
-		assetManager.load(ASSET_ID_TOWER_LASER_SOUND, Sound.class);
-		assetManager.load(ASSET_ID_TOWER_FLAME_SOUND, Sound.class);
+		assetManager.load(CannonTower.ASSET_ID_SOUND_SHOOT, Sound.class);
+		assetManager.load(SniperTower.ASSET_ID_SOUND_SHOOT, Sound.class);
+		assetManager.load(LaserTower.ASSET_ID_SOUND_SHOOT, Sound.class);
+		assetManager.load(FlameTower.ASSET_ID_SOUND_SHOOT, Sound.class);
 
 		// set audio files (other)
 		assetManager.load(ASSET_ID_THEME_MUSIC, Music.class);
@@ -545,19 +526,19 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		// Select tower to build
 		if (Gdx.input.isKeyJustPressed(Keys.NUM_1) || controllerSelectTowerPressed && controllerSelectTowerId == 0) {
 			controllerSelectTowerPressed = false;
-			towerMenu.selectTower(0, cursorPosition, enemies);
+			towerMenu.selectTower(0, cursorPosition, enemies, assetManager);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.NUM_2) || controllerSelectTowerPressed && controllerSelectTowerId == 1) {
 			controllerSelectTowerPressed = false;
-			towerMenu.selectTower(1, cursorPosition, enemies);
+			towerMenu.selectTower(1, cursorPosition, enemies, assetManager);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.NUM_3) || controllerSelectTowerPressed && controllerSelectTowerId == 2) {
 			controllerSelectTowerPressed = false;
-			towerMenu.selectTower(2, cursorPosition, enemies);
+			towerMenu.selectTower(2, cursorPosition, enemies, assetManager);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.NUM_4) || controllerSelectTowerPressed && controllerSelectTowerId == 3) {
 			controllerSelectTowerPressed = false;
-			towerMenu.selectTower(3, cursorPosition, enemies);
+			towerMenu.selectTower(3, cursorPosition, enemies, assetManager);
 		}
 
 		// Move tower
@@ -824,27 +805,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 				TowerMenu.laserButton = assetManager.get(ASSET_ID_TOWER_LASER_TEXTURE);
 				TowerMenu.sniperButton = assetManager.get(ASSET_ID_TOWER_SNIPER_TEXTURE);
 				TowerMenu.flameButton = assetManager.get(ASSET_ID_TOWER_FLAME_TEXTURE);
-
-				// set textures (towers)
-				MgTower.groundTower = assetManager.get(ASSET_ID_TOWER_CANNON_BOTTOM_TEXTURE);
-				MgTower.upperTower = assetManager.get(ASSET_ID_TOWER_CANNON_UPPER_TEXTURE);
-				MgTower.towerFiring = assetManager.get(ASSET_ID_TOWER_CANNON_FIRING_TEXTURE);
-				SniperTower.groundTower = assetManager.get(ASSET_ID_TOWER_SNIPER_BOTTOM_TEXTURE);
-				SniperTower.upperTower = assetManager.get(ASSET_ID_TOWER_SNIPER_UPPER_TEXTURE);
-				SniperTower.towerFiring = assetManager.get(ASSET_ID_TOWER_SNIPER_FIRING_TEXTURE);
-				LaserTower.groundTower = assetManager.get(ASSET_ID_TOWER_LASER_BOTTOM_TEXTURE);
-				LaserTower.upperTower = assetManager.get(ASSET_ID_TOWER_LASER_UPPER_TEXTURE);
-				LaserTower.towerFiring = assetManager.get(ASSET_ID_TOWER_LASER_FIRING_TEXTURE);
-				FireTower.groundTower = assetManager.get(ASSET_ID_TOWER_FLAME_BOTTOM_TEXTURE);
-				FireTower.upperTower = assetManager.get(ASSET_ID_TOWER_FLAME_UPPER_TEXTURE);
-				FireTower.towerFiring = assetManager.get(ASSET_ID_TOWER_FLAME_FIRING_TEXTURE);
-				FireTower.tflame = assetManager.get(ASSET_ID_TOWER_FLAME_FIRE_TEXTURE);
-
-				// set audio files (towers)
-				MgTower.soundShoot = assetManager.get(ASSET_ID_TOWER_CANNON_SOUND);
-				SniperTower.soundShoot = assetManager.get(ASSET_ID_TOWER_SNIPER_SOUND);
-				LaserTower.soundShoot = assetManager.get(ASSET_ID_TOWER_LASER_SOUND);
-				FireTower.soundShoot = assetManager.get(ASSET_ID_TOWER_FLAME_SOUND);
 
 				// set audio files (other)
 				musicBackground = assetManager.get(ASSET_ID_THEME_MUSIC);
@@ -1209,19 +1169,23 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 				ASSET_ID_TOWER_LASER_TEXTURE,
 				ASSET_ID_TOWER_SNIPER_TEXTURE,
 				ASSET_ID_TOWER_FLAME_TEXTURE,
-				ASSET_ID_TOWER_CANNON_BOTTOM_TEXTURE,
-				ASSET_ID_TOWER_CANNON_UPPER_TEXTURE,
-				ASSET_ID_TOWER_CANNON_FIRING_TEXTURE,
-				ASSET_ID_TOWER_SNIPER_BOTTOM_TEXTURE,
-				ASSET_ID_TOWER_SNIPER_UPPER_TEXTURE,
-				ASSET_ID_TOWER_SNIPER_FIRING_TEXTURE,
-				ASSET_ID_TOWER_LASER_BOTTOM_TEXTURE,
-				ASSET_ID_TOWER_LASER_UPPER_TEXTURE,
-				ASSET_ID_TOWER_LASER_FIRING_TEXTURE,
-				ASSET_ID_TOWER_FLAME_BOTTOM_TEXTURE,
-				ASSET_ID_TOWER_FLAME_UPPER_TEXTURE,
-				ASSET_ID_TOWER_FLAME_FIRING_TEXTURE,
-				ASSET_ID_TOWER_FLAME_FIRE_TEXTURE,
+				CannonTower.ASSET_ID_TEXTURE_BOTTOM,
+				CannonTower.ASSET_ID_TEXTURE_UPPER,
+				CannonTower.ASSET_ID_TEXTURE_FIRING,
+				LaserTower.ASSET_ID_TEXTURE_BOTTOM,
+				LaserTower.ASSET_ID_TEXTURE_UPPER,
+				LaserTower.ASSET_ID_TEXTURE_FIRING,
+				SniperTower.ASSET_ID_TEXTURE_BOTTOM,
+				SniperTower.ASSET_ID_TEXTURE_UPPER,
+				SniperTower.ASSET_ID_TEXTURE_FIRING,
+				FlameTower.ASSET_ID_TEXTURE_BOTTOM,
+				FlameTower.ASSET_ID_TEXTURE_UPPER,
+				FlameTower.ASSET_ID_TEXTURE_FIRING,
+				FlameTower.ASSET_ID_TEXTURE_FLAME,
+				CannonTower.ASSET_ID_SOUND_SHOOT,
+				SniperTower.ASSET_ID_SOUND_SHOOT,
+				LaserTower.ASSET_ID_SOUND_SHOOT,
+				FlameTower.ASSET_ID_SOUND_SHOOT,
 				EnemyBicycle.ASSET_ID_TEXTURE_ALIVE,
 				EnemyBicycle.ASSET_ID_TEXTURE_DAMAGE,
 				EnemyBicycle.ASSET_ID_TEXTURE_DEAD,
@@ -1237,10 +1201,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 				EnemyLincoln.ASSET_ID_TEXTURE_ALIVE,
 				EnemyLincoln.ASSET_ID_TEXTURE_DAMAGE,
 				EnemyLincoln.ASSET_ID_TEXTURE_DEAD,
-				ASSET_ID_TOWER_CANNON_SOUND,
-				ASSET_ID_TOWER_SNIPER_SOUND,
-				ASSET_ID_TOWER_LASER_SOUND,
-				ASSET_ID_TOWER_FLAME_SOUND,
 				ASSET_ID_THEME_MUSIC,
 				ASSET_ID_CAR_ENGINE_MUSIC,
 				ASSET_ID_CAR_ENGINE_START_SOUND,

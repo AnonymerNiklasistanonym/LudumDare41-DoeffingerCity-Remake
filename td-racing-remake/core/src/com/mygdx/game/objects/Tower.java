@@ -1,5 +1,7 @@
 package com.mygdx.game.objects;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -18,6 +20,7 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.mygdx.game.MainGame;
 import com.mygdx.game.gamestate.states.PlayState;
 
 public abstract class Tower implements Disposable {
@@ -55,17 +58,23 @@ public abstract class Tower implements Disposable {
 	protected float timesincelastshot;
 	private boolean toremove;
 	protected float turnspeed;
+	protected final World world;
+	protected final String name;
 
-	protected Tower(final Vector2 position, final Texture spriteBody, final Texture spriteUpperBody,
-			final Texture spriteFiring, final Array<Enemy> enemies, final World world, final int range,
-			final Sound soundShoot) {
-		System.out.println("CREATE NEW TOWER");
-		this.soundShoot = soundShoot;
+	protected Tower(final String name, final Vector2 position, final AssetManager assetManager, final String assetIdBottom, final String assetIdUpper,
+			final String assetIdFiring, final Array<Enemy> enemies, final World world, final int range,
+			final String assetIdShoot) {
+		Gdx.app.debug("tower:constructor", MainGame.getCurrentTimeStampLogString() + "create tower \"" + name + "\"");
+		this.name = name;
+		soundShoot = assetManager.get(assetIdShoot);
 		this.enemies = enemies;
 		this.range = range;
-		this.spriteBody = new Sprite(spriteBody);
-		this.spriteUpperBody = new Sprite(spriteUpperBody);
-		this.spriteFiring = new Sprite(spriteFiring);
+		Texture bottom = assetManager.get(assetIdBottom);
+		this.spriteBody = new Sprite(bottom);
+		Texture upper = assetManager.get(assetIdUpper);
+		this.spriteUpperBody = new Sprite(upper);
+		Texture firing = assetManager.get(assetIdFiring);
+		this.spriteFiring = new Sprite(firing);
 		this.spriteBody.setSize(spriteBody.getWidth() * PlayState.PIXEL_TO_METER,
 				spriteBody.getHeight() * PlayState.PIXEL_TO_METER);
 		this.spriteUpperBody.setSize(spriteUpperBody.getWidth() * PlayState.PIXEL_TO_METER,
@@ -75,6 +84,7 @@ public abstract class Tower implements Disposable {
 		this.spriteBody.setOriginCenter();
 		this.spriteUpperBody.setOriginCenter();
 		this.spriteFiring.setOriginCenter();
+		this.world = world;
 
 		timesincelastshot = 10;
 		soundVolume = 0.25f;
@@ -122,10 +132,7 @@ public abstract class Tower implements Disposable {
 	}
 
 	public void disposeMedia() {
-		spriteBody.getTexture().dispose();
-		spriteFiring.getTexture().dispose();
-		spriteFiring.getTexture().dispose();
-		soundShoot.dispose();
+		// Nothing to dispose since everything is loaded via the asset manager
 	}
 
 	public void draw(final SpriteBatch spriteBatch) {

@@ -13,26 +13,26 @@ import com.mygdx.game.MainGame;
 import com.mygdx.game.objects.Enemy;
 import com.mygdx.game.objects.Tower;
 
-public class SniperTower extends Tower {
+public class CannonTower extends Tower {
 
-	private static final String TOWER_NAME = "Sniper";
+	private static final String TOWER_NAME = "Cannon";
 
-	public static final String ASSET_ID_TEXTURE_BOTTOM = MainGame.getGameTowerFilePath("sniper_bottom");
-	public static final String ASSET_ID_TEXTURE_UPPER = MainGame.getGameTowerFilePath("sniper_upper");
-	public static final String ASSET_ID_TEXTURE_FIRING = MainGame.getGameTowerFilePath("sniper_firing");
-	public static final String ASSET_ID_SOUND_SHOOT = MainGame.getGameSoundFilePath("tower_sniper");
-	public static final int COST = 400;
-	public static final int RANGE = 25;
+	public static final String ASSET_ID_TEXTURE_BOTTOM = MainGame.getGameTowerFilePath("cannon_bottom");
+	public static final String ASSET_ID_TEXTURE_UPPER = MainGame.getGameTowerFilePath("cannon_upper");
+	public static final String ASSET_ID_TEXTURE_FIRING = MainGame.getGameTowerFilePath("cannon_firing");
+	public static final String ASSET_ID_SOUND_SHOOT = MainGame.getGameSoundFilePath("tower_cannon");
+	public static final int COST = 100;
+	public static final int RANGE = 11;
 
-	private static final Color COLOR_TOWER_RANGE = new Color(0.5f, 0.1f, 0.7f, 0.3f);
-	private static final float TIME_FIRING_SPRITE = 0.5f;
-	private static final float POWER_SHOOT = 40;
-	private static final float SPEED_SHOOT = 5;
+	private static final Color COLOR_TOWER_RANGE = new Color(.5f, 0.1f, 0.7f, 0.3f);
+	private static final float TIME_FIRING_SPRITE = 0.1f;
+	private static final float POWER_SHOOT = 1;
+	private static final float SPEED_SHOOT = 0.4f;
 	private static final float SPEED_TURN = 30;
 	private static final boolean SOUND_LOOP = false;
 	private static final float SOUND_VOLUME = 0.25f;
 
-	public SniperTower(final Vector2 position, final Array<Enemy> enemies, final World world,
+	public CannonTower(final Vector2 position, final Array<Enemy> enemies, final World world,
 			final AssetManager assetManager) {
 		super(TOWER_NAME, position, assetManager, ASSET_ID_TEXTURE_BOTTOM, ASSET_ID_TEXTURE_UPPER, ASSET_ID_TEXTURE_FIRING, enemies, world, RANGE, ASSET_ID_SOUND_SHOOT);
 
@@ -47,7 +47,7 @@ public class SniperTower extends Tower {
 
 	@Override
 	public void drawProjectile(final ShapeRenderer shapeRenderer) {
-		shapeRenderer.setColor(Color.ORANGE);
+		shapeRenderer.setColor(Color.YELLOW);
 		shapeRenderer.rectLine(center, shotposition, 0.2f);
 	}
 
