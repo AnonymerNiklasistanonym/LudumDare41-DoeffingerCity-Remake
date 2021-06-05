@@ -61,23 +61,23 @@ import java.util.Date;
 public class PlayState extends GameState implements CollisionCallbackInterface, IControllerCallbackPlayState,
 		ScoreBoardCallbackInterface, EnemyCallbackInterface {
 
-	private final static String STATE_NAME = "Play";
-	private final static String TEXT_LOADING = "LOADING";
+	private static final String STATE_NAME = "Play";
+	private static final String TEXT_LOADING = "LOADING";
 
 	private static final String ASSET_ID_TEXT_FONT = MainGame.getGameFontFilePath("cornerstone_70");
 
 	private static final String ASSET_ID_TEXT_LOADING_FONT = MainGame.getGameFontFilePath("cornerstone_upper_case_big");
 	private static final String ASSET_ID_BACKGROUND_LOADING_TEXTURE = MainGame.getGameBackgroundFilePath("loading");
 
-	private final static String ASSET_ID_CAR_TEXTURE = MainGame.getGameCarFilePath("standard");
-	private final static String ASSET_ID_FINISH_LINE_TEXTURE = MainGame.getGameMapFilePath("finish_line");
-	private final static String ASSET_ID_PIT_STOP_TEXTURE = MainGame.getGameMapFilePath("pit_stop");
-	private final static String ASSET_ID_SMOKE_TEXTURE = MainGame.getGameMapFilePath("smoke");
+	private static final String ASSET_ID_CAR_TEXTURE = MainGame.getGameCarFilePath("standard");
+	private static final String ASSET_ID_FINISH_LINE_TEXTURE = MainGame.getGameMapFilePath("finish_line");
+	private static final String ASSET_ID_PIT_STOP_TEXTURE = MainGame.getGameMapFilePath("pit_stop");
+	private static final String ASSET_ID_SMOKE_TEXTURE = MainGame.getGameMapFilePath("smoke");
 
-	private final static String ASSET_ID_TOWER_CANNON_TEXTURE = MainGame.getGameButtonFilePath("tower_cannon");
-	private final static String ASSET_ID_TOWER_LASER_TEXTURE = MainGame.getGameButtonFilePath("tower_laser");
-	private final static String ASSET_ID_TOWER_SNIPER_TEXTURE = MainGame.getGameButtonFilePath("tower_sniper");
-	private final static String ASSET_ID_TOWER_FLAME_TEXTURE = MainGame.getGameButtonFilePath("tower_flame");
+	private static final String ASSET_ID_TOWER_CANNON_TEXTURE = MainGame.getGameButtonFilePath("tower_cannon");
+	private static final String ASSET_ID_TOWER_LASER_TEXTURE = MainGame.getGameButtonFilePath("tower_laser");
+	private static final String ASSET_ID_TOWER_SNIPER_TEXTURE = MainGame.getGameButtonFilePath("tower_sniper");
+	private static final String ASSET_ID_TOWER_FLAME_TEXTURE = MainGame.getGameButtonFilePath("tower_flame");
 
 	private static final String ASSET_ID_TOWER_CANNON_BOTTOM_TEXTURE = MainGame.getGameTowerFilePath("cannon_bottom");
 	private static final String ASSET_ID_TOWER_CANNON_UPPER_TEXTURE = MainGame.getGameTowerFilePath("cannon_upper");
@@ -121,14 +121,14 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	// TODO Make that and the physics implementation variable from this value so that the fps can
 	// TODO be set to other values like for example 240
-	public final static int foregroundFps = 60;
+	public static final int foregroundFps = 60;
 
 	// Identify collision entities
-	public final static short PLAYER_BOX = 0x1; // 0001
-	public final static short ENEMY_BOX = 0x1 << 1; // 0010 or 0x2 in hex
-	public final static float TIME_STEP = (float) 1 / foregroundFps; // time for physics step
-	public final static float PIXEL_TO_METER = 0.05f;
-	public final static float METER_TO_PIXEL = 20f;
+	public static final short PLAYER_BOX = 0x1; // 0001
+	public static final short ENEMY_BOX = 0x1 << 1; // 0010 or 0x2 in hex
+	public static final float TIME_STEP = (float) 1 / foregroundFps; // time for physics step
+	public static final float PIXEL_TO_METER = 0.05f;
+	public static final float METER_TO_PIXEL = 20f;
 
 	private Music musicBackground;
 	private Music musicCar;
@@ -697,7 +697,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	@Override
 	protected void update(float deltaTime) {
-		if (pausedByUser || !assetsLoaded || !levelLoaded) {
+		if (paused || pausedByUser || !assetsLoaded || !levelLoaded) {
 			return;
 		}
 

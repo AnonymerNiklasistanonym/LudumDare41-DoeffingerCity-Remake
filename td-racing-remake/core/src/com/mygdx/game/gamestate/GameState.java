@@ -20,7 +20,7 @@ public abstract class GameState extends ControllerCallbackVariables {
   /**
    * The name of the game state
    */
-  final public String stateName;
+  public final String stateName;
   /**
    * Game screen camera
    */
@@ -41,7 +41,7 @@ public abstract class GameState extends ControllerCallbackVariables {
   /**
    * The current cursor position
    */
-  protected final Vector3 cursorPosition;
+  protected final Vector3 cursorPosition = new Vector3();
   /**
    * Indicator if all assets are already loaded
    */
@@ -66,14 +66,11 @@ public abstract class GameState extends ControllerCallbackVariables {
         MainGame.getCurrentTimeStampLogString() + "create new state: \"" + stateName + "\"");
     this.stateName = stateName;
     this.gameStateManager = gameStateManager;
-    this.camera = new OrthographicCamera();
+    camera = new OrthographicCamera();
 
     // Get the asset and preferences manager from the game state manager
     assetManager = this.gameStateManager.getAssetManager();
     preferencesManager = this.gameStateManager.getPreferencesManager();
-
-    // Initialize variable for the cursor position
-    cursorPosition = new Vector3();
   }
 
   /**
@@ -139,8 +136,10 @@ public abstract class GameState extends ControllerCallbackVariables {
    */
   protected void drawLoadingProgress(final SpriteBatch spriteBatch,
       final ShapeRenderer shapeRenderer, final float progress) {
-    spriteBatch.setProjectionMatrix(camera.combined);
-    shapeRenderer.setProjectionMatrix(spriteBatch.getProjectionMatrix());
+    // Uncomment an replace the next line if sprite batch is needed
+    //spriteBatch.setProjectionMatrix(camera.combined);
+    //shapeRenderer.setProjectionMatrix(spriteBatch.getProjectionMatrix());
+    shapeRenderer.setProjectionMatrix(camera.combined);
     shapeRenderer.begin(ShapeType.Filled);
     shapeRenderer.setColor(1, 1, 1, 1);
     shapeRenderer

@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.controller.generic.menu_button_grid.ControllerCallbackGenericMenuButtonGrid;
 import com.mygdx.game.controller.generic.menu_button_grid.IControllerCallbackGenericMenuButtonGrid;
+import com.mygdx.game.controller.generic.menu_button_grid.NextMenuButtonDirection;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
 import com.mygdx.game.gamestate.elements.MenuButton;
@@ -28,15 +29,15 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
   /**
    * The menu button ID for starting the game
    */
-  private final static String START_ID = "START_ID";
+  private static final String START_ID = "START_ID";
   /**
    * The menu button ID for switching to the highscore list
    */
-  private final static String HIGHSCORE_ID = "HIGHSCORE_ID";
+  private static final String HIGHSCORE_ID = "HIGHSCORE_ID";
   /**
    * The menu button ID for switching to the about screen
    */
-  private final static String ABOUT_ID = "ABOUT_ID";
+  private static final String ABOUT_ID = "ABOUT_ID";
   /**
    * The game state name for this game state
    */
@@ -373,31 +374,23 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
   }
 
   @Override
-  public void controllerCallbackSelectLeftMenuButton() {
-    Gdx.app.debug("menu_state:controllerCallbackSelectLeftMenuButton",
-        MainGame.getCurrentTimeStampLogString());
-    controllerLeftKeyWasPressed = true;
-  }
-
-  @Override
-  public void controllerCallbackSelectRightMenuButton() {
-    Gdx.app.debug("menu_state:controllerCallbackSelectRightMenuButton",
-        MainGame.getCurrentTimeStampLogString());
-    controllerRightKeyWasPressed = true;
-  }
-
-  @Override
-  public void controllerCallbackSelectAboveMenuButton() {
-    Gdx.app.debug("menu_state:controllerCallbackSelectAboveMenuButton",
-        MainGame.getCurrentTimeStampLogString());
-    controllerUpKeyWasPressed = true;
-  }
-
-  @Override
-  public void controllerCallbackSelectBelowMenuButton() {
-    Gdx.app.debug("menu_state:controllerCallbackSelectBelowMenuButton",
-        MainGame.getCurrentTimeStampLogString());
-    controllerDownKeyWasPressed = true;
+  public void controllerCallbackSelectMenuButton(NextMenuButtonDirection direction) {
+    Gdx.app.debug("menu_state:controllerCallbackSelectMenuButton",
+        MainGame.getCurrentTimeStampLogString() + direction.name());
+    switch (direction) {
+      case ABOVE:
+        controllerUpKeyWasPressed = true;
+        break;
+      case BELOW:
+        controllerDownKeyWasPressed = true;
+        break;
+      case RIGHT:
+        controllerRightKeyWasPressed = true;
+        break;
+      case LEFT:
+        controllerLeftKeyWasPressed = true;
+        break;
+    }
   }
 
   @Override

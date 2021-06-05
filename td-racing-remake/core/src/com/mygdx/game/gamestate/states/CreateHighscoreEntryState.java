@@ -11,8 +11,10 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.MainGame;
+import com.mygdx.game.controller.create_highscore_entry.ChangeCharacterDirection;
 import com.mygdx.game.controller.create_highscore_entry.ControllerCallbackCreateHighscoreEntryState;
 import com.mygdx.game.controller.create_highscore_entry.IControllerCallbackCreateHighscoreEntryState;
+import com.mygdx.game.controller.create_highscore_entry.NextCharacterEntryDirection;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
 import com.mygdx.game.gamestate.elements.HighscoreSelectCharacterDisplay;
@@ -22,13 +24,14 @@ public class CreateHighscoreEntryState extends GameState implements
     IControllerCallbackCreateHighscoreEntryState {
 
   private static final String STATE_NAME = "CreateHighscoreEntry";
-  private static final String highscoreText = "YOU REACHED THE TOP 5!";
+  private static final String HIGHSCORE_TEXT = "YOU REACHED THE TOP 5!";
   private static final String ASSET_ID_YOU_REACHED_TOP_5_FONT = MainGame
       .getGameFontFilePath("cornerstone_upper_case_big");
   /**
    * Variable for the font scale of the credits text
    */
   private static final float FONT_SCALE_YOU_REACHED_TOP_5 = 0.65f;
+
   private final String scoreText;
   private final int score;
   private final int laps;
@@ -45,8 +48,7 @@ public class CreateHighscoreEntryState extends GameState implements
   private BitmapFont fontYouReachedTop5;
 
   public CreateHighscoreEntryState(GameStateManager gameStateManager, final int score,
-      final int level, final int laps,
-      final boolean goToCreditStage) {
+      final int level, final int laps, final boolean goToCreditStage) {
     super(gameStateManager, STATE_NAME);
 
     this.score = score;
@@ -71,6 +73,11 @@ public class CreateHighscoreEntryState extends GameState implements
 
   @Override
   protected void handleInput() {
+    if (paused || !assetsLoaded) {
+      // When the game is paused or assets not loaded don't handle anything
+      return;
+    }
+
     if (Gdx.app.getType() == ApplicationType.Desktop) {
       // Toggle full screen when full screen keys are pressed (desktop only)
       if (controllerToggleFullScreenPressed || Gdx.input.isKeyJustPressed(Keys.F11)) {
@@ -164,7 +171,7 @@ public class CreateHighscoreEntryState extends GameState implements
         fontYouReachedTop5.getData().setScale(FONT_SCALE_YOU_REACHED_TOP_5);
         fontYouReachedTop5.setUseIntegerPositions(false);
         highscoreTextPosition = GameStateManager.calculateCenteredTextPosition(fontYouReachedTop5,
-            highscoreText, MainGame.GAME_WIDTH, (float) MainGame.GAME_HEIGHT / 3 * 5);
+            HIGHSCORE_TEXT, MainGame.GAME_WIDTH, (float) MainGame.GAME_HEIGHT / 3 * 5);
         scoreTextPosition = GameStateManager
             .calculateCenteredTextPosition(fontYouReachedTop5, scoreText,
                 MainGame.GAME_WIDTH, (float) MainGame.GAME_HEIGHT / 3);
@@ -180,7 +187,7 @@ public class CreateHighscoreEntryState extends GameState implements
       spriteBatch.setProjectionMatrix(camera.combined);
       spriteBatch.begin();
       fontYouReachedTop5
-          .draw(spriteBatch, highscoreText, highscoreTextPosition.x, highscoreTextPosition.y);
+          .draw(spriteBatch, HIGHSCORE_TEXT, highscoreTextPosition.x, highscoreTextPosition.y);
       fontYouReachedTop5.draw(spriteBatch, scoreText, scoreTextPosition.x, scoreTextPosition.y);
       for (final HighscoreSelectCharacterDisplay highscoreCharacterButton : highscoreCharacterButtons) {
         highscoreCharacterButton.draw(spriteBatch);
@@ -283,21 +290,26 @@ public class CreateHighscoreEntryState extends GameState implements
   }
 
   @Override
-  public void controllerCallbackSelectLeftCharacter() {
-    controllerLeftKeyWasPressed = true;
+  public void controllerCallbackSelectCharacterEntry(NextCharacterEntryDirection direction) {
+    switch (direction) {
+      case LEFT:
+        controllerLeftKeyWasPressed = true;
+        break;
+      case RIGHT:
+        controllerRightKeyWasPressed = true;
+        break;
+    }
   }
 
   @Override
-  public void controllerCallbackSelectRightCharacter() {
-    controllerRightKeyWasPressed = true;
-  }
-
-  @Override
-  public void controllerCallbackSelectAboveMenuButton(boolean upwards) {
-    if (upwards) {
-      controllerUpKeyWasPressed = true;
-    } else {
-      controllerDownKeyWasPressed = true;
+  public void controllerCallbackChangeCharacterEntry(ChangeCharacterDirection direction) {
+    switch (direction) {
+      case UPWARDS:
+        controllerUpKeyWasPressed = true;
+        break;
+      case DOWNWARDS:
+        controllerDownKeyWasPressed = true;
+        break;
     }
   }
 

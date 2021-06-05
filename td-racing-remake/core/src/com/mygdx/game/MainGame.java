@@ -25,19 +25,19 @@ public class MainGame implements ApplicationListener {
   /**
    * Height of the game screen
    */
-  public final static int GAME_HEIGHT = 720;
+  public static final int GAME_HEIGHT = 720;
   /**
    * Width of the game screen
    */
-  public final static int GAME_WIDTH = 1280;
+  public static final int GAME_WIDTH = 1280;
   /**
    * Name of the game
    */
-  public final static String GAME_NAME = "TnT (Tracks `n Towers)";
+  public static final String GAME_NAME = "TnT (Tracks `n Towers)";
   /**
    * The provided icon sizes
    */
-  public final static int[] GAME_ICON_SIZES = {16, 32, 64};
+  public static final int[] GAME_ICON_SIZES = {16, 32, 64};
 
   /**
    * Indicator if release or development version of the game

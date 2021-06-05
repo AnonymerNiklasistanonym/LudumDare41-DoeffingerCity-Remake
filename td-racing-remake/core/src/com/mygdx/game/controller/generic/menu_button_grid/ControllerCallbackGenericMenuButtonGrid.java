@@ -20,13 +20,13 @@ public class ControllerCallbackGenericMenuButtonGrid implements ControllerListen
    * The threshold for recognizing an axis input (this is used so that the constant spam of low
    * values when the user only slightly touches an axis is ignored)
    */
-  private final static float THRESHOLD_CONTROLLER_AXIS_INPUT = 0.5f;
+  private static final float THRESHOLD_CONTROLLER_AXIS_INPUT = 0.5f;
   /**
    * The threshold for an "ignore inputs after a registered input" time span so that menu inputs are
    * not spammed (otherwise a simple axis up input quickly creates 5 UP callbacks but we only want
    * to register one)
    */
-  private final static float THRESHOLD_BETWEEN_AXIS_INPUTS_IN_MS = 300;
+  private static final float THRESHOLD_BETWEEN_AXIS_INPUTS_IN_MS = 300;
   /**
    * Class that implements the controller callbacks
    */
@@ -88,10 +88,6 @@ public class ControllerCallbackGenericMenuButtonGrid implements ControllerListen
               + ") with the a value " + value + "that is higher than the threshold "
               + THRESHOLD_CONTROLLER_AXIS_INPUT);
       switch (ControllerInputMapping.getControllerAxis(controller, axisCode)) {
-        case AXIS_LT:
-        case AXIS_RT:
-          // Ignore input
-          break;
         case AXIS_LEFT_PAD_HORIZONTAL:
         case AXIS_RIGHT_PAD_HORIZONTAL:
           // Reduce spamming of one axis input by only allowing one input for a certain time
@@ -104,9 +100,9 @@ public class ControllerCallbackGenericMenuButtonGrid implements ControllerListen
           if (timeDifferenceSinceLastLeftRightInput > THRESHOLD_BETWEEN_AXIS_INPUTS_IN_MS) {
             lastTimeAxisHorizontalInputCallback = new Date().getTime();
             if (value > 0) {
-              controllerCallbackClass.controllerCallbackSelectRightMenuButton();
+              controllerCallbackClass.controllerCallbackSelectMenuButton(NextMenuButtonDirection.RIGHT);
             } else {
-              controllerCallbackClass.controllerCallbackSelectLeftMenuButton();
+              controllerCallbackClass.controllerCallbackSelectMenuButton(NextMenuButtonDirection.LEFT);
             }
           }
           break;
@@ -122,9 +118,9 @@ public class ControllerCallbackGenericMenuButtonGrid implements ControllerListen
           if (timeDifferenceSinceLastUpDownInput > THRESHOLD_BETWEEN_AXIS_INPUTS_IN_MS) {
             lastTimeAxisVerticalInputCallback = new Date().getTime();
             if (value > 0) {
-              controllerCallbackClass.controllerCallbackSelectBelowMenuButton();
+              controllerCallbackClass.controllerCallbackSelectMenuButton(NextMenuButtonDirection.BELOW);
             } else {
-              controllerCallbackClass.controllerCallbackSelectAboveMenuButton();
+              controllerCallbackClass.controllerCallbackSelectMenuButton(NextMenuButtonDirection.ABOVE);
             }
           }
           break;
@@ -157,16 +153,16 @@ public class ControllerCallbackGenericMenuButtonGrid implements ControllerListen
           controllerCallbackClass.controllerCallbackToggleFullScreen();
           break;
         case BUTTON_UP:
-          controllerCallbackClass.controllerCallbackSelectAboveMenuButton();
+          controllerCallbackClass.controllerCallbackSelectMenuButton(NextMenuButtonDirection.ABOVE);
           break;
         case BUTTON_DOWN:
-          controllerCallbackClass.controllerCallbackSelectBelowMenuButton();
+          controllerCallbackClass.controllerCallbackSelectMenuButton(NextMenuButtonDirection.BELOW);
           break;
         case BUTTON_LEFT:
-          controllerCallbackClass.controllerCallbackSelectLeftMenuButton();
+          controllerCallbackClass.controllerCallbackSelectMenuButton(NextMenuButtonDirection.LEFT);
           break;
         case BUTTON_RIGHT:
-          controllerCallbackClass.controllerCallbackSelectRightMenuButton();
+          controllerCallbackClass.controllerCallbackSelectMenuButton(NextMenuButtonDirection.RIGHT);
           break;
         case BUTTON_X:
           controllerCallbackClass.controllerCallbackToggleMusic();

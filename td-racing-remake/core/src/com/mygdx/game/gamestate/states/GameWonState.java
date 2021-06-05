@@ -37,10 +37,16 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
    */
   private final AssetManager assetManager;
   /**
-   * Variable tzo keep track of the achieved score
+   * Variable to keep track of the achieved score
    */
   private final int score;
+  /**
+   * Variable to keep track of the reached level
+   */
   private final int level;
+  /**
+   * Variable to keep track of the achieved laps
+   */
   private final int laps;
   /**
    * Variable for the texture of the game won background
@@ -71,6 +77,7 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
     // Load assets that are not necessary to be available just yet
     assetManager.load(MainGame.getGameBackgroundFilePath("game_won"), Texture.class);
     assetManager.load(MainGame.getGameSoundFilePath("victory"), Sound.class);
+
     // Register controller callback so that controller input can be managed
     controllerCallbackGenericOneClick = new ControllerCallbackGenericOneClick(this);
     Controllers.addListener(controllerCallbackGenericOneClick);

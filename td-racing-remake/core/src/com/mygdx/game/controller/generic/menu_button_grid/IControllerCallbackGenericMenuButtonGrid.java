@@ -9,24 +9,11 @@ public interface IControllerCallbackGenericMenuButtonGrid extends
     IControllerCallbackGenericGlobalButtons {
 
   /**
-   * Select left menu button
+   * Select a menu button
+   *
+   * @param direction The direction in which the next menu button was selected
    */
-  void controllerCallbackSelectLeftMenuButton();
-
-  /**
-   * Select right menu button
-   */
-  void controllerCallbackSelectRightMenuButton();
-
-  /**
-   * Select above (up) menu button
-   */
-  void controllerCallbackSelectAboveMenuButton();
-
-  /**
-   * Select below (down) menu button
-   */
-  void controllerCallbackSelectBelowMenuButton();
+  void controllerCallbackSelectMenuButton(NextMenuButtonDirection direction);
 
   /**
    * Click the start game menu button

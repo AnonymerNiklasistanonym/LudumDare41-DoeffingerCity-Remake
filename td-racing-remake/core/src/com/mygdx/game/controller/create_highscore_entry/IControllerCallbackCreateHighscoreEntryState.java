@@ -1,6 +1,7 @@
 package com.mygdx.game.controller.create_highscore_entry;
 
 import com.mygdx.game.controller.IControllerCallbackGenericGlobalButtons;
+import com.mygdx.game.controller.generic.menu_button_grid.NextMenuButtonDirection;
 
 /**
  * Callback interface for controller inputs in the menu state
@@ -9,21 +10,18 @@ public interface IControllerCallbackCreateHighscoreEntryState extends
     IControllerCallbackGenericGlobalButtons {
 
   /**
-   * Select left character button
-   */
-  void controllerCallbackSelectLeftCharacter();
-
-  /**
-   * Select right character button
-   */
-  void controllerCallbackSelectRightCharacter();
-
-  /**
-   * Change character
+   * Select a character entry
    *
-   * @param upwards True if upwards was pressed otherwise downwards
+   * @param direction The direction in which the next character entry was selected
    */
-  void controllerCallbackSelectAboveMenuButton(boolean upwards);
+  void controllerCallbackSelectCharacterEntry(NextCharacterEntryDirection direction);
+
+  /**
+   * Change a character in the currently selected character entry
+   *
+   * @param direction The direction in which the character was changed
+   */
+  void controllerCallbackChangeCharacterEntry(ChangeCharacterDirection direction);
 
   /**
    * Accept the highscore entry and go to the next state

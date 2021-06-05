@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.controller.generic.menu_button_grid.ControllerCallbackGenericMenuButtonGrid;
 import com.mygdx.game.controller.generic.menu_button_grid.IControllerCallbackGenericMenuButtonGrid;
+import com.mygdx.game.controller.generic.menu_button_grid.NextMenuButtonDirection;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
 import com.mygdx.game.gamestate.elements.MenuButton;
@@ -28,19 +29,19 @@ public class GameOverState extends GameState implements IControllerCallbackGener
   /**
    * The menu button ID for (re)starting the game
    */
-  private final static String PLAY_AGAIN_ID = "PLAY_AGAIN_ID";
+  private static final String PLAY_AGAIN_ID = "PLAY_AGAIN_ID";
   /**
    * The menu button ID for (re)starting the current level of the game
    */
-  private final static String PLAY_LEVEL_AGAIN_ID = "PLAY_LEVEL_AGAIN_ID";
+  private static final String PLAY_LEVEL_AGAIN_ID = "PLAY_LEVEL_AGAIN_ID";
   /**
    * The menu button ID for opening the highscore list page
    */
-  private final static String HIGHSCORE_ID = "HIGHSCORE_ID";
+  private static final String HIGHSCORE_ID = "HIGHSCORE_ID";
   /**
    * The menu button ID for opening the about page
    */
-  private final static String ABOUT_ID = "ABOUT_ID";
+  private static final String ABOUT_ID = "ABOUT_ID";
 
   /**
    * The game state name for this game state
@@ -49,11 +50,11 @@ public class GameOverState extends GameState implements IControllerCallbackGener
   /**
    * The game over text
    */
-  private static final String gameOverText = "GAME OVER";
+  private static final String GAME_OVER_TEXT = "GAME OVER";
   /**
    * The game over text font scale
    */
-  private static final float gameOverFontScale = 1;
+  private static final float GAME_OVER_FONT_SCALE = 1;
   /**
    * Controller callback class that gets this class in its constructor which implements some
    * callback methods and can then be added as a controller listener which can then call the
@@ -230,13 +231,6 @@ public class GameOverState extends GameState implements IControllerCallbackGener
         controllerSelectKeyWasPressed = false;
         openSelectedMenuButton();
       }
-    } else {
-      controllerDownKeyWasPressed = false;
-      controllerUpKeyWasPressed = false;
-      controllerLeftKeyWasPressed = false;
-      controllerRightKeyWasPressed = false;
-      controllerStartKeyWasPressed = false;
-      controllerSelectKeyWasPressed = false;
     }
 
     // If escape or back is pressed quit
@@ -286,9 +280,9 @@ public class GameOverState extends GameState implements IControllerCallbackGener
         };
 
         gameOverFont = assetManager.get(MainGame.getGameFontFilePath("cornerstone_upper_case_big"));
-        gameOverFont.getData().setScale(gameOverFontScale);
+        gameOverFont.getData().setScale(GAME_OVER_FONT_SCALE);
         gameOverTextPosition = GameStateManager.calculateCenteredTextPosition(gameOverFont,
-            gameOverText,
+            GAME_OVER_TEXT,
             MainGame.GAME_WIDTH, (float) MainGame.GAME_HEIGHT / 5 * 8);
 
       }
@@ -304,7 +298,7 @@ public class GameOverState extends GameState implements IControllerCallbackGener
       }
 
       gameOverFont.getData().setScale(1);
-      gameOverFont.draw(spriteBatch, gameOverText, gameOverTextPosition.x, gameOverTextPosition.y);
+      gameOverFont.draw(spriteBatch, GAME_OVER_TEXT, gameOverTextPosition.x, gameOverTextPosition.y);
 
       spriteBatch.end();
     } else {
@@ -402,45 +396,43 @@ public class GameOverState extends GameState implements IControllerCallbackGener
   }
 
   @Override
-  public void controllerCallbackSelectLeftMenuButton() {
-    Gdx.app.debug("game_over_state:controllerCallbackSelectLeftMenuButton",
-        MainGame.getCurrentTimeStampLogString());
-    controllerLeftKeyWasPressed = true;
-  }
-
-  @Override
-  public void controllerCallbackSelectRightMenuButton() {
-    Gdx.app.debug("game_over_state:controllerCallbackSelectRightMenuButton",
-        MainGame.getCurrentTimeStampLogString());
-    controllerRightKeyWasPressed = true;
-  }
-
-  @Override
-  public void controllerCallbackSelectAboveMenuButton() {
-    Gdx.app.debug("game_over_state:controllerCallbackSelectAboveMenuButton",
-        MainGame.getCurrentTimeStampLogString());
-    controllerUpKeyWasPressed = true;
-  }
-
-  @Override
-  public void controllerCallbackSelectBelowMenuButton() {
-    Gdx.app.debug("game_over_state:controllerCallbackSelectBelowMenuButton",
-        MainGame.getCurrentTimeStampLogString());
-    controllerDownKeyWasPressed = true;
+  public void controllerCallbackSelectMenuButton(NextMenuButtonDirection direction) {
+    Gdx.app.debug("game_over_state:controllerCallbackSelectMenuButton",
+        MainGame.getCurrentTimeStampLogString() + direction.name());
+    if (menuButtons != null) {
+      switch (direction) {
+        case ABOVE:
+          controllerUpKeyWasPressed = true;
+          break;
+        case BELOW:
+          controllerDownKeyWasPressed = true;
+          break;
+        case RIGHT:
+          controllerRightKeyWasPressed = true;
+          break;
+        case LEFT:
+          controllerLeftKeyWasPressed = true;
+          break;
+      }
+    }
   }
 
   @Override
   public void controllerCallbackClickStartMenuButton() {
     Gdx.app.debug("game_over_state:controllerCallbackClickStartMenuButton",
         MainGame.getCurrentTimeStampLogString());
-    controllerStartKeyWasPressed = true;
+    if (menuButtons != null) {
+      controllerStartKeyWasPressed = true;
+    }
   }
 
   @Override
   public void controllerCallbackClickMenuButton() {
     Gdx.app.debug("game_over_state:controllerCallbackClickMenuButton",
         MainGame.getCurrentTimeStampLogString());
-    controllerSelectKeyWasPressed = true;
+    if (menuButtons != null) {
+      controllerSelectKeyWasPressed = true;
+    }
   }
 
   @Override

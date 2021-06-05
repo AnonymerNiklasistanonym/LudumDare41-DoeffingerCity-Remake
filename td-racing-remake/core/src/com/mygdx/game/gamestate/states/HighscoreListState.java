@@ -19,9 +19,10 @@ import com.mygdx.game.preferences.PreferencesManager;
 public class HighscoreListState extends GameState implements IControllerCallbackGenericOneClick {
 
   private static final String STATE_NAME = "HighscoreList";
-  private final static float fontScaleDeveloperInfo = 1;
+  private static final float FONT_SCALE_DEVELOPER_INFO = 1;
   private static final String ASSET_MANAGER_ID_FONT_DEVELOPER_INFO = MainGame
       .getGameFontFilePath("cornerstone");
+
   private final ControllerCallbackGenericOneClick controllerCallbackGenericOneClick;
   private final int level;
   private final boolean goToGameOverState;
@@ -45,7 +46,7 @@ public class HighscoreListState extends GameState implements IControllerCallback
     assetManager.load(HighscoreEntry.ASSET_MANAGER_ID_FONT, BitmapFont.class);
     assetManager.load(HighscoreEntry.ASSET_MANAGER_ID_TEXTURE, Texture.class);
 
-    // set camera to 1280x720
+    // Initialize game camera/canvas
     camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
 
     // Register controller callback so that controller input can be managed
@@ -144,7 +145,7 @@ public class HighscoreListState extends GameState implements IControllerCallback
           // set font scale to the correct size and disable to use integers for scaling
           fontDeveloperInfo = assetManager.get(ASSET_MANAGER_ID_FONT_DEVELOPER_INFO);
           fontDeveloperInfo.setUseIntegerPositions(false);
-          fontDeveloperInfo.getData().setScale(fontScaleDeveloperInfo);
+          fontDeveloperInfo.getData().setScale(FONT_SCALE_DEVELOPER_INFO);
         }
 
         // Load highscore list which updates the highscore "buttons"

@@ -63,8 +63,7 @@ public class GameStateManager {
    * @return x and y coordinate for drawing the text
    */
   public static Vector2 calculateCenteredTextPosition(final BitmapFont font, final String text,
-      final float width,
-      final float height) {
+      final float width, final float height) {
     final GlyphLayout temp = new GlyphLayout(font, text);
     return new Vector2(width / 2 - temp.width / 2, height / 2 + temp.height / 2);
   }
@@ -79,8 +78,7 @@ public class GameStateManager {
    * @return x and y coordinates for drawing the array of text
    */
   public static Vector2[] calculateCenteredMultiLineTextPositions(final BitmapFont font,
-      final String[] text,
-      final float width, final float height) {
+      final String[] text, final float width, final float height) {
     final Vector2[] positions = new Vector2[text.length];
     for (int i = 0; i < text.length; i++) {
       final GlyphLayout temp = new GlyphLayout(font, text[i]);

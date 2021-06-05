@@ -13,13 +13,13 @@ public class ControllerCallbackCreateHighscoreEntryState implements ControllerLi
    * The threshold for recognizing an axis input (this is used so that the constant spam of low
    * values when the user only slightly touches an axis is ignored)
    */
-  private final static float THRESHOLD_CONTROLLER_AXIS_INPUT = 0.5f;
+  private static final float THRESHOLD_CONTROLLER_AXIS_INPUT = 0.5f;
   /**
    * The threshold for an "ignore inputs after a registered input" time span so that menu inputs are
    * not spammed (otherwise a simple axis up input quickly creates 5 UP callbacks but we only want
    * to register one)
    */
-  private final static float THRESHOLD_BETWEEN_AXIS_INPUTS_IN_MS = 300;
+  private static final float THRESHOLD_BETWEEN_AXIS_INPUTS_IN_MS = 300;
   /**
    * Class that implements the controller callbacks
    */
@@ -81,10 +81,6 @@ public class ControllerCallbackCreateHighscoreEntryState implements ControllerLi
               + ") with the a value " + value + "that is higher than the threshold "
               + THRESHOLD_CONTROLLER_AXIS_INPUT);
       switch (ControllerInputMapping.getControllerAxis(controller, axisCode)) {
-        case AXIS_LT:
-        case AXIS_RT:
-          // Ignore input
-          break;
         case AXIS_LEFT_PAD_HORIZONTAL:
         case AXIS_RIGHT_PAD_HORIZONTAL:
           // Reduce spamming of one axis input by only allowing one input for a certain time
@@ -96,11 +92,7 @@ public class ControllerCallbackCreateHighscoreEntryState implements ControllerLi
                   + THRESHOLD_BETWEEN_AXIS_INPUTS_IN_MS + "ms");
           if (timeDifferenceSinceLastLeftRightInput > THRESHOLD_BETWEEN_AXIS_INPUTS_IN_MS) {
             lastTimeAxisHorizontalInputCallback = new Date().getTime();
-            if (value > 0) {
-              controllerCallbackClass.controllerCallbackSelectRightCharacter();
-            } else {
-              controllerCallbackClass.controllerCallbackSelectLeftCharacter();
-            }
+            controllerCallbackClass.controllerCallbackSelectCharacterEntry(value > 0 ? NextCharacterEntryDirection.RIGHT : NextCharacterEntryDirection.LEFT);
           }
           break;
         case AXIS_LEFT_PAD_VERTICAL:
@@ -114,7 +106,7 @@ public class ControllerCallbackCreateHighscoreEntryState implements ControllerLi
                   + THRESHOLD_BETWEEN_AXIS_INPUTS_IN_MS + "ms");
           if (timeDifferenceSinceLastUpDownInput > THRESHOLD_BETWEEN_AXIS_INPUTS_IN_MS) {
             lastTimeAxisVerticalInputCallback = new Date().getTime();
-            controllerCallbackClass.controllerCallbackSelectAboveMenuButton(value < 0);
+            controllerCallbackClass.controllerCallbackChangeCharacterEntry(value < 0 ? ChangeCharacterDirection.UPWARDS : ChangeCharacterDirection.DOWNWARDS);
           }
           break;
         default:
@@ -144,16 +136,16 @@ public class ControllerCallbackCreateHighscoreEntryState implements ControllerLi
           controllerCallbackClass.controllerCallbackToggleFullScreen();
           break;
         case BUTTON_UP:
-          controllerCallbackClass.controllerCallbackSelectAboveMenuButton(true);
+          controllerCallbackClass.controllerCallbackChangeCharacterEntry(ChangeCharacterDirection.UPWARDS);
           break;
         case BUTTON_DOWN:
-          controllerCallbackClass.controllerCallbackSelectAboveMenuButton(false);
+          controllerCallbackClass.controllerCallbackChangeCharacterEntry(ChangeCharacterDirection.DOWNWARDS);
           break;
         case BUTTON_LEFT:
-          controllerCallbackClass.controllerCallbackSelectLeftCharacter();
+          controllerCallbackClass.controllerCallbackSelectCharacterEntry(NextCharacterEntryDirection.LEFT);
           break;
         case BUTTON_RIGHT:
-          controllerCallbackClass.controllerCallbackSelectRightCharacter();
+          controllerCallbackClass.controllerCallbackSelectCharacterEntry(NextCharacterEntryDirection.RIGHT);
           break;
         case BUTTON_X:
           controllerCallbackClass.controllerCallbackToggleMusic();

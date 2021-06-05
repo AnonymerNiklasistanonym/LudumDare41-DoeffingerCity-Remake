@@ -18,17 +18,22 @@ import com.mygdx.game.gamestate.GameStateManager;
 public class CreditState extends GameState implements IControllerCallbackGenericOneClick {
 
   private static final String STATE_NAME = "Credits";
-  private static final String[] textCredits = new String[]{"THIS GAME WAS MADE BY",
+  private static final String[] TEXT_CREDITS = new String[]{
+      "THIS GAME WAS MADE BY",
       "DANIEL CZEPPEL",
-      "NIKLAS MIKELER", "PATRICK ULMER", "",
-      "MUSIC BY SASCHA CZEPPEL"};
+      "NIKLAS MIKELER",
+      "PATRICK ULMER",
+      "",
+      "MUSIC BY SASCHA CZEPPEL"
+  };
   /**
    * Variable for the font scale of the credits text
    */
-  private static final float fontScaleCredits = 0.5f;
+  private static final float FONT_SCALE_CREDITS = 0.5f;
   private static final String ASSET_MANAGER_ID_MUSIC_THEME = MainGame.getGameMusicFilePath("theme");
   private static final String ASSET_MANAGER_ID_FONT_CREDITS = MainGame
       .getGameFontFilePath("cornerstone_upper_case_big");
+
   private final ControllerCallbackGenericOneClick controllerCallbackGenericOneClick;
   private final boolean goToHighscoreListState;
   private Vector2[] textContentPosition;
@@ -49,6 +54,7 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
       final boolean goToHighscoreListState) {
     super(gameStateManager, STATE_NAME);
 
+    // Save if on click or back the next state should be the highscore list instead of the menu
     this.goToHighscoreListState = goToHighscoreListState;
 
     // Initialize game camera/canvas
@@ -133,18 +139,18 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
         // set font scale to the correct size and disable to use integers for scaling
         fontCredits = assetManager.get(ASSET_MANAGER_ID_FONT_CREDITS);
         fontCredits.setUseIntegerPositions(false);
-        fontCredits.getData().setScale(fontScaleCredits);
+        fontCredits.getData().setScale(FONT_SCALE_CREDITS);
         // calculate the text positions so that every line is centered
         textContentPosition = GameStateManager.calculateCenteredMultiLineTextPositions(fontCredits,
-            textCredits, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
+            TEXT_CREDITS, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
       }
       // Render credits
       spriteBatch.setProjectionMatrix(camera.combined);
       spriteBatch.begin();
 
       // Render the credits (text)
-      for (int i = 0; i < textCredits.length; i++) {
-        fontCredits.draw(spriteBatch, textCredits[i], textContentPosition[i].x,
+      for (int i = 0; i < TEXT_CREDITS.length; i++) {
+        fontCredits.draw(spriteBatch, TEXT_CREDITS[i], textContentPosition[i].x,
             textContentPosition[i].y);
       }
 
