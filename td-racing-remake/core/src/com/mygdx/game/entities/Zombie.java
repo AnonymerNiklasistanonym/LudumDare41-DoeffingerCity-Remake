@@ -23,6 +23,9 @@ import com.mygdx.game.world.Node;
 
 public abstract class Zombie implements Disposable {
 
+	/**
+	 * TODO Do anything to not be public static
+	 */
 	public static ZombieCallbackInterface callbackInterface;
 
 
@@ -44,7 +47,7 @@ public abstract class Zombie implements Disposable {
 	private float timeSinceLastNode = 0f;
 
 	private float timesincedeepsearch = 0;
-	private Body body;
+	private final Body body;
 	protected Map map;
 	protected Array<Node> path;
 	private final float distancetonode;
