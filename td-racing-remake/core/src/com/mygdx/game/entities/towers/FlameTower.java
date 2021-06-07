@@ -44,11 +44,11 @@ public class FlameTower extends Tower {
 
 	private static final TowerOptions TOWER_OPTIONS = getTowerOptions();
 
-	public FlameTower(final Vector2 position, final Array<Zombie> enemies, final World world,
+	public FlameTower(final Vector2 position, final Array<Zombie> zombies, final World world,
 			final AssetManager assetManager) {
 		super(TOWER_NAME, position, COST, RANGE, POWER_SHOOT, SPEED_SHOOT, SPEED_TURN,
 				assetManager, ASSET_ID_TEXTURE_BOTTOM, ASSET_ID_TEXTURE_UPPER,
-				ASSET_ID_TEXTURE_FIRING, ASSET_ID_SOUND_SHOOT, world, enemies, TOWER_OPTIONS);
+				ASSET_ID_TEXTURE_FIRING, ASSET_ID_SOUND_SHOOT, world, zombies, TOWER_OPTIONS);
 		flames = new Array<>();
 		textureFlameFire = assetManager.get(ASSET_ID_TEXTURE_FLAME_FIRE);
 		spriteFlameFire = new Sprite(textureFlameFire);

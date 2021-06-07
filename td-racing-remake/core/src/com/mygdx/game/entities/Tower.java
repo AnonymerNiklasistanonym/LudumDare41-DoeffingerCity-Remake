@@ -55,9 +55,8 @@ public abstract class Tower implements Disposable {
 
 	protected Tower(final String name, final Vector2 position, final int cost, final int range,
 			float powerShoot, float speedShoot, float speedTurn, final AssetManager assetManager,
-			final String assetIdBottom,
-			final String assetIdUpper,
-			final String assetIdFiring, final String assetIdSoundShoot, final World world,
+			final String assetIdBottom, final String assetIdUpper, final String assetIdFiring,
+			final String assetIdSoundShoot, final World world,
 			final Array<Zombie> zombies, final TowerOptions towerOptions) {
 		Gdx.app.debug("tower:constructor", MainGame.getCurrentTimeStampLogString() + "create tower \"" + name + "\"");
 		this.name = name;
