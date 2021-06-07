@@ -28,9 +28,9 @@ public abstract class Zombie implements Disposable {
 
 	private final float density;
 
-	private final Sprite sprite;
+	protected final Sprite sprite;
 	private final Sprite spriteDamage;
-	protected final Texture textureDead, textureAlive, textureDamage;
+	private final Texture textureDead;
 	private final float spawnTimeStamp;
 
 	private float health;
@@ -59,7 +59,7 @@ public abstract class Zombie implements Disposable {
 	private boolean bodyDeleted = false;
 	private boolean spawned = false;
 	private final boolean showHealthBar;
-	protected final String name;
+	private final String name;
 
 	public Zombie(final String name, final Vector2 position, final float damage, final float health,
 			final float money, final float score, final float spawnTimeStamp, final float speed,
@@ -79,12 +79,12 @@ public abstract class Zombie implements Disposable {
 		density = zombieOptions.density;
 
 		textureDead = assetManager.get(textureSpriteDead);
-		textureAlive = assetManager.get(textureSpriteAlive);
+		Texture textureAlive = assetManager.get(textureSpriteAlive);
 		sprite = new Sprite(textureAlive);
 		sprite.setSize(sprite.getWidth() * PlayState.PIXEL_TO_METER, sprite.getHeight() * PlayState.PIXEL_TO_METER);
 		sprite.setOriginCenter();
 
-		textureDamage = assetManager.get(textureSpriteDamage);
+		Texture textureDamage = assetManager.get(textureSpriteDamage);
 		spriteDamage = new Sprite(textureDamage);
 		spriteDamage.setSize(spriteDamage.getWidth() * PlayState.PIXEL_TO_METER,
 				spriteDamage.getHeight() * PlayState.PIXEL_TO_METER);
@@ -94,7 +94,7 @@ public abstract class Zombie implements Disposable {
 		color = new Color(MathUtils.random(0f, 1f), MathUtils.random(0f, 1f), MathUtils.random(0f, 1f), 0.7f);
 
 		// create body for box2D
-		createBody(position, world);
+		body = createBody(position, world);
 
 		distancetonode = sprite.getWidth();
 
@@ -114,17 +114,19 @@ public abstract class Zombie implements Disposable {
 		return fdef;
 	}
 
-	private void createBody(final Vector2 position, World w) {
+	private Body createBody(final Vector2 position, final World world) {
 		final BodyDef bodydef = new BodyDef();
 		bodydef.type = BodyDef.BodyType.DynamicBody;
 		bodydef.position.set(position.x * PlayState.PIXEL_TO_METER, position.y * PlayState.PIXEL_TO_METER);
 
-		body = w.createBody(bodydef);
+		final Body body = world.createBody(bodydef);
 		// Do not activate the body until the zombie has spawned
 		body.setActive(false);
 
 		body.createFixture(createFixture());
 		body.setUserData(this);
+
+		return body;
 	}
 
 	public void spawn() {
@@ -134,17 +136,17 @@ public abstract class Zombie implements Disposable {
 
 	/*
 	public void steerLeft() {
-		this.body.applyTorque(45, true);
+		body.applyTorque(45, true);
 	}
 
 	public void steerRight() {
-		this.body.applyTorque(45 * -1, true);
+		body.applyTorque(45 * -1, true);
 	}
 	*/
 
 	private void die() {
 		// set dead
-		this.setDead(true);
+		dead = true;
 		// set position of dead sprite to the current one
 		sprite.setTexture(textureDead);
 		sprite.setSize(textureDead.getWidth() * PlayState.PIXEL_TO_METER,
@@ -171,19 +173,19 @@ public abstract class Zombie implements Disposable {
 	}
 
 	public float getX() {
-		return this.body.getPosition().x - sprite.getWidth() / 2;
+		return body.getPosition().x - sprite.getWidth() / 2;
 	}
 
 	public float getY() {
-		return this.body.getPosition().y - sprite.getHeight() / 2;
+		return body.getPosition().y - sprite.getHeight() / 2;
 	}
 
 	public float getBodyX() {
-		return this.body.getPosition().x;
+		return body.getPosition().x;
 	}
 
 	public float getBodyY() {
-		return this.body.getPosition().y;
+		return body.getPosition().y;
 	}
 
 	public void drawHealthBar(final ShapeRenderer shapeRenderer) {
@@ -222,24 +224,24 @@ public abstract class Zombie implements Disposable {
 
 		if (wasHitTime > 0) {
 			wasHitTime -= deltaTime;
-			hitRandom.x = MathUtils.random(-this.sprite.getWidth() / 4, this.sprite.getWidth() / 4);
-			hitRandom.y = MathUtils.random(-this.sprite.getHeight() / 4, this.sprite.getHeight() / 4);
+			hitRandom.x = MathUtils.random(-sprite.getWidth() / 4, sprite.getWidth() / 4);
+			hitRandom.y = MathUtils.random(-sprite.getHeight() / 4, sprite.getHeight() / 4);
 			spriteDamage.setPosition(
-					getX() + this.sprite.getWidth() / 2 - this.spriteDamage.getWidth() / 2 + hitRandom.x,
-					getY() + this.sprite.getHeight() / 2 - this.spriteDamage.getHeight() / 2 + hitRandom.y);
+					getX() + sprite.getWidth() / 2 - spriteDamage.getWidth() / 2 + hitRandom.x,
+					getY() + sprite.getHeight() / 2 - spriteDamage.getHeight() / 2 + hitRandom.y);
 		}
 
 		if (getHealth() <= 0)
-			this.die();
+			die();
 
 		if (path.size > 0) {
 			final float angle = (float) ((Math.atan2(
 					path.get(path.size - 1).getPosition().x * PlayState.PIXEL_TO_METER - getBodyX(),
 					-(path.get(path.size - 1).getPosition().y * PlayState.PIXEL_TO_METER - getBodyY())) * 180.0d
 					/ Math.PI));
-			this.body.setTransform(this.body.getPosition(), (float) Math.toRadians(angle - 90));
+			body.setTransform(body.getPosition(), (float) Math.toRadians(angle - 90));
 			final Vector2 velo = new Vector2(speed, 0);
-			velo.rotateRad(this.body.getAngle());
+			velo.rotateRad(body.getAngle());
 
 			body.applyForceToCenter(velo, true);
 			reduceToMaxSpeed(speed);
@@ -288,7 +290,7 @@ public abstract class Zombie implements Disposable {
 		}
 
 		sprite.setPosition(getX(), getY());
-		sprite.setRotation(MathUtils.radDeg * this.body.getAngle());
+		sprite.setRotation(MathUtils.radDeg * body.getAngle());
 	}
 
 	private boolean isCloseEnough(Node n, float distance) {
@@ -296,7 +298,7 @@ public abstract class Zombie implements Disposable {
 	}
 
 	private float getDistanceToTarget(Node n) {
-		return this.body.getPosition().dst(n.getPosition().x * PlayState.PIXEL_TO_METER,
+		return body.getPosition().dst(n.getPosition().x * PlayState.PIXEL_TO_METER,
 				n.getPosition().y * PlayState.PIXEL_TO_METER);
 	}
 
@@ -362,7 +364,7 @@ public abstract class Zombie implements Disposable {
 	public void draw(final SpriteBatch spriteBatch) {
 		if (spawned)
 			sprite.draw(spriteBatch);
-		if (!this.isDead() && this.wasHitTime > 0)
+		if (!isDead() && wasHitTime > 0)
 			spriteDamage.draw(spriteBatch);
 	}
 
@@ -382,20 +384,12 @@ public abstract class Zombie implements Disposable {
 		return health;
 	}
 
-	public float getDamadge() {
+	public float getDamage() {
 		return damage;
-	}
-
-	public void setHealth(float health) {
-		this.health = health;
 	}
 
 	public boolean isDead() {
 		return dead;
-	}
-
-	public void setDead(boolean dead) {
-		this.dead = dead;
 	}
 
 	public boolean isSpawned() {
@@ -417,7 +411,7 @@ public abstract class Zombie implements Disposable {
 	protected abstract void disposeZombieResources();
 
 	public Color getColor() {
-		return this.color;
+		return color;
 	}
 
 	public void setBodyDeleted(boolean b) {

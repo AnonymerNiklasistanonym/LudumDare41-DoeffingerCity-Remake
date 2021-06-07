@@ -23,7 +23,6 @@ public class ZombieBicycle extends Zombie {
   private static final float MONEY = 2;
   private static final float SPEED = 15;
   private static final float SCORE = 20;
-  private static final float DENSITY = 5f;
   private static final String ENEMY_NAME = "Bicycle";
 
   private static final ZombieOptions zombieOptions = getZombieOptions();
@@ -38,17 +37,18 @@ public class ZombieBicycle extends Zombie {
   private static ZombieOptions getZombieOptions() {
     final ZombieOptions zombieOptions = new ZombieOptions();
     zombieOptions.showHealthBar = true;
+    zombieOptions.density = 5;
     return zombieOptions;
   }
 
   @Override
   protected FixtureDef createFixture() {
     final PolygonShape zBox = new PolygonShape();
-    zBox.setAsBox(textureAlive.getWidth() * PlayState.PIXEL_TO_METER * 0.4f,
-        textureAlive.getHeight() * PlayState.PIXEL_TO_METER * 0.4f);
+    zBox.setAsBox(sprite.getWidth() * PlayState.PIXEL_TO_METER * 0.4f,
+        sprite.getHeight() * PlayState.PIXEL_TO_METER * 0.4f);
     final FixtureDef fdef = new FixtureDef();
     fdef.shape = zBox;
-    fdef.density = DENSITY;
+    fdef.density = zombieOptions.density;
     // fdef.isSensor=true;
     fdef.filter.categoryBits = PlayState.PLAYER_BOX;
     return fdef;

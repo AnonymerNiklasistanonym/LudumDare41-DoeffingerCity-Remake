@@ -90,7 +90,7 @@ public class ScoreBoard {
 	}
 
 	public void trailerHitByEnemy(final Zombie zombie) {
-		healthPoints -= zombie.getDamadge();
+		healthPoints -= zombie.getDamage();
 		if (healthPoints <= 0)
 			playState.trailerHealthIs0();
 	}
