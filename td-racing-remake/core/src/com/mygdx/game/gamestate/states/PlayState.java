@@ -18,7 +18,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
@@ -106,7 +105,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	private Sound soundVictory;
 	private Sound soundDamage;
 	private final ScoreBoard scoreBoard;
-	private final Array<Zombie> enemies, enemiesDead;
+	private final Array<Zombie> zombies, enemiesDead;
 	private final Array<Tower> towers;
 	private final Array<Sprite> trailerSmokes;
 	private float timesincesmoke;
@@ -274,7 +273,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		scoreBoard = new ScoreBoard(this);
 		preferencesManager.checkHighscore();
 		// preferencesManager.setupIfFirstStart();
-		enemies = new Array<Zombie>();
+		zombies = new Array<Zombie>();
 		towers = new Array<Tower>();
 		collis = new CollisionListener(this);
 		checkpoints = new Checkpoint[4];
@@ -318,7 +317,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		// TODO Rewrite most of the next 2 sections
 
 		// clear all enemies and tower
-		enemies.clear();
+		zombies.clear();
 		towers.clear();
 		enemiesDead.clear();
 		trailerSmokes.clear();
@@ -526,19 +525,19 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		// Select tower to build
 		if (Gdx.input.isKeyJustPressed(Keys.NUM_1) || controllerSelectTowerPressed && controllerSelectTowerId == 0) {
 			controllerSelectTowerPressed = false;
-			towerMenu.selectTower(0, cursorPosition, enemies, assetManager);
+			towerMenu.selectTower(0, cursorPosition, zombies, assetManager);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.NUM_2) || controllerSelectTowerPressed && controllerSelectTowerId == 1) {
 			controllerSelectTowerPressed = false;
-			towerMenu.selectTower(1, cursorPosition, enemies, assetManager);
+			towerMenu.selectTower(1, cursorPosition, zombies, assetManager);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.NUM_3) || controllerSelectTowerPressed && controllerSelectTowerId == 2) {
 			controllerSelectTowerPressed = false;
-			towerMenu.selectTower(2, cursorPosition, enemies, assetManager);
+			towerMenu.selectTower(2, cursorPosition, zombies, assetManager);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.NUM_4) || controllerSelectTowerPressed && controllerSelectTowerId == 3) {
 			controllerSelectTowerPressed = false;
-			towerMenu.selectTower(3, cursorPosition, enemies, assetManager);
+			towerMenu.selectTower(3, cursorPosition, zombies, assetManager);
 		}
 
 		// Move tower
@@ -566,28 +565,28 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		// manually instantiate enemies
 		if (Gdx.input.isKeyJustPressed(Keys.F)) {
 			final Zombie zombie = new ZombieSmall(map.getSpawnPosition(), world, assetManager, map, 0);
-			zombie.activateEnemy();
-			enemies.add(zombie);
+			zombie.spawn();
+			zombies.add(zombie);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.G)) {
 			final Zombie zombie = new ZombieFat(map.getSpawnPosition(), world, assetManager, map, 0);
-			zombie.activateEnemy();
-			enemies.add(zombie);
+			zombie.spawn();
+			zombies.add(zombie);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.H)) {
 			final Zombie zombie = new ZombieBicycle(map.getSpawnPosition(), world, assetManager, map, 0);
-			zombie.activateEnemy();
-			enemies.add(zombie);
+			zombie.spawn();
+			zombies.add(zombie);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.J)) {
 			final Zombie zombie = new ZombieLincoln(map.getSpawnPosition(), world, assetManager, map, 0);
-			zombie.activateEnemy();
-			enemies.add(zombie);
+			zombie.spawn();
+			zombies.add(zombie);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.K)) {
 			final Zombie zombie = new ZombieSpider(map.getSpawnPosition(), world, assetManager, map, 0);
-			zombie.activateEnemy();
-			enemies.add(zombie);
+			zombie.spawn();
+			zombies.add(zombie);
 		}
 
 		// debug renderer
@@ -610,10 +609,10 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		if (Gdx.input.isKeyJustPressed(Keys.NUM_8))
 			scoreBoard.debugKillTrailer();
 		if (Gdx.input.isKeyJustPressed(Keys.NUM_9)) {
-			for (int i = 0; i < enemies.size; i++) {
-				final Zombie zombie = enemies.get(i);
+			for (int i = 0; i < zombies.size; i++) {
+				final Zombie zombie = zombies.get(i);
 				if (!zombie.isSpawned())
-					zombie.activateEnemy();
+					zombie.spawn();
 				if (!zombie.isDead())
 					zombie.takeDamage(zombie.getHealth());
 			}
@@ -634,8 +633,8 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 			}
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.E)) {
-			for (final Zombie e : enemies)
-				e.activateEnemy();
+			for (final Zombie e : zombies)
+				e.spawn();
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.R))
 			scoreBoard.addScore(1000);
@@ -683,12 +682,9 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 			tower.update(deltaTime, cursorPosition);
 		}
 
-		// check additionally if enemies should be activated
-		for (int i = 0; i < enemies.size; i++) {
-			final Zombie zombie = enemies.get(i);
-			zombie.update(deltaTime);
-			if (!zombie.isSpawned() && zombie.getTime() < scoreBoard.getTime())
-				zombie.activateEnemy();
+		// Update all zombies
+		for (final Zombie zombie : zombies) {
+			zombie.update(deltaTime, scoreBoard.getTime());
 		}
 
 		// update building tower
@@ -701,8 +697,9 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 			buildTowerIfAllowed(false);
 		}
 
+		// TODO Move the whole loop into the zombie update method
 		// garbage collect enemies
-		for (final Zombie zombie : enemies) {
+		for (final Zombie zombie : zombies) {
 			// if enemy has a body
 			if (!zombie.isBodyDeleted()) {
 				// and it's body or itself should be deleted
@@ -713,12 +710,12 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 				}
 				// if enemy should be deleted delete the from the list
 				if (zombie.isDelete()) {
-					enemies.removeValue(zombie, true);
+					zombies.removeValue(zombie, true);
 				}
 			}
 			// If the enemy is dead add him to the other enemy list
 			if (zombie.isDead() && !zombie.isDelete()) {
-				enemies.removeValue(zombie, true);
+				zombies.removeValue(zombie, true);
 				enemiesDead.add(zombie);
 			}
 		}
@@ -843,13 +840,13 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 				spriteBatch.begin();
 				for (final Zombie e : enemiesDead)
 					e.draw(spriteBatch);
-				for (final Zombie e : enemies)
+				for (final Zombie e : zombies)
 					e.draw(spriteBatch);
 				spriteBatch.end();
 
 				// draw enemy health bars
 				shapeRenderer.begin(ShapeType.Filled);
-				for (final Zombie e : enemies)
+				for (final Zombie e : zombies)
 					e.drawHealthBar(shapeRenderer);
 				shapeRenderer.end();
 
@@ -984,10 +981,10 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	private void renderDebugWay(SpriteBatch spriteBatch) {
 		MainGame.font.getData().setScale(0.06f);
-		for (final Zombie e : enemies) {
+		for (final Zombie e : zombies) {
 			if (e.isSpawned() && !e.isDead()) {
 				MainGame.font.setColor(e.getColor());
-				for (final Node node : e.getWeg())
+				for (final Node node : e.getPath())
 					MainGame.font.draw(spriteBatch, "x", node.getPosition().x * PlayState.PIXEL_TO_METER,
 							node.getPosition().y * PlayState.PIXEL_TO_METER);
 			}
@@ -1137,9 +1134,9 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		Controllers.removeListener(controllerCallbackPlayState);
 
 		// dispose loaded objects
-		for (final Zombie zombie : enemies)
+		for (final Zombie zombie : zombies)
 			zombie.dispose();
-		enemies.clear();
+		zombies.clear();
 		for (final Tower tower : towers)
 			tower.dispose();
 		towers.clear();
@@ -1277,7 +1274,8 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 				else
 					setWaveText("FINAL WAVE");
 				// create and add all enemies of the current wave to all enemies
-				enemies.addAll(currentLevelWaves.get(currentWave).createEnemies(map.getSpawnPosition(), world, assetManager, map,
+				zombies
+						.addAll(currentLevelWaves.get(currentWave).createEnemies(map.getSpawnPosition(), world, assetManager, map,
 						scoreBoard.getTime()));
 			}
 		}
@@ -1288,7 +1286,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	 * visible and walk to the trailer)
 	 */
 	private boolean areAllEnemiesSpawned() {
-		for (final Zombie zombie : enemies) {
+		for (final Zombie zombie : zombies) {
 			if (!zombie.isSpawned()) {
 				return false;
 			}
@@ -1314,7 +1312,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	 * @return Returns true if all currently spawned enemies are dead
 	 */
 	private boolean areAllEnemiesDead() {
-		for (final Zombie zombie : enemies) {
+		for (final Zombie zombie : zombies) {
 			// If any enemy is still not dead return false, otherwise return true
 			if (!zombie.isDead()) {
 				return false;

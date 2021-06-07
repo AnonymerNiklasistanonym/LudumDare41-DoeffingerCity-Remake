@@ -5,35 +5,38 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.entities.Zombie;
+import com.mygdx.game.entities.ZombieOptions;
 import com.mygdx.game.world.Map;
 
 public class ZombieLincoln extends Zombie {
 
-	private static final float DAMAGE = 40;
-	private static final float HEALTH = 3000;
-	private static final float MONEY = 10000;
-	private static final float SPEED = 2f;
-	private static final float SCORE = 1000;
-	private static final boolean HEALTH_BAR = true;
+  public static final String ASSET_ID_TEXTURE_ALIVE = MainGame.getGameZombieFilePath("lincoln");
+  public static final String ASSET_ID_TEXTURE_DEAD = MainGame.getGameZombieFilePath("lincoln_dead");
+  public static final String ASSET_ID_TEXTURE_DAMAGE = MainGame.getGameZombieFilePath("blood");
+  private static final float DAMAGE = 40;
+  private static final float HEALTH = 3000;
+  private static final float MONEY = 10000;
+  private static final float SPEED = 2f;
+  private static final float SCORE = 1000;
+  private static final String ENEMY_NAME = "Lincoln";
 
-	private static final String ENEMY_NAME = "Lincoln";
-	public static final String ASSET_ID_TEXTURE_ALIVE = MainGame.getGameZombieFilePath("lincoln");
-	public static final String ASSET_ID_TEXTURE_DEAD = MainGame.getGameZombieFilePath("lincoln_dead");
-	public static final String ASSET_ID_TEXTURE_DAMAGE = MainGame.getGameZombieFilePath("blood");
+  private static final ZombieOptions zombieOptions = getZombieOptions();
 
-	public ZombieLincoln(final Vector2 position, final World world, final AssetManager assetManager, final Map map, final float time) {
-		super(ENEMY_NAME, position, world, assetManager, ASSET_ID_TEXTURE_ALIVE, ASSET_ID_TEXTURE_DEAD, ASSET_ID_TEXTURE_DAMAGE, map, time);
-		damage = DAMAGE;
-		health = HEALTH;
-		maxHealth = HEALTH;
-		money = MONEY;
-		speed = SPEED;
-		score = SCORE;
-		healthBar = HEALTH_BAR;
-	}
+  public ZombieLincoln(final Vector2 position, final World world, final AssetManager assetManager,
+      final Map map, final float spawnTimeStamp) {
+    super(ENEMY_NAME, position, DAMAGE, HEALTH, MONEY, SCORE, spawnTimeStamp, SPEED,
+        world, assetManager, ASSET_ID_TEXTURE_ALIVE, ASSET_ID_TEXTURE_DEAD, ASSET_ID_TEXTURE_DAMAGE,
+        map, zombieOptions);
+  }
 
-	@Override
-	public void dispose() {
-		super.disposeMedia();
-	}
+  private static ZombieOptions getZombieOptions() {
+    final ZombieOptions zombieOptions = new ZombieOptions();
+    zombieOptions.showHealthBar = true;
+    return zombieOptions;
+  }
+
+  @Override
+  protected void disposeZombieResources() {
+    // Nothing to dispose
+  }
 }

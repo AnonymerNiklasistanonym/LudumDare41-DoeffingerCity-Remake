@@ -147,7 +147,7 @@ public class Car implements Disposable {
 		float damage = Math.abs(getForwardVelocity().x * 2f);
 		if (damage > 0.1f)
 			e.takeDamage(damage);
-		return e.health;
+		return e.getHealth();
 	}
 
 	@Override

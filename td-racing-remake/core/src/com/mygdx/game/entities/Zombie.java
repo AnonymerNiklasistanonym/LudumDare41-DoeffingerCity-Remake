@@ -1,5 +1,6 @@
 package com.mygdx.game.entities;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -15,6 +16,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.mygdx.game.MainGame;
 import com.mygdx.game.gamestate.states.PlayState;
 import com.mygdx.game.world.Map;
 import com.mygdx.game.world.Node;
@@ -23,46 +25,60 @@ public abstract class Zombie implements Disposable {
 
 	public static ZombieCallbackInterface callbackInterface;
 
-	private static final float DAMAGE = 2;
-	private static final float HEALTH = 10;
-	private static final float MONEY = 1;
-	private static final float SPEED = 80;
-	private static final float SCORE = 10;
-	private static final boolean HEALTH_BAR = true;
-	private static final float DENSITY = 1f;
+
+	private final float density;
 
 	private final Sprite sprite;
 	private final Sprite spriteDamage;
 	protected final Texture textureDead, textureAlive, textureDamage;
-	private final float time;
+	private final float spawnTimeStamp;
 
-	protected float maxHealth, health, money, score, speed, damage, timeAlive, distanceToTarget, timeSinceLastNode;
+	private float health;
+	private final float maxHealth;
+	private final float money;
+	private final float score;
+	private final float speed;
+	private final float damage;
+	private float timeAlive = 0;
+	private float distanceToTarget = 0f;
+	private float timeSinceLastNode = 0f;
 
 	private float timesincedeepsearch = 0;
-	private float maxtimedeepsearch = 3;
 	private Body body;
 	protected Map map;
-	protected Array<Node> weg;
-	private float distancetonode, wasHitTime;
-	private Vector2 hitRandom;
-	private Color color;
-	protected boolean activated, bodyDeleted, healthBar, tot, deleteBody, delete, leftSpawn;
+	protected Array<Node> path;
+	private final float distancetonode;
+	private float wasHitTime;
+	private final Vector2 hitRandom = new Vector2();
+	private final Color color;
+	private boolean dead = false;
+	private boolean delete = false;
+	private boolean deleteBody = false;
+	private boolean leftSpawn = false;
+
+	private boolean bodyDeleted = false;
+	private boolean spawned = false;
+	private final boolean showHealthBar;
 	protected final String name;
 
-	public Zombie(final String name, final Vector2 position, final World world,
-			final AssetManager assetManager, final String textureSpriteAlive,
+	public Zombie(final String name, final Vector2 position, final float damage, final float health,
+			final float money, final float score, final float spawnTimeStamp, final float speed,
+			final World world, final AssetManager assetManager, final String textureSpriteAlive,
 			final String textureSpriteDead, final String textureSpriteDamage, final Map map,
-			final float time) {
+			final ZombieOptions zombieOptions) {
 		this.name = name;
-		timeAlive = 0f;
+		this.damage = damage;
+		maxHealth = health;
+		this.health = maxHealth;
+		this.money = money;
+		this.score = score;
+		this.speed = speed;
+		this.spawnTimeStamp = spawnTimeStamp;
+		this.map = map;
+		showHealthBar = zombieOptions.showHealthBar;
+		density = zombieOptions.density;
+
 		textureDead = assetManager.get(textureSpriteDead);
-		deleteBody = false;
-		delete = false;
-		tot = false;
-		leftSpawn = false;
-		hitRandom = new Vector2();
-		distanceToTarget = 0f;
-		timeSinceLastNode = 0f;
 		textureAlive = assetManager.get(textureSpriteAlive);
 		sprite = new Sprite(textureAlive);
 		sprite.setSize(sprite.getWidth() * PlayState.PIXEL_TO_METER, sprite.getHeight() * PlayState.PIXEL_TO_METER);
@@ -74,30 +90,18 @@ public abstract class Zombie implements Disposable {
 				spriteDamage.getHeight() * PlayState.PIXEL_TO_METER);
 		spriteDamage.setOriginCenter();
 
-		health = HEALTH;
-		maxHealth = HEALTH;
-		money = MONEY;
-		score = SCORE;
-		speed = SPEED;
-		damage = DAMAGE;
-		healthBar = HEALTH_BAR;
-
-		// deactivate enemies on creation
-		activated = false;
-
-		// give them a time when the should spawn
-		this.time = time;
-
 		// create a random color for every enemy
-		this.color = new Color(MathUtils.random(0f, 1f), MathUtils.random(0f, 1f), MathUtils.random(0f, 1f), 0.7f);
+		color = new Color(MathUtils.random(0f, 1f), MathUtils.random(0f, 1f), MathUtils.random(0f, 1f), 0.7f);
 
 		// create body for box2D
 		createBody(position, world);
 
-		this.map = map;
-
 		distancetonode = sprite.getWidth();
-		findWay();
+
+		path = findPath();
+		if (path.size < 1) {
+			Gdx.app.error("enemy:findWay", MainGame.getCurrentTimeStampLogString() + "the zombie \"" + name + "\" did not find a path");
+		}
 	}
 
 	protected FixtureDef createFixture() {
@@ -106,7 +110,7 @@ public abstract class Zombie implements Disposable {
 		final FixtureDef fdef = new FixtureDef();
 		fdef.shape = enemyCircle;
 		fdef.friction = 0;
-		fdef.density = DENSITY;
+		fdef.density = density;
 		return fdef;
 	}
 
@@ -115,22 +119,20 @@ public abstract class Zombie implements Disposable {
 		bodydef.type = BodyDef.BodyType.DynamicBody;
 		bodydef.position.set(position.x * PlayState.PIXEL_TO_METER, position.y * PlayState.PIXEL_TO_METER);
 
-		this.body = w.createBody(bodydef);
-		this.body.setActive(false);
+		body = w.createBody(bodydef);
+		// Do not activate the body until the zombie has spawned
+		body.setActive(false);
 
-		this.body.createFixture(createFixture());
-		this.body.setUserData(this);
+		body.createFixture(createFixture());
+		body.setUserData(this);
 	}
 
-	public float getTime() {
-		return this.time;
+	public void spawn() {
+		spawned = true;
+		body.setActive(true);
 	}
 
-	public void activateEnemy() {
-		this.activated = true;
-		this.body.setActive(true);
-	}
-
+	/*
 	public void steerLeft() {
 		this.body.applyTorque(45, true);
 	}
@@ -138,10 +140,11 @@ public abstract class Zombie implements Disposable {
 	public void steerRight() {
 		this.body.applyTorque(45 * -1, true);
 	}
+	*/
 
 	private void die() {
 		// set dead
-		this.setTot(true);
+		this.setDead(true);
 		// set position of dead sprite to the current one
 		sprite.setTexture(textureDead);
 		sprite.setSize(textureDead.getWidth() * PlayState.PIXEL_TO_METER,
@@ -150,24 +153,21 @@ public abstract class Zombie implements Disposable {
 		callbackInterface.enemyDied(this);
 		deleteBody = true;
 		wasHitTime = 0;
-		speed = 0;
 	}
 
 	public void takeDamage(float amount) {
 		if (isValidTarget()) {
-			this.health -= amount;
-			this.wasHitTime = 0.15f;
+			health -= amount;
+			wasHitTime = 0.15f;
 		}
 	}
 
-	protected void findWay() {
-		weg = map.getRandomPath();
-		if (weg.size < 1)
-			System.out.println("Ich hab keinen gueltigen Weg bekommen :(");
+	protected Array<Node> findPath() {
+		return map.getRandomPath();
 	}
 
-	public Array<Node> getWeg() {
-		return weg;
+	public Array<Node> getPath() {
+		return path;
 	}
 
 	public float getX() {
@@ -187,7 +187,7 @@ public abstract class Zombie implements Disposable {
 	}
 
 	public void drawHealthBar(final ShapeRenderer shapeRenderer) {
-		if (tot || !activated || !healthBar || (int) health == (int) maxHealth || health <= 0f)
+		if (dead || !spawned || !showHealthBar || (int) health == (int) maxHealth || health <= 0f)
 			return;
 		shapeRenderer.setColor(new Color(1, 0, 0, 1));
 		shapeRenderer.rect(getBodyX() - 25 * PlayState.PIXEL_TO_METER, getBodyY() + sprite.getHeight() / 2,
@@ -197,10 +197,20 @@ public abstract class Zombie implements Disposable {
 				50 * PlayState.PIXEL_TO_METER * (health / maxHealth), 3 * PlayState.PIXEL_TO_METER);
 	}
 
-	public void update(final float deltaTime) {
-
-		if (this.isDead() || !this.activated)
+	public void update(final float deltaTime, float gameTimeStamp) {
+		// When zombie already dead don't do anything
+		if (isDead()) {
 			return;
+		}
+
+		// If zombie is not yet spawned check if it can now be spawned
+		if (!spawned) {
+			if (spawnTimeStamp < gameTimeStamp) {
+				spawn();
+			} else {
+				return;
+			}
+		}
 
 		timesincedeepsearch = timesincedeepsearch + deltaTime;
 		timeAlive = timeAlive + deltaTime;
@@ -222,10 +232,10 @@ public abstract class Zombie implements Disposable {
 		if (getHealth() <= 0)
 			this.die();
 
-		if (weg.size > 0) {
+		if (path.size > 0) {
 			final float angle = (float) ((Math.atan2(
-					weg.get(weg.size - 1).getPosition().x * PlayState.PIXEL_TO_METER - getBodyX(),
-					-(weg.get(weg.size - 1).getPosition().y * PlayState.PIXEL_TO_METER - getBodyY())) * 180.0d
+					path.get(path.size - 1).getPosition().x * PlayState.PIXEL_TO_METER - getBodyX(),
+					-(path.get(path.size - 1).getPosition().y * PlayState.PIXEL_TO_METER - getBodyY())) * 180.0d
 					/ Math.PI));
 			this.body.setTransform(this.body.getPosition(), (float) Math.toRadians(angle - 90));
 			final Vector2 velo = new Vector2(speed, 0);
@@ -237,7 +247,7 @@ public abstract class Zombie implements Disposable {
 			killLateral(0.2f);
 
 			float oldDistance = distanceToTarget;
-			distanceToTarget = getDistanceToTarget(weg.get(weg.size - 1));
+			distanceToTarget = getDistanceToTarget(path.get(path.size - 1));
 			float distanceTraveled = Math.abs(oldDistance - distanceToTarget);
 			if (timeAlive > 7f && distanceTraveled != 0 && timeSinceLastNode > 2f) {
 				if (distanceTraveled < 0.001f) {
@@ -257,19 +267,24 @@ public abstract class Zombie implements Disposable {
 				doDeepSearch(timeSinceLastNode);
 			}
 
-			if (isCloseEnough(weg.get(weg.size - 1), distancetonode)) {
-				weg.removeIndex(weg.size - 1);
+			if (isCloseEnough(path.get(path.size - 1), distancetonode)) {
+				path.removeIndex(path.size - 1);
 				distanceToTarget = 100;
 				timeSinceLastNode = 0;
 			}
 
-			if (weg.size > 0)
-				score = weg.get(weg.size - 1).getH();
+			/*
+			if (path.size > 0) {
+				// TODO Try to rework this in giving a SMALL bonus in score for early kills (long path to trailer)
+				// score = path.get(path.size - 1).getH();
+				// Gdx.app.debug("enemy:update", MainGame.getCurrentTimeStampLogString() + "the score " + score + " was replaced by " + path.get(path.size - 1).getH() + "????");
+			}
+			*/
 
 		} else {
 			callbackInterface.enemyHitsHomeCallback(this);
 			deleteBody = true;
-			tot = true;
+			dead = true;
 		}
 
 		sprite.setPosition(getX(), getY());
@@ -287,16 +302,16 @@ public abstract class Zombie implements Disposable {
 
 	private void doDeepSearch(float factor) {
 		Node skipnode = null;
-		for (Node n : weg) {
+		for (Node n : path) {
 			if (isCloseEnough(n, distancetonode * factor)) {
-				if(weg.indexOf(n, true)>weg.size/2)
+				if(path.indexOf(n, true)> path.size/2)
 				if (skipnode == null)
 					skipnode = n;
 			}
 		}
 		if (skipnode != null) {
-			while (weg.get(weg.size - 1) != skipnode) {
-				weg.removeIndex(weg.size - 1);
+			while (path.get(path.size - 1) != skipnode) {
+				path.removeIndex(path.size - 1);
 				timeSinceLastNode = 0f;
 			}
 		}
@@ -312,7 +327,7 @@ public abstract class Zombie implements Disposable {
 
 	private void killLateral(float drift) {
 		float lat = getVelocityVector().dot(getOrthogonal());
-		body.applyLinearImpulse(getOrthogonal().scl(drift).scl(lat).scl(-1).scl(DENSITY), body.getPosition(), true);
+		body.applyLinearImpulse(getOrthogonal().scl(drift).scl(lat).scl(-1).scl(density), body.getPosition(), true);
 	}
 
 	private Vector2 getVelocityVector() {
@@ -345,7 +360,7 @@ public abstract class Zombie implements Disposable {
 	}
 
 	public void draw(final SpriteBatch spriteBatch) {
-		if (activated)
+		if (spawned)
 			sprite.draw(spriteBatch);
 		if (!this.isDead() && this.wasHitTime > 0)
 			spriteDamage.draw(spriteBatch);
@@ -376,21 +391,30 @@ public abstract class Zombie implements Disposable {
 	}
 
 	public boolean isDead() {
-		return tot;
+		return dead;
 	}
 
-	public void setTot(boolean tot) {
-		this.tot = tot;
+	public void setDead(boolean dead) {
+		this.dead = dead;
 	}
 
 	public boolean isSpawned() {
-		return this.activated;
+		return spawned;
 	}
 
-	public void disposeMedia() {
-		sprite.getTexture().dispose();
-		spriteDamage.getTexture().dispose();
+	/**
+	 * For memory safety this method cannot be overridden by sub classes
+	 */
+	public final void dispose() {
+		// Dispose resources from the sub classes if there are any
+		disposeZombieResources();
+		// Nothing else to dispose per default since everything is loaded via the asset manager
 	}
+
+	/**
+	 * Each tower must implement a method to dispose resources
+	 */
+	protected abstract void disposeZombieResources();
 
 	public Color getColor() {
 		return this.color;
@@ -416,7 +440,7 @@ public abstract class Zombie implements Disposable {
 	}
 
 	public boolean isValidTarget() {
-		return activated && !tot;
+		return spawned && !dead;
 
 	}
 
