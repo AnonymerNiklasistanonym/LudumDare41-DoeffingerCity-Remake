@@ -26,6 +26,7 @@ import com.mygdx.game.controller.play_state.ControllerCallbackPlayState;
 import com.mygdx.game.controller.play_state.IControllerCallbackPlayState;
 import com.mygdx.game.controller.play_state.SteerCarForwardsBackwards;
 import com.mygdx.game.controller.play_state.SteerCarLeftRight;
+import com.mygdx.game.file.LevelInfoCsvFile;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
 import com.mygdx.game.level.Level;
@@ -55,6 +56,7 @@ import com.mygdx.game.entities.towers.LaserTower;
 import com.mygdx.game.entities.towers.CannonTower;
 import com.mygdx.game.entities.towers.SniperTower;
 import com.mygdx.game.world.Node;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class PlayState extends GameState implements CollisionCallbackInterface, IControllerCallbackPlayState,
@@ -105,10 +107,12 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	private Sound soundVictory;
 	private Sound soundDamage;
 	private final ScoreBoard scoreBoard;
-	private final Array<Zombie> zombies, enemiesDead;
-	private final Array<Tower> towers;
-	private final Array<Sprite> trailerSmokes;
-	private float timesincesmoke;
+	private final Array<Zombie> zombies = new Array<>();
+	private final Array<Zombie> enemiesDead = new Array<>();
+	private final Array<Tower> towers = new Array<>();
+	private final Array<Sprite> trailerSmokes = new Array<>();
+	private final Array<Checkpoint> checkpoints = new Array<>();
+	private final ArrayList<LevelInfoCsvFile> levelInfo;
 	private Sprite spritePitStop;
 	private Sprite spriteCar;
 	private Sprite spriteFinishLine;
@@ -118,7 +122,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	private Texture backgroundLoading;
 
 	private Tower buildingtower;
-	private Checkpoint[] checkpoints;
 	private final CollisionListener collis;
 	private World world;
 	private Car car;
@@ -127,13 +130,26 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	private Map map;
 	private Box2DDebugRenderer debugRender;
 	private String waveText;
-	private final Vector2 trailerpos;
-	private float tutorialtimer, physicsaccumulator, timeToDisplayWaveTextInS;
-	private boolean pausedByUser, debugBox2D, debugCollision, debugDistance,
-			debugWay, unlockAllTowers, debugTower;
-	private int tutorialState, checkPointsCleared, speedFactor;
+	private final Vector2 trailerpos = new Vector2(0, 0);
+	private float tutorialtimer = 0;
+	private float timeToDisplayWaveTextInS;
+	private boolean unlockAllTowers = false;
 	private final Vector2 loadingTextPosition = new Vector2();
 	private String loadingText;
+	private int speedFactor = 1;
+	private int checkPointsCleared = 0;
+	/**
+	 * TODO Make this an enum or boolean (check how it is implemented)
+	 */
+	private int tutorialState = 0;
+	private float physicsaccumulator = 0;
+	private float timesincesmoke = 0;
+	private boolean pausedByUser = false;
+	private boolean debugTower = false;
+	private boolean debugBox2D = false;
+	private boolean debugCollision = false;
+	private boolean debugWay = false;
+	private boolean debugDistance = false;
 
 	/**
 	 * Tracker if a controller manual pause key was pressed
@@ -252,34 +268,16 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		assetManager.load(ASSET_ID_VICTORY_SOUND, Sound.class);
 		assetManager.load(ASSET_ID_TRAILER_DAMAGE_SOUND, Sound.class);
 
-		// instantiate global fields
-		speedFactor = 1;
-		checkPointsCleared = 0;
-		tutorialtimer = 0;
-		unlockAllTowers = false;
-		tutorialState = 0;
-		physicsaccumulator = 0;
-		timesincesmoke = 0;
-		pausedByUser = false;
-		debugTower = false;
-		debugBox2D = false;
-		debugCollision = false;
-		debugWay = false;
-		debugDistance = false;
-
-		// instantiate global objects
-		// TODO Create a level info object which is loaded and from this level info object load the levels
-		levels = LevelHandler.loadLevels();
+		// Create scoreboard and allow callbacks to this class
 		scoreBoard = new ScoreBoard(this);
-		preferencesManager.checkHighscore();
-		// preferencesManager.setupIfFirstStart();
-		zombies = new Array<Zombie>();
-		towers = new Array<Tower>();
+
+		// Create collision listener and allow callbacks to this class
 		collis = new CollisionListener(this);
-		checkpoints = new Checkpoint[4];
-		trailerpos = new Vector2(0, 0);
-		trailerSmokes = new Array<Sprite>();
-		enemiesDead = new Array<Zombie>();
+
+		// Get the level info
+		levelInfo = LevelInfoCsvFile.readCsvFile(Gdx.files.internal("level/level_info.csv"));
+		// TODO Replace levels with levelInfo so that the new classes will be used
+		levels = LevelHandler.loadLevels();
 
 		// Register controller callback so that controller input can be managed
 		controllerCallbackPlayState = new ControllerCallbackPlayState(this);
@@ -316,11 +314,12 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 		// TODO Rewrite most of the next 2 sections
 
-		// clear all enemies and tower
+		// Clear all level related lists
 		zombies.clear();
 		towers.clear();
 		enemiesDead.clear();
 		trailerSmokes.clear();
+		checkpoints.clear();
 
 		// create a new world and add contact listener to the new world
 		world = new World(new Vector2(), true);
@@ -346,10 +345,13 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		trailerpos.set(map.getTargetPosition().x, map.getTargetPosition().y);
 		this.spritePitStop.setPosition(level.getPitStopPosition().x * PIXEL_TO_METER,
 				level.getPitStopPosition().y * PIXEL_TO_METER);
-		for (int j = 0; j < level.getCheckPoints().length; j++)
-			checkpoints[j] = new NormalCheckpoint(world,
-					level.getCheckPoints()[j].x * PIXEL_TO_METER,
-					level.getCheckPoints()[j].y * PIXEL_TO_METER);
+
+		// Set checkpoints
+		for (final Vector2 checkpoint : level.getCheckPoints()) {
+			checkpoints.add(new NormalCheckpoint(world,
+					checkpoint.x * PIXEL_TO_METER,
+					checkpoint.y * PIXEL_TO_METER));
+		}
 
 		// Update the scoreboard because a new level was loaded
 		scoreBoard.resetNewLevelLoaded();
@@ -1323,6 +1325,8 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	@Override
 	public void trailerHealthIs0() {
+		// Check if highscore values are properly set in the preferences
+		preferencesManager.checkHighscore();
 		// If the user got a top 5 score go to the high score create entry state otherwise go to the game over state
 		if (preferencesManager.scoreIsInTop5(scoreBoard.getScore()))
 			gameStateManager.setGameState(
