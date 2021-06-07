@@ -1,9 +1,9 @@
-package com.mygdx.game.objects;
+package com.mygdx.game.entities;
 
-public interface EnemyCallbackInterface {
+public interface ZombieCallbackInterface {
 
-	void enemyHitsHomeCallback(Enemy enemy);
+	void enemyHitsHomeCallback(Zombie zombie);
 
-	void enemyDied(Enemy enemy);
+	void enemyDied(Zombie zombie);
 
 }
