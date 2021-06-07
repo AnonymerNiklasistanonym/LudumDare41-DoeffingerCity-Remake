@@ -1,4 +1,4 @@
-package com.mygdx.game.objects;
+package com.mygdx.game.entities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
@@ -35,7 +35,7 @@ public abstract class Tower implements Disposable {
 	protected int cost = 10;
 	protected float damage, soundVolume;
 	protected Animation<TextureRegion> destroyAnimation;
-	Array<Enemy> enemies;
+	Array<Zombie> enemies;
 	protected float firingLineTime = 0.1f;
 	protected float firingSpriteTime = 0.3f;
 	boolean healthBarActivated;
@@ -54,7 +54,7 @@ public abstract class Tower implements Disposable {
 	protected Sprite spriteBody;
 	protected Sprite spriteFiring;
 	protected Sprite spriteUpperBody;
-	protected Enemy target = null;
+	protected Zombie target = null;
 	protected float timesincelastshot;
 	private boolean toremove;
 	protected float turnspeed;
@@ -62,7 +62,7 @@ public abstract class Tower implements Disposable {
 	protected final String name;
 
 	protected Tower(final String name, final Vector2 position, final AssetManager assetManager, final String assetIdBottom, final String assetIdUpper,
-			final String assetIdFiring, final Array<Enemy> enemies, final World world, final int range,
+			final String assetIdFiring, final Array<Zombie> enemies, final World world, final int range,
 			final String assetIdShoot) {
 		Gdx.app.debug("tower:constructor", MainGame.getCurrentTimeStampLogString() + "create tower \"" + name + "\"");
 		this.name = name;
@@ -173,7 +173,7 @@ public abstract class Tower implements Disposable {
 		}
 	}
 
-	public float getAngleToEnemy(Enemy e) {
+	public float getAngleToEnemy(Zombie e) {
 		float angle = 0;
 		Vector2 epos = new Vector2(center.x, center.y);
 		Vector2 tpos = new Vector2(e.getBodyX(), e.getBodyY());
@@ -233,7 +233,7 @@ public abstract class Tower implements Disposable {
 		return this.isInBuildingMode;
 	}
 
-	protected boolean isTargetInRange(Enemy e) {
+	protected boolean isTargetInRange(Zombie e) {
 		Vector2 epos = new Vector2(e.getBodyX(), e.getBodyY());
 		Vector2 tpos = new Vector2(center.x, center.y);
 		float dist = epos.dst(tpos);
@@ -262,8 +262,8 @@ public abstract class Tower implements Disposable {
 
 	private void selectNewTarget() {
 
-		Enemy best = null;
-		for (Enemy e : enemies) {
+		Zombie best = null;
+		for (Zombie e : enemies) {
 			if (best == null) {
 				if (isTargetInRange(e) && e.isValidTarget()&&e.hasLeftSpawn())
 					best = e;
@@ -316,7 +316,7 @@ public abstract class Tower implements Disposable {
 		this.toremove = toremove;
 	}
 
-	public void shoot(Enemy e, float deltaTime) {
+	public void shoot(Zombie e, float deltaTime) {
 		if (isTargetInRange(e)) {
 			damage = power;
 			if (speed == 0) {

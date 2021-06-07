@@ -1,7 +1,6 @@
-package com.mygdx.game.objects.checkpoints;
+package com.mygdx.game.world;
 
 import com.badlogic.gdx.physics.box2d.World;
-import com.mygdx.game.objects.Checkpoint;
 
 public class NormalCheckpoint extends Checkpoint {
 

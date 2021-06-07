@@ -1,4 +1,4 @@
-package com.mygdx.game.unsorted;
+package com.mygdx.game.world;
 
 import java.util.ArrayList;
 import java.util.HashMap;

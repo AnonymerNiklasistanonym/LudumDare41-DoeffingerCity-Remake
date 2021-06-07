@@ -1,4 +1,4 @@
-package com.mygdx.game.objects;
+package com.mygdx.game.world;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
@@ -9,11 +9,13 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.mygdx.game.entities.Tower;
+import com.mygdx.game.entities.Zombie;
 import com.mygdx.game.gamestate.states.PlayState;
-import com.mygdx.game.objects.towers.FlameTower;
-import com.mygdx.game.objects.towers.LaserTower;
-import com.mygdx.game.objects.towers.CannonTower;
-import com.mygdx.game.objects.towers.SniperTower;
+import com.mygdx.game.entities.towers.FlameTower;
+import com.mygdx.game.entities.towers.LaserTower;
+import com.mygdx.game.entities.towers.CannonTower;
+import com.mygdx.game.entities.towers.SniperTower;
 
 public class TowerMenu implements Disposable {
 
@@ -62,7 +64,7 @@ public class TowerMenu implements Disposable {
 			sprite.draw(batch);
 	}
 
-	public boolean selectTower(int i, final Vector3 mousePos, final Array<Enemy> enemies,
+	public boolean selectTower(int i, final Vector3 mousePos, final Array<Zombie> enemies,
 			final AssetManager assetManager) {
 		boolean unselect = false;
 		if (!towerUnlocked[i])
@@ -99,7 +101,7 @@ public class TowerMenu implements Disposable {
 		return false;
 	}
 
-	public Tower getTower(final int tower, final Vector3 mousePos, final Array<Enemy> enemies,
+	public Tower getTower(final int tower, final Vector3 mousePos, final Array<Zombie> enemies,
 			final AssetManager assetManager) {
 		switch (tower) {
 		case 0:

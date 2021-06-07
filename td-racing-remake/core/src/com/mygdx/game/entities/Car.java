@@ -1,4 +1,4 @@
-package com.mygdx.game.objects;
+package com.mygdx.game.entities;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -143,7 +143,7 @@ public class Car implements Disposable {
 		return ort;
 	}
 
-	public float hitEnemy(final Enemy e) {
+	public float hitEnemy(final Zombie e) {
 		float damage = Math.abs(getForwardVelocity().x * 2f);
 		if (damage > 0.1f)
 			e.takeDamage(damage);

@@ -1,14 +1,12 @@
-package com.mygdx.game.listener.collisions;
+package com.mygdx.game.world;
 
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Manifold;
-import com.mygdx.game.objects.Car;
-import com.mygdx.game.objects.Checkpoint;
-import com.mygdx.game.objects.Enemy;
-import com.mygdx.game.objects.FinishLine;
-import com.mygdx.game.objects.Flame;
+import com.mygdx.game.entities.Car;
+import com.mygdx.game.entities.Zombie;
+import com.mygdx.game.entities.towers.FlameTowerFire;
 
 public class CollisionListener implements ContactListener {
 
@@ -27,12 +25,12 @@ public class CollisionListener implements ContactListener {
 		if (a instanceof Car || b instanceof Car) {
 
 			// and the other object is an Enemy
-			if (a instanceof Enemy || b instanceof Enemy) {
+			if (a instanceof Zombie || b instanceof Zombie) {
 
-				if (a instanceof Enemy)
-					this.collisionCallbackInterface.collisionCallbackCarEnemy((Car) b, (Enemy) a);
+				if (a instanceof Zombie)
+					this.collisionCallbackInterface.collisionCallbackCarEnemy((Car) b, (Zombie) a);
 				else
-					this.collisionCallbackInterface.collisionCallbackCarEnemy((Car) a, (Enemy) b);
+					this.collisionCallbackInterface.collisionCallbackCarEnemy((Car) a, (Zombie) b);
 			}
 
 			// and the other object is a Checkpoint
@@ -54,15 +52,15 @@ public class CollisionListener implements ContactListener {
 			}
 		}
 
-		if (a instanceof Enemy || b instanceof Enemy) {
+		if (a instanceof Zombie || b instanceof Zombie) {
 
 			// and the other object is an Enemy
-			if (a instanceof Flame || b instanceof Flame) {
+			if (a instanceof FlameTowerFire || b instanceof FlameTowerFire) {
 
-				if (a instanceof Enemy)
-					this.collisionCallbackInterface.collisionCallbackFlameEnemy((Enemy) a, (Flame) b);
+				if (a instanceof Zombie)
+					this.collisionCallbackInterface.collisionCallbackFlameEnemy((Zombie) a, (FlameTowerFire) b);
 				else
-					this.collisionCallbackInterface.collisionCallbackFlameEnemy((Enemy) b, (Flame) a);
+					this.collisionCallbackInterface.collisionCallbackFlameEnemy((Zombie) b, (FlameTowerFire) a);
 			}
 		}
 	}

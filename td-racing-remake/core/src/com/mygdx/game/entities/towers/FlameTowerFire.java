@@ -1,4 +1,4 @@
-package com.mygdx.game.objects;
+package com.mygdx.game.entities.towers;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -10,7 +10,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
 
-public class Flame implements Disposable {
+public class FlameTowerFire implements Disposable {
 
 	private final Body body;
 	private final Sprite sprite;
@@ -21,9 +21,9 @@ public class Flame implements Disposable {
 	private float lifetime;
 	private boolean killme;
 
-	public Flame(final Vector2 position, final Sprite sprite, final World world, final float damage) {
+	public FlameTowerFire(final Vector2 position, final Sprite sprite, final World world, final float damage) {
 
-		// add flame as dynamic body to the box2D world
+		// add flameTowerFire as dynamic body to the box2D world
 		final BodyDef bodydef = new BodyDef();
 		bodydef.type = BodyDef.BodyType.DynamicBody;
 		bodydef.position.set(position);

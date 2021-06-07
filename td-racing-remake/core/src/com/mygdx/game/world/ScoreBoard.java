@@ -1,7 +1,8 @@
-package com.mygdx.game.objects;
+package com.mygdx.game.world;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mygdx.game.MainGame;
+import com.mygdx.game.entities.Zombie;
 import com.mygdx.game.gamestate.states.PlayState;
 
 public class ScoreBoard {
@@ -88,8 +89,8 @@ public class ScoreBoard {
 		}
 	}
 
-	public void trailerHitByEnemy(final Enemy enemy) {
-		healthPoints -= enemy.getDamadge();
+	public void trailerHitByEnemy(final Zombie zombie) {
+		healthPoints -= zombie.getDamadge();
 		if (healthPoints <= 0)
 			playState.trailerHealthIs0();
 	}
@@ -99,10 +100,10 @@ public class ScoreBoard {
 		currentTime += deltaTime;
 	}
 
-	public void killEnemy(final Enemy enemy) {
+	public void killEnemy(final Zombie zombie) {
 		killCount++;
-		this.score += enemy.getScore();
-		this.money += enemy.getMoney();
+		this.score += zombie.getScore();
+		this.money += zombie.getMoney();
 	}
 
 	public void newLap(final int newMoney) {

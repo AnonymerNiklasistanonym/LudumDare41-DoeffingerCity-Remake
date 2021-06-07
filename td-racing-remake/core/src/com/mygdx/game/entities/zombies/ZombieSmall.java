@@ -1,14 +1,13 @@
-package com.mygdx.game.objects.enemies;
+package com.mygdx.game.entities.zombies;
 
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.game.MainGame;
-import com.mygdx.game.objects.Enemy;
-import com.mygdx.game.objects.Map;
+import com.mygdx.game.entities.Zombie;
+import com.mygdx.game.world.Map;
 
-public class EnemySmall extends Enemy {
+public class ZombieSmall extends Zombie {
 
 	private static final float DAMAGE = 1;
 	private static final float HEALTH = 12;
@@ -22,7 +21,7 @@ public class EnemySmall extends Enemy {
 	public static final String ASSET_ID_TEXTURE_DEAD = MainGame.getGameZombieFilePath("small_dead");
 	public static final String ASSET_ID_TEXTURE_DAMAGE = MainGame.getGameZombieFilePath("blood");
 
-	public EnemySmall(final Vector2 position, final World world, final AssetManager assetManager, final Map map, final float time) {
+	public ZombieSmall(final Vector2 position, final World world, final AssetManager assetManager, final Map map, final float time) {
 		super(ENEMY_NAME, position, world, assetManager, ASSET_ID_TEXTURE_ALIVE, ASSET_ID_TEXTURE_DEAD, ASSET_ID_TEXTURE_DAMAGE, map, time);
 		damage = DAMAGE;
 		health = HEALTH;

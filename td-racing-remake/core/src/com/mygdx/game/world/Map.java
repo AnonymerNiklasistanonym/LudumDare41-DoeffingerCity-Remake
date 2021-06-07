@@ -1,4 +1,4 @@
-package com.mygdx.game.objects;
+package com.mygdx.game.world;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
@@ -17,8 +17,8 @@ import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.gamestate.states.PlayState;
 import com.mygdx.game.level.Level;
-import com.mygdx.game.unsorted.BodyEditorLoader;
-import com.mygdx.game.unsorted.Node;
+import com.mygdx.game.world.BodyEditorLoader;
+import com.mygdx.game.world.Node;
 
 public class Map {
 

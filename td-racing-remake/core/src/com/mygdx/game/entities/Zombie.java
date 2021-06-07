@@ -1,4 +1,4 @@
-package com.mygdx.game.objects;
+package com.mygdx.game.entities;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
@@ -16,11 +16,12 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.game.gamestate.states.PlayState;
-import com.mygdx.game.unsorted.Node;
+import com.mygdx.game.world.Map;
+import com.mygdx.game.world.Node;
 
-public abstract class Enemy implements Disposable {
+public abstract class Zombie implements Disposable {
 
-	public static EnemyCallbackInterface callbackInterface;
+	public static ZombieCallbackInterface callbackInterface;
 
 	private static final float DAMAGE = 2;
 	private static final float HEALTH = 10;
@@ -48,7 +49,7 @@ public abstract class Enemy implements Disposable {
 	protected boolean activated, bodyDeleted, healthBar, tot, deleteBody, delete, leftSpawn;
 	protected final String name;
 
-	public Enemy(final String name, final Vector2 position, final World world,
+	public Zombie(final String name, final Vector2 position, final World world,
 			final AssetManager assetManager, final String textureSpriteAlive,
 			final String textureSpriteDead, final String textureSpriteDamage, final Map map,
 			final float time) {

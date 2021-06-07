@@ -1,17 +1,15 @@
-package com.mygdx.game.objects.towers;
+package com.mygdx.game.entities.towers;
 
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.MainGame;
-import com.mygdx.game.objects.Enemy;
-import com.mygdx.game.objects.Tower;
+import com.mygdx.game.entities.Zombie;
+import com.mygdx.game.entities.Tower;
 
 public class CannonTower extends Tower {
 
@@ -32,7 +30,7 @@ public class CannonTower extends Tower {
 	private static final boolean SOUND_LOOP = false;
 	private static final float SOUND_VOLUME = 0.25f;
 
-	public CannonTower(final Vector2 position, final Array<Enemy> enemies, final World world,
+	public CannonTower(final Vector2 position, final Array<Zombie> enemies, final World world,
 			final AssetManager assetManager) {
 		super(TOWER_NAME, position, assetManager, ASSET_ID_TEXTURE_BOTTOM, ASSET_ID_TEXTURE_UPPER, ASSET_ID_TEXTURE_FIRING, enemies, world, RANGE, ASSET_ID_SOUND_SHOOT);
 
