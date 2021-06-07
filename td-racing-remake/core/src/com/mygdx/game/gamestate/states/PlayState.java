@@ -679,8 +679,9 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		towerMenu.update();
 		scoreBoard.update(deltaTime * speedFactor);
 		car.update(deltaTime);
-		for (final Tower tower : towers)
+		for (final Tower tower : towers) {
 			tower.update(deltaTime, cursorPosition);
+		}
 
 		// check additionally if enemies should be activated
 		for (int i = 0; i < enemies.size; i++) {
@@ -698,18 +699,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 			startBuilding(buildingtower);
 			buildingtower.update(deltaTime, cursorPosition);
 			buildTowerIfAllowed(false);
-		}
-
-		// garbage collect tower projectiles that should be deleted
-		for (final Tower tower : towers) {
-			Array<Body> rb = tower.removeProjectiles();
-			if (rb != null) {
-				for (final Body body : rb) {
-					// why compare world?, there is only one
-					if (body.getWorld() == world)
-						world.destroyBody(body);
-				}
-			}
 		}
 
 		// garbage collect enemies

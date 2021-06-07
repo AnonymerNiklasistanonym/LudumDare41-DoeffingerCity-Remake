@@ -120,9 +120,19 @@ public abstract class Tower implements Disposable {
 				&& (yPos >= spriteBody.getY() && yPos <= spriteBody.getY() + spriteBody.getHeight());
 	}
 
-	public void disposeMedia() {
-		// Nothing to dispose since everything is loaded via the asset manager
+	/**
+	 * For memory safety this method cannot be overridden by sub classes
+	 */
+	public final void dispose() {
+		// Dispose resources from the sub classes if there are any
+		disposeTowerResources();
+		// Nothing else to dispose per default since everything is loaded via the asset manager
 	}
+
+	/**
+	 * Each tower must implement a method to dispose resources
+	 */
+	protected abstract void disposeTowerResources();
 
 	public void draw(final SpriteBatch spriteBatch) {
 		spriteBody.draw(spriteBatch);
@@ -133,9 +143,19 @@ public abstract class Tower implements Disposable {
 			drawProjectile(shapeRenderer);
 	}
 
-	public abstract void drawProjectile(final SpriteBatch spriteBatch);
+	/**
+	 * Each tower must implement a custom rendering of projectiles
+	 *
+	 * @param spriteBatch
+	 */
+	protected abstract void drawProjectile(final SpriteBatch spriteBatch);
 
-	public abstract void drawProjectile(final ShapeRenderer shapeRenderer);
+	/**
+	 * Each tower must implement a custom rendering of projectiles
+	 *
+	 * @param shapeRenderer
+	 */
+	protected abstract void drawProjectile(final ShapeRenderer shapeRenderer);
 
 	public void drawRange(final ShapeRenderer shapeRenderer) {
 		if (rangeActivated) {
@@ -220,10 +240,6 @@ public abstract class Tower implements Disposable {
 		return inrange;
 	}
 
-	public Array<Body> removeProjectiles() {
-		return null;
-	}
-
 	private void selectNewTarget() {
 
 		Zombie best = null;
@@ -267,8 +283,8 @@ public abstract class Tower implements Disposable {
 		}
 	}
 
-	public void setCenter(Vector2 center) {
-		this.center = center;
+	public void setCenter(final Vector2 center) {
+		this.center.set(center);
 	}
 
 	public void setDegrees(float degrees) {
@@ -276,20 +292,21 @@ public abstract class Tower implements Disposable {
 		spriteFiring.setRotation(degrees);
 	}
 
-	public void shoot(Zombie e, float deltaTime) {
+	public boolean shoot(Zombie e, float deltaTime) {
 		if (isTargetInRange(e)) {
 			float damage = power;
 			if (speed == 0) {
 				damage = power * deltaTime;
 			}
 			e.takeDamage(damage);
-			timesincelastshot = 0;
 			shotposition = e.getCenter();
 			if (soundOn) {
 				soundShoot.play(soundVolume, MathUtils.random(1f, 1.1f), 0f);
 			}
+			return true;
 		} else {
 			target = null;
+			return false;
 		}
 	}
 
@@ -313,8 +330,12 @@ public abstract class Tower implements Disposable {
 
 		if (degreeChangeOne <= maximumDegreeChange * 2f || degreeChangeTwo <= maximumDegreeChange * 2f) {
 			newDegrees = getAngleToEnemy(target);
-			if (timesincelastshot > speed)
-				shoot(target, deltaTime);
+			if (timesincelastshot > speed) {
+				if (shoot(target, deltaTime)) {
+					// If the tower shot reset time since last shot
+					timesincelastshot = 0;
+				}
+			}
 		} else if (turnClockWise(getDegrees() % 360, getAngleToEnemy(target) % 360)) {
 			// System.out.println("Turning clockwise because of: getDegrees() = " +
 			// getDegrees() + ", getAngleToEnemy() = "
@@ -356,12 +377,14 @@ public abstract class Tower implements Disposable {
 	public void update(final float timeDelta, final Vector3 mousePos) {
 
 		// when in building mode move tower sprite(s) according to mouse/pad position
-		if (isInBuildingMode)
+		if (isInBuildingMode) {
 			updateSprites(new Vector2(mousePos.x, mousePos.y));
+		}
 
 		// when the tower is not yet active do nothing more
-		if (!isactive)
+		if (!isactive) {
 			return;
+		}
 
 		// make time since last shot bigger on every computer
 		timesincelastshot += timeDelta;
@@ -377,12 +400,12 @@ public abstract class Tower implements Disposable {
 			tryshoot(timeDelta);
 		}
 
+		// Update projectiles
 		updateProjectiles(timeDelta);
-
 	}
 
 	public void updateProjectiles(float delta) {
-
+		// Nothing to do per default
 	}
 
 	public void updateSprites(final Vector2 position) {
