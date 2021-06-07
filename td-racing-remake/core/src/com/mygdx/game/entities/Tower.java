@@ -5,10 +5,8 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -25,49 +23,46 @@ import com.mygdx.game.gamestate.states.PlayState;
 
 public abstract class Tower implements Disposable {
 
+	// TODO Update protected and public variables to be private if possible!
 	protected static boolean soundOn;
 
-	protected Sprite amunition;
 	public Body body;
 	private boolean buildingModeBlocked;
 	protected Vector2 center;
 	protected Color color;
-	protected int cost = 10;
-	protected float damage, soundVolume;
-	protected Animation<TextureRegion> destroyAnimation;
-	Array<Zombie> enemies;
+	protected final int cost;
+	protected float soundVolume;
+	private final Array<Zombie> zombies;
 	protected float firingLineTime = 0.1f;
-	protected float firingSpriteTime = 0.3f;
-	boolean healthBarActivated;
-	boolean isactive = false;
+	protected float firingSpriteTime;
+	private boolean isactive = false;
 	private boolean isInBuildingMode;
-	boolean isSoundPlaying = false;
-	boolean justshot = false;
-	protected float maxHealth;
-	protected boolean permanentsound = false;
-	protected float power;
-	protected float range;
+	protected final boolean permanentsound;
+	protected final float power;
+	protected final float range;
 	private boolean rangeActivated = false;
 	protected Vector2 shotposition;
 	protected Sound soundShoot;
-	protected float speed;
+	protected final float speed;
 	protected Sprite spriteBody;
 	protected Sprite spriteFiring;
 	protected Sprite spriteUpperBody;
 	protected Zombie target = null;
 	protected float timesincelastshot;
-	private boolean toremove;
-	protected float turnspeed;
+	protected final float turnspeed;
 	protected final World world;
 	protected final String name;
 
-	protected Tower(final String name, final Vector2 position, final AssetManager assetManager, final String assetIdBottom, final String assetIdUpper,
-			final String assetIdFiring, final Array<Zombie> enemies, final World world, final int range,
-			final String assetIdShoot) {
+	protected Tower(final String name, final Vector2 position, final int cost, final int range,
+			float powerShoot, float speedShoot, float speedTurn, final AssetManager assetManager,
+			final String assetIdBottom,
+			final String assetIdUpper,
+			final String assetIdFiring, final String assetIdSoundShoot, final World world,
+			final Array<Zombie> zombies, final TowerOptions towerOptions) {
 		Gdx.app.debug("tower:constructor", MainGame.getCurrentTimeStampLogString() + "create tower \"" + name + "\"");
 		this.name = name;
-		soundShoot = assetManager.get(assetIdShoot);
-		this.enemies = enemies;
+		soundShoot = assetManager.get(assetIdSoundShoot);
+		this.zombies = zombies;
 		this.range = range;
 		Texture bottom = assetManager.get(assetIdBottom);
 		this.spriteBody = new Sprite(bottom);
@@ -85,15 +80,18 @@ public abstract class Tower implements Disposable {
 		this.spriteUpperBody.setOriginCenter();
 		this.spriteFiring.setOriginCenter();
 		this.world = world;
+		this.cost = cost;
+		this.speed = speedShoot;
+		this.power = powerShoot;
+		this.turnspeed = speedTurn;
+
+		firingSpriteTime = towerOptions.firingSpriteTime;
+		color = towerOptions.rangeColor;
+		permanentsound = towerOptions.loopSoundShoot;
+		soundVolume = towerOptions.volumeSoundShoot;
 
 		timesincelastshot = 10;
-		soundVolume = 0.25f;
-		healthBarActivated = false;
-		toremove = false;
-		damage = 0;
 		buildingModeBlocked = false;
-		color = new Color(1, 0, 0, 0.3f);
-		rangeActivated = false;
 
 		// create box2D body and add it to the world
 		final BodyDef bodydef = new BodyDef();
@@ -114,21 +112,13 @@ public abstract class Tower implements Disposable {
 		isactive = true;
 	}
 
-	public void activateHealthBar(final boolean healthBarActivated) {
-		this.healthBarActivated = healthBarActivated;
-	}
-
 	public void activateRange(final boolean rangeActivated) {
 		this.rangeActivated = rangeActivated;
 	}
 
-	public boolean buildingModeBlocked() {
-		return this.buildingModeBlocked;
-	}
-
 	public boolean contains(final float xPos, final float yPos) {
-		return (xPos >= this.spriteBody.getX() && xPos <= this.spriteBody.getX() + this.spriteBody.getWidth())
-				&& (yPos >= this.spriteBody.getY() && yPos <= this.spriteBody.getY() + this.spriteBody.getHeight());
+		return (xPos >= spriteBody.getX() && xPos <= spriteBody.getX() + spriteBody.getWidth())
+				&& (yPos >= spriteBody.getY() && yPos <= spriteBody.getY() + spriteBody.getHeight());
 	}
 
 	public void disposeMedia() {
@@ -149,18 +139,18 @@ public abstract class Tower implements Disposable {
 	public abstract void drawProjectile(final ShapeRenderer shapeRenderer);
 
 	public void drawRange(final ShapeRenderer shapeRenderer) {
-		if (this.rangeActivated) {
-			shapeRenderer.setColor(this.color);
-			shapeRenderer.circle(this.spriteBody.getX() + this.spriteBody.getWidth() / 2,
-					this.spriteBody.getY() + this.spriteBody.getHeight() / 2, this.range);
+		if (rangeActivated) {
+			shapeRenderer.setColor(color);
+			shapeRenderer.circle(spriteBody.getX() + spriteBody.getWidth() / 2,
+					spriteBody.getY() + spriteBody.getHeight() / 2, range);
 		}
 	}
 
 	public void drawRange(final ShapeRenderer shapeRenderer, final Color color) {
-		if (this.rangeActivated) {
+		if (rangeActivated) {
 			shapeRenderer.setColor(color);
-			shapeRenderer.circle(this.spriteBody.getX() + this.spriteBody.getWidth() / 2,
-					this.spriteBody.getY() + this.spriteBody.getHeight() / 2, this.range);
+			shapeRenderer.circle(spriteBody.getX() + spriteBody.getWidth() / 2,
+					spriteBody.getY() + spriteBody.getHeight() / 2, range);
 		}
 	}
 
@@ -191,34 +181,26 @@ public abstract class Tower implements Disposable {
 	public float[][] getCornerPoints() {
 		float[][] cornerPoints = new float[4][2];
 		// left bottom
-		cornerPoints[0][0] = this.spriteBody.getX();
-		cornerPoints[0][1] = this.spriteBody.getY();
+		cornerPoints[0][0] = spriteBody.getX();
+		cornerPoints[0][1] = spriteBody.getY();
 		// right top
-		cornerPoints[1][0] = this.spriteBody.getX() + this.spriteBody.getHeight();
-		cornerPoints[1][1] = this.spriteBody.getY() + this.spriteBody.getHeight();
+		cornerPoints[1][0] = spriteBody.getX() + spriteBody.getHeight();
+		cornerPoints[1][1] = spriteBody.getY() + spriteBody.getHeight();
 		// left top
-		cornerPoints[2][0] = this.spriteBody.getX();
-		cornerPoints[2][1] = this.spriteBody.getY() + this.spriteBody.getHeight();
+		cornerPoints[2][0] = spriteBody.getX();
+		cornerPoints[2][1] = spriteBody.getY() + spriteBody.getHeight();
 		// right bottom
-		cornerPoints[3][0] = this.spriteBody.getX() + this.spriteBody.getHeight();
-		cornerPoints[3][1] = this.spriteBody.getY();
+		cornerPoints[3][0] = spriteBody.getX() + spriteBody.getHeight();
+		cornerPoints[3][1] = spriteBody.getY();
 		return cornerPoints;
 	}
 
 	public int getCost() {
-		return this.cost;
+		return cost;
 	}
 
 	public float getDegrees() {
 		return spriteUpperBody.getRotation();
-	}
-
-	public float getRange() {
-		return range;
-	}
-
-	public Sprite getSpriteBody() {
-		return spriteBody;
 	}
 
 	public float getX() {
@@ -227,10 +209,6 @@ public abstract class Tower implements Disposable {
 
 	public float getY() {
 		return spriteBody.getY();
-	}
-
-	public boolean isInBuildingMode() {
-		return this.isInBuildingMode;
 	}
 
 	protected boolean isTargetInRange(Zombie e) {
@@ -243,27 +221,14 @@ public abstract class Tower implements Disposable {
 		return inrange;
 	}
 
-	public boolean isToremove() {
-		return toremove;
-	}
-
-	public boolean rangeIsActivated() {
-		return this.rangeActivated;
-	}
-
 	public Array<Body> removeProjectiles() {
 		return null;
-	}
-
-	public void rotate(float degrees) {
-		spriteUpperBody.rotate(degrees);
-		spriteFiring.rotate(degrees);
 	}
 
 	private void selectNewTarget() {
 
 		Zombie best = null;
-		for (Zombie e : enemies) {
+		for (Zombie e : zombies) {
 			if (best == null) {
 				if (isTargetInRange(e) && e.isValidTarget()&&e.hasLeftSpawn())
 					best = e;
@@ -276,9 +241,9 @@ public abstract class Tower implements Disposable {
 	}
 
 	public void setBlockBuildingMode(final boolean b) {
-		this.buildingModeBlocked = b;
+		buildingModeBlocked = b;
 
-		if (this.buildingModeBlocked) {
+		if (buildingModeBlocked) {
 			spriteBody.setColor(1, 0, 0, 0.5f);
 			spriteUpperBody.setColor(1, 0, 0, 0.5f);
 			spriteFiring.setColor(1, 0, 0, 0.5f);
@@ -290,9 +255,9 @@ public abstract class Tower implements Disposable {
 	}
 
 	public void setBuildingMode(final boolean buildingMode) {
-		this.isInBuildingMode = buildingMode;
+		isInBuildingMode = buildingMode;
 
-		if (this.isInBuildingMode) {
+		if (isInBuildingMode) {
 			spriteBody.setColor(1, 1, 1, 0.5f);
 			spriteUpperBody.setColor(1, 1, 1, 0.5f);
 			spriteFiring.setColor(1, 1, 1, 0.5f);
@@ -308,17 +273,13 @@ public abstract class Tower implements Disposable {
 	}
 
 	public void setDegrees(float degrees) {
-		this.spriteUpperBody.setRotation(degrees);
-		this.spriteFiring.setRotation(degrees);
-	}
-
-	public void setToremove(boolean toremove) {
-		this.toremove = toremove;
+		spriteUpperBody.setRotation(degrees);
+		spriteFiring.setRotation(degrees);
 	}
 
 	public void shoot(Zombie e, float deltaTime) {
 		if (isTargetInRange(e)) {
-			damage = power;
+			float damage = power;
 			if (speed == 0) {
 				damage = power * deltaTime;
 			}
@@ -331,10 +292,6 @@ public abstract class Tower implements Disposable {
 		} else {
 			target = null;
 		}
-	}
-
-	public void takeDamage(float amount) {
-		damage += amount;
 	}
 
 	public void tryshoot(float deltaTime) {

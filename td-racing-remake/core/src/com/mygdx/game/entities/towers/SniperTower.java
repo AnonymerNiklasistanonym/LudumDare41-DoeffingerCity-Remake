@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.MainGame;
+import com.mygdx.game.entities.TowerOptions;
 import com.mygdx.game.entities.Zombie;
 import com.mygdx.game.entities.Tower;
 
@@ -27,20 +28,23 @@ public class SniperTower extends Tower {
 	private static final float POWER_SHOOT = 40;
 	private static final float SPEED_SHOOT = 5;
 	private static final float SPEED_TURN = 30;
-	private static final boolean SOUND_LOOP = false;
 	private static final float SOUND_VOLUME = 0.25f;
+
+	private static final TowerOptions TOWER_OPTIONS = getTowerOptions();
 
 	public SniperTower(final Vector2 position, final Array<Zombie> enemies, final World world,
 			final AssetManager assetManager) {
-		super(TOWER_NAME, position, assetManager, ASSET_ID_TEXTURE_BOTTOM, ASSET_ID_TEXTURE_UPPER, ASSET_ID_TEXTURE_FIRING, enemies, world, RANGE, ASSET_ID_SOUND_SHOOT);
+		super(TOWER_NAME, position, COST, RANGE, POWER_SHOOT, SPEED_SHOOT, SPEED_TURN,
+				assetManager, ASSET_ID_TEXTURE_BOTTOM, ASSET_ID_TEXTURE_UPPER,
+				ASSET_ID_TEXTURE_FIRING, ASSET_ID_SOUND_SHOOT, world, enemies, TOWER_OPTIONS);
+	}
 
-		color = COLOR_TOWER_RANGE;
-		cost = COST;
-		firingSpriteTime = TIME_FIRING_SPRITE;
-		maxHealth = -1;
-		power = POWER_SHOOT;
-		speed = SPEED_SHOOT;
-		turnspeed = SPEED_TURN;
+	private static TowerOptions getTowerOptions() {
+		final TowerOptions towerOptions = new TowerOptions();
+		towerOptions.rangeColor = COLOR_TOWER_RANGE;
+		towerOptions.firingSpriteTime = TIME_FIRING_SPRITE;
+		towerOptions.volumeSoundShoot = SOUND_VOLUME;
+		return towerOptions;
 	}
 
 	@Override

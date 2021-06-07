@@ -12,6 +12,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.MainGame;
+import com.mygdx.game.entities.TowerOptions;
 import com.mygdx.game.gamestate.states.PlayState;
 import com.mygdx.game.entities.Zombie;
 import com.mygdx.game.entities.Tower;
@@ -19,10 +20,10 @@ import com.mygdx.game.entities.Tower;
 public class FlameTower extends Tower {
 
 	// static properties
-	public Texture tflame;
+	public Texture textureFlameFire;
 
 	private final Array<FlameTowerFire> flames;
-	private final Sprite sflame;
+	private final Sprite spriteFlameFire;
 
 	private static final String TOWER_NAME = "Flame";
 	public static final String ASSET_ID_TEXTURE_BOTTOM = MainGame.getGameTowerFilePath("flame_bottom");
@@ -32,7 +33,7 @@ public class FlameTower extends Tower {
 	public static final int COST = 300;
 	private static final int RANGE = 8;
 
-	public static final String ASSET_ID_TEXTURE_FLAME = MainGame.getGameTowerFilePath("flame_fire");
+	public static final String ASSET_ID_TEXTURE_FLAME_FIRE = MainGame.getGameTowerFilePath("flame_fire");
 
 	private static final Color COLOR_TOWER_RANGE = new Color(1, 0, 0, 0.3f);
 	private static final float TIME_FIRING_SPRITE = 0.2f;
@@ -40,25 +41,27 @@ public class FlameTower extends Tower {
 	private static final float SPEED_SHOOT = 0.04f;
 	private static final float SPEED_TURN = 700;
 	private static final boolean SOUND_LOOP = true;
-	private static final float SOUND_VOLUME = 1;
+
+	private static final TowerOptions TOWER_OPTIONS = getTowerOptions();
 
 	public FlameTower(final Vector2 position, final Array<Zombie> enemies, final World world,
 			final AssetManager assetManager) {
-		super(TOWER_NAME, position, assetManager, ASSET_ID_TEXTURE_BOTTOM, ASSET_ID_TEXTURE_UPPER, ASSET_ID_TEXTURE_FIRING, enemies, world, RANGE, ASSET_ID_SOUND_SHOOT);
+		super(TOWER_NAME, position, COST, RANGE, POWER_SHOOT, SPEED_SHOOT, SPEED_TURN,
+				assetManager, ASSET_ID_TEXTURE_BOTTOM, ASSET_ID_TEXTURE_UPPER,
+				ASSET_ID_TEXTURE_FIRING, ASSET_ID_SOUND_SHOOT, world, enemies, TOWER_OPTIONS);
+		flames = new Array<>();
+		textureFlameFire = assetManager.get(ASSET_ID_TEXTURE_FLAME_FIRE);
+		spriteFlameFire = new Sprite(textureFlameFire);
+		spriteFlameFire.setSize(
+				spriteFlameFire.getWidth() * PlayState.PIXEL_TO_METER, spriteFlameFire.getHeight() * PlayState.PIXEL_TO_METER);
+	}
 
-		color = COLOR_TOWER_RANGE;
-		cost = COST;
-		firingSpriteTime = TIME_FIRING_SPRITE;
-		flames = new Array<FlameTowerFire>();
-		maxHealth = -1;
-		permanentsound = SOUND_LOOP;
-		power = POWER_SHOOT;
-		tflame = assetManager.get(ASSET_ID_TEXTURE_FLAME);
-		sflame = new Sprite(tflame);
-		sflame.setSize(sflame.getWidth() * PlayState.PIXEL_TO_METER, sflame.getHeight() * PlayState.PIXEL_TO_METER);
-		speed = SPEED_SHOOT;
-		turnspeed = SPEED_TURN;
-		this.soundVolume = SOUND_VOLUME;
+	private static TowerOptions getTowerOptions() {
+		final TowerOptions towerOptions = new TowerOptions();
+		towerOptions.rangeColor = COLOR_TOWER_RANGE;
+		towerOptions.firingSpriteTime = TIME_FIRING_SPRITE;
+		towerOptions.loopSoundShoot = SOUND_LOOP;
+		return towerOptions;
 	}
 
 	@Override
@@ -82,7 +85,7 @@ public class FlameTower extends Tower {
 
 			this.timesincelastshot = 0;
 
-			final FlameTowerFire flameTowerFire = new FlameTowerFire(body.getPosition(), sflame, world, power);
+			final FlameTowerFire flameTowerFire = new FlameTowerFire(body.getPosition(), spriteFlameFire, world, power);
 			flameTowerFire.getBody().applyForceToCenter(aim, true);
 			flames.add(flameTowerFire);
 			if (soundOn)
@@ -111,7 +114,7 @@ public class FlameTower extends Tower {
 	@Override
 	public void dispose() {
 		super.disposeMedia();
-		sflame.getTexture().dispose();
+		spriteFlameFire.getTexture().dispose();
 		for (final FlameTowerFire flameTowerFire : flames)
 			flameTowerFire.dispose();
 	}

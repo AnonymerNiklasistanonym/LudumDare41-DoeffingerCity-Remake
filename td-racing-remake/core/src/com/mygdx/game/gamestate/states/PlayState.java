@@ -219,7 +219,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		assetManager.load(FlameTower.ASSET_ID_TEXTURE_BOTTOM, Texture.class);
 		assetManager.load(FlameTower.ASSET_ID_TEXTURE_UPPER, Texture.class);
 		assetManager.load(FlameTower.ASSET_ID_TEXTURE_FIRING, Texture.class);
-		assetManager.load(FlameTower.ASSET_ID_TEXTURE_FLAME, Texture.class);
+		assetManager.load(FlameTower.ASSET_ID_TEXTURE_FLAME_FIRE, Texture.class);
 
 		// set textures (enemies)
 		assetManager.load(ZombieBicycle.ASSET_ID_TEXTURE_ALIVE, Texture.class);
@@ -1181,7 +1181,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 				FlameTower.ASSET_ID_TEXTURE_BOTTOM,
 				FlameTower.ASSET_ID_TEXTURE_UPPER,
 				FlameTower.ASSET_ID_TEXTURE_FIRING,
-				FlameTower.ASSET_ID_TEXTURE_FLAME,
+				FlameTower.ASSET_ID_TEXTURE_FLAME_FIRE,
 				CannonTower.ASSET_ID_SOUND_SHOOT,
 				SniperTower.ASSET_ID_SOUND_SHOOT,
 				LaserTower.ASSET_ID_SOUND_SHOOT,
