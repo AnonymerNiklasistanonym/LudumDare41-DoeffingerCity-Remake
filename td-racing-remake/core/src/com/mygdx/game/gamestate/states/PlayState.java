@@ -206,9 +206,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		fontText = assetManager.get(ASSET_ID_TEXT_FONT);
 		fontText.getData().setScale(fontScaleText);
 
-		// set static dependencies
-		Zombie.callbackInterface = this;
-
 		// create sprite(s)
 		assetManager.load(ASSET_ID_CAR_TEXTURE, Texture.class);
 		assetManager.load(ASSET_ID_FINISH_LINE_TEXTURE, Texture.class);
@@ -566,27 +563,27 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 		// manually instantiate enemies
 		if (Gdx.input.isKeyJustPressed(Keys.F)) {
-			final Zombie zombie = new ZombieSmall(map.getSpawnPosition(), world, assetManager, map, 0);
+			final Zombie zombie = new ZombieSmall(map.getSpawnPosition(), world, assetManager, map, 0, this);
 			zombie.spawn();
 			zombies.add(zombie);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.G)) {
-			final Zombie zombie = new ZombieFat(map.getSpawnPosition(), world, assetManager, map, 0);
+			final Zombie zombie = new ZombieFat(map.getSpawnPosition(), world, assetManager, map, 0, this);
 			zombie.spawn();
 			zombies.add(zombie);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.H)) {
-			final Zombie zombie = new ZombieBicycle(map.getSpawnPosition(), world, assetManager, map, 0);
+			final Zombie zombie = new ZombieBicycle(map.getSpawnPosition(), world, assetManager, map, 0, this);
 			zombie.spawn();
 			zombies.add(zombie);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.J)) {
-			final Zombie zombie = new ZombieLincoln(map.getSpawnPosition(), world, assetManager, map, 0);
+			final Zombie zombie = new ZombieLincoln(map.getSpawnPosition(), world, assetManager, map, 0, this);
 			zombie.spawn();
 			zombies.add(zombie);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.K)) {
-			final Zombie zombie = new ZombieSpider(map.getSpawnPosition(), world, assetManager, map, 0);
+			final Zombie zombie = new ZombieSpider(map.getSpawnPosition(), world, assetManager, map, 0, this);
 			zombie.spawn();
 			zombies.add(zombie);
 		}
@@ -1278,7 +1275,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 				// create and add all enemies of the current wave to all enemies
 				zombies
 						.addAll(currentLevelWaves.get(currentWave).createEnemies(map.getSpawnPosition(), world, assetManager, map,
-						scoreBoard.getTime()));
+						scoreBoard.getTime(), this));
 			}
 		}
 	}

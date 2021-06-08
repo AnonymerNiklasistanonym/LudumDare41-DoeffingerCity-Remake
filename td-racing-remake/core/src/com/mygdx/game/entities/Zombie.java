@@ -23,10 +23,7 @@ import com.mygdx.game.world.Node;
 
 public abstract class Zombie implements Disposable {
 
-	/**
-	 * TODO Do anything to not be public static
-	 */
-	public static ZombieCallbackInterface callbackInterface;
+	private ZombieCallbackInterface callbackInterface;
 
 
 	private final float density;
@@ -68,7 +65,7 @@ public abstract class Zombie implements Disposable {
 			final float money, final float score, final float spawnTimeStamp, final float speed,
 			final World world, final AssetManager assetManager, final String textureSpriteAlive,
 			final String textureSpriteDead, final String textureSpriteDamage, final Map map,
-			final ZombieOptions zombieOptions) {
+			final ZombieCallbackInterface callbackInterface, final ZombieOptions zombieOptions) {
 		this.name = name;
 		this.damage = damage;
 		maxHealth = health;
@@ -78,6 +75,7 @@ public abstract class Zombie implements Disposable {
 		this.speed = speed;
 		this.spawnTimeStamp = spawnTimeStamp;
 		this.map = map;
+		this.callbackInterface = callbackInterface;
 		showHealthBar = zombieOptions.showHealthBar;
 		density = zombieOptions.density;
 

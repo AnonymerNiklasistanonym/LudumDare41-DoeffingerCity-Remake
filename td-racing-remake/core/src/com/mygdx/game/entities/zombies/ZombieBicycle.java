@@ -8,6 +8,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.entities.Zombie;
+import com.mygdx.game.entities.ZombieCallbackInterface;
 import com.mygdx.game.entities.ZombieOptions;
 import com.mygdx.game.gamestate.states.PlayState;
 import com.mygdx.game.world.Map;
@@ -28,10 +29,10 @@ public class ZombieBicycle extends Zombie {
   private static final ZombieOptions zombieOptions = getZombieOptions();
 
   public ZombieBicycle(final Vector2 position, final World world, final AssetManager assetManager,
-      final Map map, final float spawnTimeStamp) {
+      final Map map, final float spawnTimeStamp, final ZombieCallbackInterface callbackInterface) {
     super(ENEMY_NAME, position, DAMAGE, HEALTH, MONEY, SCORE, spawnTimeStamp, SPEED, world,
         assetManager, ASSET_ID_TEXTURE_ALIVE, ASSET_ID_TEXTURE_DEAD, ASSET_ID_TEXTURE_DAMAGE, map,
-        zombieOptions);
+        callbackInterface, zombieOptions);
   }
 
   private static ZombieOptions getZombieOptions() {
