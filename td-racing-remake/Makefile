@@ -4,32 +4,36 @@
 .PHONY: run_desktop run_html
 
 VERSION=1.0
+DIST_DIR=bin
+DIST_FILE_ANDROID="$(DIST_DIR)/android-$(VERSION).apk"
+DIST_FILE_DESKTOP="$(DIST_DIR)/desktop-$(VERSION).jar"
+DIST_DIR_HTML="$(DIST_DIR)/html-$(VERSION)"
 
 all: dist_desktop
 
 clean: clean_android clean_desktop clean_html
 	# Clean gradlew build files in general additionally
 	./gradlew clean
-	# Remove the created bin directory
-	rm -rf bin/
+	# Remove the created dist directory
+	rm -rf "$(DIST_DIR)"
 
 clean_android:
 	# Run the gradle command to clean the desktop build files
 	./gradlew android:clean
-	# Remove the created JAR file
-	rm -f bin/android-$(VERSION).apk
+	# Remove the created APK file
+	rm -f "$(DIST_FILE_ANDROID)"
 
 clean_desktop:
 	# Run the gradle command to clean the desktop build files
 	./gradlew desktop:clean
 	# Remove the created JAR file
-	rm -f bin/desktop-$(VERSION).jar
+	rm -f "$(DIST_FILE_DESKTOP)"
 
 clean_html:
 	# Run the gradle command to clean the html build files
 	./gradlew html:clean
 	# Remove the created HTML directory
-	rm -rf bin/html-$(VERSION)
+	rm -rf "$(DIST_DIR_HTML)"
 
 build: build_android build_desktop build_html
 
@@ -62,22 +66,23 @@ build_html:
 dist: dist_android dist_desktop dist_html
 
 dist_android: build_android
-	# After building android copy the created apk into a new bin directory
-	mkdir -p bin
-	cp android/build/outputs/apk/release/android-release.apk bin/android-$(VERSION).apk
+	# After building android copy the created apk into a new dist directory
+	mkdir -p "$(DIST_DIR)"
+	cp "android/build/outputs/apk/release/android-release.apk" "$(DIST_FILE_ANDROID)"
 
 dist_desktop: build_desktop
-	# After building desktop copy the created jar into a new bin directory
-	mkdir -p bin
-	cp desktop/build/libs/desktop-$(VERSION).jar bin/desktop-$(VERSION).jar
+	# After building desktop copy the created jar into a new dist directory
+	mkdir -p "$(DIST_DIR)"
+	cp "desktop/build/libs/desktop-$(VERSION).jar" "$(DIST_FILE_DESKTOP)"
 
 dist_html: build_html
-	# After building html copy the created directory into a new bin directory
-	mkdir -p bin
-	cp -R html/build/dist bin/html-$(VERSION)
+	# After building html copy the created directory into a new dist directory
+	mkdir -p "$(DIST_DIR)"
+	cp -R "html/build/dist" "$(DIST_DIR_HTML)"
 
 run_desktop: dist_desktop
-	java -jar bin/desktop-$(VERSION).jar
+	java -jar "$(DIST_FILE_DESKTOP)"
 
 run_html: dist_html
-	python -m http.server --directory bin/html-$(VERSION)
+	@echo "Make sure to reload the page and disable caching when updating the code"
+	python -m http.server --directory "$(DIST_DIR_HTML)"
