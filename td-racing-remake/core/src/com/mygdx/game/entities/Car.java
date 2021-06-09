@@ -1,5 +1,6 @@
 package com.mygdx.game.entities;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
@@ -10,9 +11,10 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Disposable;
+import com.mygdx.game.MainGame;
 import com.mygdx.game.gamestate.states.PlayState;
 
-public class Car implements Disposable {
+public class Car extends Entity {
 
 	private static final float SPEED_MAX = 15;
 	private static final float ACCELERATION_FORWARD = 2000f;
@@ -24,10 +26,9 @@ public class Car implements Disposable {
 	private final Sprite sprite;
 
 	private float deltaTime;
-	private final World world;
 
 	public Car(final World world, final Sprite sprite, final Vector2 position, final float angle) {
-		this.world = world;
+		super("car", world);
 		final BodyDef bodydef = new BodyDef();
 		bodydef.type = BodyDef.BodyType.DynamicBody;
 		bodydef.position.set(position.x * PlayState.PIXEL_TO_METER, position.y * PlayState.PIXEL_TO_METER);
@@ -157,7 +158,11 @@ public class Car implements Disposable {
 		sprite.getTexture().dispose();
 	}
 
-  public void removeMapFromWorld() {
-		world.destroyBody(body);
-  }
+	@Override
+	public void removeFromWorld() {
+		Gdx.app.debug("car:removeFromWorld", MainGame.getCurrentTimeStampLogString() + "remove Car " + name + " from world");
+		if (body != null) {
+			world.destroyBody(body);
+		}
+	}
 }

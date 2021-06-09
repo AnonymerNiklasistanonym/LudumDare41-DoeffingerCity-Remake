@@ -15,13 +15,12 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.gamestate.states.PlayState;
 import com.mygdx.game.world.Map;
 import com.mygdx.game.world.Node;
 
-public abstract class Zombie implements Disposable {
+public abstract class Zombie extends Entity {
 
 	private ZombieCallbackInterface callbackInterface;
 
@@ -59,18 +58,15 @@ public abstract class Zombie implements Disposable {
 	private boolean bodyDeleted = false;
 	private boolean spawned = false;
 	private final boolean showHealthBar;
-	private final String name;
 
 	private static int countSpawns = 0;
-
-	private World world;
 
 	public Zombie(final String name, final Vector2 position, final float damage, final float health,
 			final float money, final float score, final float spawnTimeStamp, final float speed,
 			final World world, final AssetManager assetManager, final String textureSpriteAlive,
 			final String textureSpriteDead, final String textureSpriteDamage, final Map map,
 			final ZombieCallbackInterface callbackInterface, final ZombieOptions zombieOptions) {
-		this.name = name;
+		super(name, world);
 		this.damage = damage;
 		maxHealth = health;
 		this.health = maxHealth;
@@ -80,7 +76,6 @@ public abstract class Zombie implements Disposable {
 		this.spawnTimeStamp = spawnTimeStamp;
 		this.map = map;
 		this.callbackInterface = callbackInterface;
-		this.world = world;
 		showHealthBar = zombieOptions.showHealthBar;
 		density = zombieOptions.density;
 
@@ -465,7 +460,9 @@ public abstract class Zombie implements Disposable {
 		return name;
 	}
 
-	public void removeZombieFromWorld() {
+	@Override
+	public void removeFromWorld() {
+		Gdx.app.debug("zombie:removeFromWorld", MainGame.getCurrentTimeStampLogString() + "remove Zombie " + name + " from world");
 		spawn();
 		die();
 		if (body != null) {

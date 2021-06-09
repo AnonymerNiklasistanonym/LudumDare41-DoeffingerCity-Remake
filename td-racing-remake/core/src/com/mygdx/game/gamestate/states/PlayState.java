@@ -58,7 +58,6 @@ import com.mygdx.game.entities.towers.SniperTower;
 import com.mygdx.game.world.Node;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class PlayState extends GameState implements CollisionCallbackInterface, IControllerCallbackPlayState,
 		ScoreBoardCallbackInterface, ZombieCallbackInterface {
@@ -322,9 +321,12 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 		// Clear all level related lists
 		for (final Zombie zombie : zombies) {
-			zombie.removeZombieFromWorld();
+			zombie.removeFromWorld();
 		}
 		zombies.clear();
+		for (final Tower tower : towers) {
+			tower.removeFromWorld();
+		}
 		towers.clear();
 		enemiesDead.clear();
 		trailerSmokes.clear();
@@ -337,7 +339,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 		// Setup the car
 		if (car != null) {
-			car.removeMapFromWorld();
+			car.removeFromWorld();
 		}
 		car = new Car(world, spriteCar, currentLevelInfo.carStartPosition, currentLevelInfo.carStartAngle);
 		// Setup the finish line
@@ -345,7 +347,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 		// TODO Check if the level can be updated via a method so that a map object does not need to be reassigned
 		if (map != null) {
-			map.removeMapFromWorld();
+			map.removeFromWorld();
 		}
 		map = new Map(currentLevelInfo, world, finishline.getBody(), spritePitStop.getHeight());
 
@@ -1184,6 +1186,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		}
 		car.dispose();
 		towerMenu.dispose();
+		map.dispose();
 		// dispose images, sounds and other resources
 		unloadAssetManagerResources(new String[]{
 				ASSET_ID_TEXT_FONT,
@@ -1326,7 +1329,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 				}
 				// create and add all enemies of the current wave to all enemies
 				for (final Zombie zombie : zombies) {
-					zombie.removeZombieFromWorld();
+					zombie.removeFromWorld();
 				}
 				zombies.clear();
 				zombies.addAll(createEnemiesForCurrentWave(scoreBoard.getWaveNumber(), map.getSpawnPosition(), scoreBoard.getTime()));

@@ -21,7 +21,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.gamestate.states.PlayState;
 
-public abstract class Tower implements Disposable {
+public abstract class Tower extends Entity {
 
 	// TODO Update protected and public variables to be private if possible!
 	protected static boolean soundOn;
@@ -50,16 +50,14 @@ public abstract class Tower implements Disposable {
 	protected Zombie target = null;
 	protected float timesincelastshot;
 	protected final float turnspeed;
-	protected final World world;
-	protected final String name;
 
 	protected Tower(final String name, final Vector2 position, final int cost, final int range,
 			float powerShoot, float speedShoot, float speedTurn, final AssetManager assetManager,
 			final String assetIdBottom, final String assetIdUpper, final String assetIdFiring,
 			final String assetIdSoundShoot, final World world,
 			final Array<Zombie> zombies, final TowerOptions towerOptions) {
+		super(name, world);
 		Gdx.app.debug("tower:constructor", MainGame.getCurrentTimeStampLogString() + "create tower \"" + name + "\"");
-		this.name = name;
 		soundShoot = assetManager.get(assetIdSoundShoot);
 		this.zombies = zombies;
 		this.range = range;
@@ -78,7 +76,6 @@ public abstract class Tower implements Disposable {
 		this.spriteBody.setOriginCenter();
 		this.spriteUpperBody.setOriginCenter();
 		this.spriteFiring.setOriginCenter();
-		this.world = world;
 		this.cost = cost;
 		this.speed = speedShoot;
 		this.power = powerShoot;
@@ -433,6 +430,14 @@ public abstract class Tower implements Disposable {
 	public void updateSound() {
 		if (!soundOn)
 			soundShoot.stop();
+	}
+
+	@Override
+	public void removeFromWorld() {
+		Gdx.app.debug("tower:removeFromWorld", MainGame.getCurrentTimeStampLogString() + "remove Tower " + name + " from world");
+		if (body != null) {
+			world.destroyBody(body);
+		}
 	}
 
 }

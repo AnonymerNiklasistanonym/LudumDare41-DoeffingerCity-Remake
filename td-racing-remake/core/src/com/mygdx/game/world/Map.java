@@ -15,10 +15,11 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.MainGame;
+import com.mygdx.game.entities.Entity;
 import com.mygdx.game.file.LevelInfoCsvFile;
 import com.mygdx.game.gamestate.states.PlayState;
 
-public class Map {
+public class Map extends Entity {
 
 	private final Array<Node> nodesList = new Array<>();
 	private final Vector2 healthBarPosition;
@@ -36,7 +37,9 @@ public class Map {
 	private final float spawnHeight;
 	private final World world;
 
-	public void removeMapFromWorld() {
+	@Override
+	public void removeFromWorld() {
+			Gdx.app.debug("map:removeFromWorld", MainGame.getCurrentTimeStampLogString() + "remove Map " + name + " from world");
 		if (mapModel != null) {
 			world.destroyBody(mapModel);
 		}
@@ -52,6 +55,7 @@ public class Map {
 	}
 
 	public Map(final LevelInfoCsvFile currentLevel, final World world, final Body finishLine, final float sizePitStop) {
+		super(currentLevel.mapName, world);
 		createSolidMap(currentLevel.mapName, world);
 		this.finishLine = finishLine;
 		this.world = world;
@@ -354,4 +358,9 @@ public class Map {
 		return spawnHeight;
 	}
 
+	@Override
+	public void dispose() {
+		// Nothing to dispose right now
+		// TODO Dispose loaded files?
+	}
 }
