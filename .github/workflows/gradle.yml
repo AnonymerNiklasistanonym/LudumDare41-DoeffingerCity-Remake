@@ -44,3 +44,15 @@ jobs:
     - name: Build with Gradle the android debug APK (via Makefile)
       working-directory: ./td-racing-remake/
       run: make build_android_debug
+    - name: Create website
+      working-directory: ./web-page
+      run: make
+    - name: Deploy to GitHub Pages
+      # Run this step on the main branch only
+      if: github.ref == 'refs/heads/main'
+      uses: crazy-max/ghaction-github-pages@v2
+      with:
+        target_branch: gh-pages
+        build_dir: ./web-page/bin
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
