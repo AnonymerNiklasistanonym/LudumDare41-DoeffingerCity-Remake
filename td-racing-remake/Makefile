@@ -5,9 +5,9 @@
 
 VERSION=1.0
 DIST_DIR=bin
-DIST_FILE_ANDROID="$(DIST_DIR)/android-$(VERSION).apk"
-DIST_FILE_DESKTOP="$(DIST_DIR)/desktop-$(VERSION).jar"
-DIST_DIR_HTML="$(DIST_DIR)/html-$(VERSION)"
+DIST_FILE_ANDROID=$(DIST_DIR)/android-$(VERSION).apk
+DIST_FILE_DESKTOP=$(DIST_DIR)/desktop-$(VERSION).jar
+DIST_DIR_HTML=$(DIST_DIR)/html-$(VERSION)
 
 all: dist_desktop
 
@@ -41,13 +41,13 @@ build_android:
 	# I recommend saving the following necessary variables in a shell file as
 	# environment variables and the sourcing this file before executing this target
 	# [Because of the singing step this is excluded from the default make call]
-	@echo "----------------------------------------------------------------------------"
-	@echo "You need to set the following environment variables to sign the APK:"
-	@echo "KEY_STORE_PATH=$(KEY_STORE_PATH)"
-	@echo "KEY_STORE_PASSWORD=$(KEY_STORE_PASSWORD)"
-	@echo "KEY_ALIAS=$(KEY_ALIAS)"
-	@echo "KEY_ALIAS_PASSWORD=$(KEY_ALIAS_PASSWORD)"
-	@echo "----------------------------------------------------------------------------"
+	@echo ----------------------------------------------------------------------------
+	@echo You need to set the following environment variables to sign the APK:
+	@echo KEY_STORE_PATH=\"$(KEY_STORE_PATH)\"
+	@echo KEY_STORE_PASSWORD=\"$(KEY_STORE_PASSWORD)\"
+	@echo KEY_ALIAS=\"$(KEY_ALIAS)\"
+	@echo KEY_ALIAS_PASSWORD=\"$(KEY_ALIAS_PASSWORD)\"
+	@echo ----------------------------------------------------------------------------
 	# Run the gradle command to build a signed executable (APK file)
 	./gradlew android:assembleRelease
 
@@ -84,5 +84,5 @@ run_desktop: dist_desktop
 	java -jar "$(DIST_FILE_DESKTOP)"
 
 run_html: dist_html
-	@echo "Make sure to reload the page and disable caching when updating the code"
+	@echo Make sure to reload the page and disable caching when updating the code
 	python -m http.server --directory "$(DIST_DIR_HTML)"
