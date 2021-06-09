@@ -165,6 +165,22 @@ public class ControllerCallbackPlayState implements ControllerListener {
         case BUTTON_Y:
           controllerCallbackClass.controllerCallbackToggleSoundEffects();
           break;
+        case BUTTON_LT_HTML_COMPATIBILITY:
+          steerCarForwardsBackwards.set(1, steerCarForwardsBackwards.y);
+          break;
+        case BUTTON_RT_HTML_COMPATIBILITY:
+          steerCarForwardsBackwards.set(steerCarForwardsBackwards.x, 1);
+          break;
+        default:
+          // not important
+      }
+    } else {
+      switch (ControllerInputMapping.getControllerButton(controller, buttonId)) {
+        case BUTTON_LT_HTML_COMPATIBILITY:
+          steerCarForwardsBackwards.set(0, steerCarForwardsBackwards.y);
+        case BUTTON_RT_HTML_COMPATIBILITY:
+          steerCarForwardsBackwards.set(steerCarForwardsBackwards.x, 0);
+          break;
         default:
           // not important
       }

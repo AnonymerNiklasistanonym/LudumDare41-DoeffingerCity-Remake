@@ -78,6 +78,8 @@ dist_desktop: build_desktop
 dist_html: build_html
 	# After building html copy the created directory into a new dist directory
 	mkdir -p "$(DIST_DIR)"
+	# Remove if existing the previously created HTML directory
+	rm -rf "$(DIST_DIR_HTML)"
 	cp -R "html/build/dist" "$(DIST_DIR_HTML)"
 
 run_desktop: dist_desktop

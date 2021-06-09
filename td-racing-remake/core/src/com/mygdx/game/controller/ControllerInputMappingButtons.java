@@ -16,5 +16,13 @@ public enum ControllerInputMappingButtons {
   BUTTON_DOWN,
   BUTTON_LEFT,
   BUTTON_RIGHT,
+  /**
+   * In the HTML run time the LT trigger is recognized as button instead of an axis
+   */
+  BUTTON_LT_HTML_COMPATIBILITY,
+  /**
+   * In the HTML run time the RT trigger is recognized as button instead of an axis
+   */
+  BUTTON_RT_HTML_COMPATIBILITY,
   UNKNOWN
 }
