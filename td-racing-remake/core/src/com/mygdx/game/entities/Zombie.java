@@ -61,6 +61,8 @@ public abstract class Zombie implements Disposable {
 	private final boolean showHealthBar;
 	private final String name;
 
+	private static int countSpawns = 0;
+
 	public Zombie(final String name, final Vector2 position, final float damage, final float health,
 			final float money, final float score, final float spawnTimeStamp, final float speed,
 			final World world, final AssetManager assetManager, final String textureSpriteAlive,
@@ -131,6 +133,7 @@ public abstract class Zombie implements Disposable {
 	}
 
 	public void spawn() {
+		Gdx.app.debug("zombie:spawn", MainGame.getCurrentTimeStampLogString() + "spawn count = " + (++countSpawns) + "after spawn of " + name);
 		spawned = true;
 		body.setActive(true);
 	}
@@ -209,6 +212,9 @@ public abstract class Zombie implements Disposable {
 		// If zombie is not yet spawned check if it can now be spawned
 		if (!spawned) {
 			if (spawnTimeStamp < gameTimeStamp) {
+				Gdx.app.debug("zombie:update", MainGame.getCurrentTimeStampLogString() +
+						"Spawn zombie " + name + " since the spawn time stamp " + spawnTimeStamp +
+						"s < game time stamp " + gameTimeStamp + "s");
 				spawn();
 			} else {
 				return;

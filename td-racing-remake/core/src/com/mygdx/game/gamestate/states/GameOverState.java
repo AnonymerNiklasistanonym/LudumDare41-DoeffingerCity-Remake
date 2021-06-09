@@ -348,7 +348,7 @@ public class GameOverState extends GameState implements IControllerCallbackGener
         MainGame.getCurrentTimeStampLogString() + "\"" + menuButtonId + "\"");
     switch (menuButtonId) {
       case PLAY_AGAIN_ID:
-        gameStateManager.setGameState(new PlayState(gameStateManager, 1));
+        gameStateManager.setGameState(new PlayState(gameStateManager, 0));
         break;
       case PLAY_LEVEL_AGAIN_ID:
         gameStateManager.setGameState(new PlayState(gameStateManager, level));

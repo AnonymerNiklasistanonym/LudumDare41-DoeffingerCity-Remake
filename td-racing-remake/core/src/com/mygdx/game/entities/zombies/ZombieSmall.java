@@ -24,8 +24,9 @@ public class ZombieSmall extends Zombie {
   private static final ZombieOptions zombieOptions = new ZombieOptions();
 
   public ZombieSmall(final Vector2 position, final World world, final AssetManager assetManager,
-      final Map map, final float spawnTimeStamp, final ZombieCallbackInterface callbackInterface) {
-    super(ENEMY_NAME, position, DAMAGE, HEALTH, MONEY, SCORE, spawnTimeStamp, SPEED, world,
+      final Map map, final float spawnTimeStamp, final ZombieCallbackInterface callbackInterface,
+      final String extra) {
+    super(ENEMY_NAME + extra, position, DAMAGE, HEALTH, MONEY, SCORE, spawnTimeStamp, SPEED, world,
         assetManager, ASSET_ID_TEXTURE_ALIVE, ASSET_ID_TEXTURE_DEAD, ASSET_ID_TEXTURE_DAMAGE, map,
         callbackInterface, zombieOptions);
   }

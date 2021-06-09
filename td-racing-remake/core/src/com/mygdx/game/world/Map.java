@@ -15,8 +15,8 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.MainGame;
+import com.mygdx.game.file.LevelInfoCsvFile;
 import com.mygdx.game.gamestate.states.PlayState;
-import com.mygdx.game.level.Level;
 import com.mygdx.game.world.BodyEditorLoader;
 import com.mygdx.game.world.Node;
 
@@ -33,17 +33,17 @@ public class Map {
 	private Array<Array<Node>> motorpaths;
 	private float spawnheighty;
 
-	public Map(final Level currentLevel, final World world, final Body finishLine, final float sizePitstop) {
+	public Map(final LevelInfoCsvFile currentLevel, final World world, final Body finishLine, final float sizePitstop) {
 		nodesList = new Array<Node>();
-		createSolidMap(currentLevel.getMapName(), world);
+		createSolidMap(currentLevel.mapName, world);
 		this.finishLine = finishLine;
 		spawnPosition = new Vector2();
 		targetPosition = new Vector2();
 		createAStarArray();
 		motorpaths = new Array<Array<Node>>();
 		paths = new Array<Array<Node>>();
-		healthBarPosition = currentLevel.getHealthBarPosition();
-		spawnheighty = currentLevel.getPitStopPosition().y * PlayState.PIXEL_TO_METER + sizePitstop;
+		healthBarPosition = currentLevel.healthBarPosition;
+		spawnheighty = currentLevel.pitStopPosition.y * PlayState.PIXEL_TO_METER + sizePitstop;
 
 		// Create x calculated ways
 		final PolygonShape ps = (PolygonShape) mapZiel.getFixtureList().first().getShape();
@@ -51,12 +51,12 @@ public class Map {
 		ps.getVertex(0, vector);
 
 		for (int i = 0; i < 2; i++) {
-			motorpaths.add(getPath(new Vector2(currentLevel.getSpawnPoint().x, currentLevel.getSpawnPoint().y),
+			motorpaths.add(getPath(new Vector2(currentLevel.enemySpawnPosition.x, currentLevel.enemySpawnPosition.y),
 					new Vector2(vector.x * PlayState.METER_TO_PIXEL, vector.y * PlayState.METER_TO_PIXEL),0));
 		}
 		
 		for (int i = 0; i < 200; i++) {
-			paths.add(getPath(new Vector2(currentLevel.getSpawnPoint().x, currentLevel.getSpawnPoint().y),
+			paths.add(getPath(new Vector2(currentLevel.enemySpawnPosition.x, currentLevel.enemySpawnPosition.y),
 					new Vector2(vector.x * PlayState.METER_TO_PIXEL, vector.y * PlayState.METER_TO_PIXEL),3));
 		}
 

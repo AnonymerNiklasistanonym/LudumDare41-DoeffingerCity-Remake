@@ -60,7 +60,7 @@ public class CreateHighscoreEntryState extends GameState implements
     this.goToCreditStage = goToCreditStage;
 
     scoreText = "SCORE: " + score;
-    levelLapsText = "(LEVEL: " + level + " - LAPS: " + laps + ")";
+    levelLapsText = "(LEVEL: " + (level + 1) + " - LAPS: " + laps + ")";
 
     // Initialize game camera/canvas
     camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);

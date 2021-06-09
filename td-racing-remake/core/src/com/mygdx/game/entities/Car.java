@@ -25,10 +25,10 @@ public class Car implements Disposable {
 
 	private float deltaTime;
 
-	public Car(final World world, final Sprite sprite, final float xPostion, final float yPosition) {
+	public Car(final World world, final Sprite sprite, final Vector2 position, final float angle) {
 		final BodyDef bodydef = new BodyDef();
 		bodydef.type = BodyDef.BodyType.DynamicBody;
-		bodydef.position.set(xPostion * PlayState.PIXEL_TO_METER, yPosition * PlayState.PIXEL_TO_METER);
+		bodydef.position.set(position.x * PlayState.PIXEL_TO_METER, position.y * PlayState.PIXEL_TO_METER);
 		body = world.createBody(bodydef);
 		final PolygonShape carBox = new PolygonShape();
 		carBox.setAsBox(sprite.getWidth() * 0.5f, sprite.getHeight() * 0.5f);
@@ -44,7 +44,7 @@ public class Car implements Disposable {
 		deltaTime = 0;
 
 		// turn the car at the beginning
-		body.setTransform(body.getPosition(), (float) Math.toRadians(180));
+		body.setTransform(body.getPosition(), (float) Math.toRadians(angle));
 	}
 
 	public void accelarate() {

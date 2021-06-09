@@ -371,7 +371,7 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
         MainGame.getCurrentTimeStampLogString() + "\"" + menuButtonId + "\"");
     switch (menuButtonId) {
       case START_ID:
-        gameStateManager.setGameState(new PlayState(gameStateManager, 1));
+        gameStateManager.setGameState(new PlayState(gameStateManager, 0));
         break;
       case HIGHSCORE_ID:
         gameStateManager.setGameState(new HighscoreListState(gameStateManager));

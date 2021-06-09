@@ -3,6 +3,7 @@ package com.mygdx.game.world;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
@@ -15,10 +16,10 @@ public class FinishLine {
 	private final Sprite sprite;
 	private final Body body;
 
-	public FinishLine(final World world, final Sprite sprite, final float xPos, final float yPos) {
+	public FinishLine(final World world, final Sprite sprite, final Vector2 position, final float angle) {
 		final BodyDef bodydef = new BodyDef();
 		bodydef.type = BodyDef.BodyType.StaticBody;
-		bodydef.position.set(xPos * PlayState.PIXEL_TO_METER, yPos * PlayState.PIXEL_TO_METER);
+		bodydef.position.set(position.x * PlayState.PIXEL_TO_METER, position.y * PlayState.PIXEL_TO_METER);
 		body = world.createBody(bodydef);
 		final PolygonShape carBox = new PolygonShape();
 		carBox.setAsBox(sprite.getWidth() * 0.5f, sprite.getHeight() * 0.5f);
@@ -31,6 +32,7 @@ public class FinishLine {
 		body.setUserData(this);
 		body.setAngularDamping(2);
 		this.sprite = sprite;
+		// TODO add angle
 		sprite.setPosition(getX(), getY());
 		sprite.setRotation(body.getAngle() * MathUtils.radDeg);
 	}

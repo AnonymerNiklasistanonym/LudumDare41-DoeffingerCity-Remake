@@ -27,11 +27,11 @@ import com.mygdx.game.controller.play_state.IControllerCallbackPlayState;
 import com.mygdx.game.controller.play_state.SteerCarForwardsBackwards;
 import com.mygdx.game.controller.play_state.SteerCarLeftRight;
 import com.mygdx.game.file.LevelInfoCsvFile;
+import com.mygdx.game.file.LevelWaveCsvFile;
+import com.mygdx.game.file.LevelWaveCsvFile.ZombieSpawn;
+import com.mygdx.game.file.LevelWaveCsvFile.ZombieType;
 import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
-import com.mygdx.game.level.Level;
-import com.mygdx.game.level.LevelHandler;
-import com.mygdx.game.level.Wave;
 import com.mygdx.game.world.CollisionCallbackInterface;
 import com.mygdx.game.world.CollisionListener;
 import com.mygdx.game.entities.Car;
@@ -58,6 +58,7 @@ import com.mygdx.game.entities.towers.SniperTower;
 import com.mygdx.game.world.Node;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class PlayState extends GameState implements CollisionCallbackInterface, IControllerCallbackPlayState,
 		ScoreBoardCallbackInterface, ZombieCallbackInterface {
@@ -112,23 +113,24 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	private final Array<Tower> towers = new Array<>();
 	private final Array<Sprite> trailerSmokes = new Array<>();
 	private final Array<Checkpoint> checkpoints = new Array<>();
+	private final ArrayList<LevelWaveCsvFile> levelWaves = new ArrayList<>();
 	private final ArrayList<LevelInfoCsvFile> levelInfo;
 	private Sprite spritePitStop;
 	private Sprite spriteCar;
 	private Sprite spriteFinishLine;
 	private Sprite spriteSmoke;
-	private final Level[] levels;
-	private Level level;
+	// private final Level[] levels;
+	//private Level level;
 	private Texture backgroundLoading;
 
 	private Tower buildingtower;
-	private final CollisionListener collis;
-	private World world;
+	// private final CollisionListener collis;
+	private final World world = new World(new Vector2(), true);
 	private Car car;
 	private FinishLine finishline;
 	private TowerMenu towerMenu;
 	private Map map;
-	private Box2DDebugRenderer debugRender;
+	private final Box2DDebugRenderer debugRender = new Box2DDebugRenderer();
 	private String waveText;
 	private final Vector2 trailerpos = new Vector2(0, 0);
 	private float tutorialtimer = 0;
@@ -142,6 +144,13 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	 * TODO Make this an enum or boolean (check how it is implemented)
 	 */
 	private int tutorialState = 0;
+	private boolean loadNextState = false;
+
+	public enum TutorialState {
+		SHOW_HOW_TO_DRIVE,
+		FINISHED
+	};
+	private TutorialState newTutorialState = TutorialState.SHOW_HOW_TO_DRIVE;
 	private float physicsaccumulator = 0;
 	private float timesincesmoke = 0;
 	private boolean pausedByUser = false;
@@ -174,7 +183,11 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	private Thread threadLoadFirstLevel;
 
-	private final int levelNumber;
+	/**
+	 * The number of the current level
+	 */
+	private int levelNumber;
+	private long timeStampStateStarted = System.currentTimeMillis();
 
 	private boolean levelLoaded = false;
 
@@ -202,23 +215,26 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		fontLoading.getData().setScale(fontScaleLoading);
 		backgroundLoading = assetManager.get(ASSET_ID_BACKGROUND_LOADING_TEXTURE);
 
-		// scale used font correctly
+		// Scale used fonts correctly
 		fontText = assetManager.get(ASSET_ID_TEXT_FONT);
 		fontText.getData().setScale(fontScaleText);
 
-		// create sprite(s)
+		// Load resources for the car
 		assetManager.load(ASSET_ID_CAR_TEXTURE, Texture.class);
+
+		// Load resources for the map
 		assetManager.load(ASSET_ID_FINISH_LINE_TEXTURE, Texture.class);
 		assetManager.load(ASSET_ID_PIT_STOP_TEXTURE, Texture.class);
 		assetManager.load(ASSET_ID_SMOKE_TEXTURE, Texture.class);
+		// TODO Map resources missing (is there a way to not preload them?)
 
-		// set textures (tower buttons)
+		// Load resources for the tower menu
 		assetManager.load(ASSET_ID_TOWER_CANNON_TEXTURE, Texture.class);
 		assetManager.load(ASSET_ID_TOWER_LASER_TEXTURE, Texture.class);
 		assetManager.load(ASSET_ID_TOWER_SNIPER_TEXTURE, Texture.class);
 		assetManager.load(ASSET_ID_TOWER_FLAME_TEXTURE, Texture.class);
 
-		// set textures (towers)
+		// Load resources for the towers
 		assetManager.load(CannonTower.ASSET_ID_TEXTURE_BOTTOM, Texture.class);
 		assetManager.load(CannonTower.ASSET_ID_TEXTURE_UPPER, Texture.class);
 		assetManager.load(CannonTower.ASSET_ID_TEXTURE_FIRING, Texture.class);
@@ -233,7 +249,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		assetManager.load(FlameTower.ASSET_ID_TEXTURE_FIRING, Texture.class);
 		assetManager.load(FlameTower.ASSET_ID_TEXTURE_FLAME_FIRE, Texture.class);
 
-		// set textures (enemies)
+		// Load resources for the zombies
 		assetManager.load(ZombieBicycle.ASSET_ID_TEXTURE_ALIVE, Texture.class);
 		assetManager.load(ZombieBicycle.ASSET_ID_TEXTURE_DAMAGE, Texture.class);
 		assetManager.load(ZombieBicycle.ASSET_ID_TEXTURE_DEAD, Texture.class);
@@ -249,14 +265,12 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		assetManager.load(ZombieLincoln.ASSET_ID_TEXTURE_ALIVE, Texture.class);
 		assetManager.load(ZombieLincoln.ASSET_ID_TEXTURE_DAMAGE, Texture.class);
 		assetManager.load(ZombieLincoln.ASSET_ID_TEXTURE_DEAD, Texture.class);
-
-		// set audio files (towers)
 		assetManager.load(CannonTower.ASSET_ID_SOUND_SHOOT, Sound.class);
 		assetManager.load(SniperTower.ASSET_ID_SOUND_SHOOT, Sound.class);
 		assetManager.load(LaserTower.ASSET_ID_SOUND_SHOOT, Sound.class);
 		assetManager.load(FlameTower.ASSET_ID_SOUND_SHOOT, Sound.class);
 
-		// set audio files (other)
+		// Load other audio resources
 		assetManager.load(ASSET_ID_THEME_MUSIC, Music.class);
 		assetManager.load(ASSET_ID_CAR_ENGINE_MUSIC, Music.class);
 		assetManager.load(ASSET_ID_CAR_ENGINE_START_SOUND, Sound.class);
@@ -267,49 +281,43 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 		// Create scoreboard and allow callbacks to this class
 		scoreBoard = new ScoreBoard(this);
-
-		// Create collision listener and allow callbacks to this class
-		collis = new CollisionListener(this);
+		// Create a new Box2D world and enable callbacks to this class
+		world.setContactListener(new CollisionListener(this));
 
 		// Get the level info
 		levelInfo = LevelInfoCsvFile.readCsvFile(Gdx.files.internal("level/level_info.csv"));
 		// TODO Replace levels with levelInfo so that the new classes will be used
-		levels = LevelHandler.loadLevels();
+		// levels = LevelHandler.loadLevels();
 
 		// Register controller callback so that controller input can be managed
 		controllerCallbackPlayState = new ControllerCallbackPlayState(this);
 		Controllers.addListener(controllerCallbackPlayState);
 	}
 
-	private void loadLevel(int levelNumber) {
+	/**
+	 * Load the level
+	 *
+	 * @param levelNumber The number of the level (the index 0/1 represents level 1/2)
+	 */
+	private void loadLevel(final int levelNumber) {
+		// Indicate that a level is being loaded
 		levelLoaded = false;
-		long time = System.currentTimeMillis();
-		Gdx.app.debug("play_state:loadLevel", MainGame.getCurrentTimeStampLogString() + "Load Level #" + levelNumber);
-		// set/save level number
+		// Track how long it takes to load a level
+		final long timeStampLevelLoadingWasStarted = System.currentTimeMillis();
+		Gdx.app.debug("play_state:loadLevel", MainGame.getCurrentTimeStampLogString() + "Load Level " + (levelNumber + 1));
+		// Synchronize level with scoreboard
 		scoreBoard.setLevel(levelNumber);
 
-		if (levelNumber > 1) {
-			tutorialState = -1;
+		// Fix tutorial state (for example when someone uses the debug inputs to advance the level
+		if (levelNumber > 0 && newTutorialState != TutorialState.FINISHED) {
+			newTutorialState = TutorialState.FINISHED;
 		}
 
-		// If the level number is bigger than the level number the game was won
-		if (levelNumber > this.levels.length) {
+		// Check if the last level was already beaten
+		if (levelNumber >= levelInfo.size()) {
 			gameStateManager.setGameState(new GameWonState(gameStateManager, scoreBoard.getScore(), scoreBoard.getLevel(), scoreBoard.getLaps()));
 			return;
 		}
-		// TODO Find out why the level number needs to be decremented
-		levelNumber -= 1;
-		level = levels[levelNumber];
-
-		// TODO Place this at the correct position
-		if (preferencesManager.getSoundEffectsOn()) {
-			soundCarStart.play();
-		}
-		if (preferencesManager.getMusicOn()) {
-			musicBackground.play();
-		}
-
-		// TODO Rewrite most of the next 2 sections
 
 		// Clear all level related lists
 		zombies.clear();
@@ -317,44 +325,53 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		enemiesDead.clear();
 		trailerSmokes.clear();
 		checkpoints.clear();
+		levelWaves.clear();
 
-		// create a new world and add contact listener to the new world
-		world = new World(new Vector2(), true);
-		world.setContactListener(collis);
-		// create a new debug renderer
-		debugRender = new Box2DDebugRenderer(); // needed?
-		// setup new car
-		car = new Car(world, spriteCar, level.getCarPos().x, level.getCarPos().y);
-		// create a new TowerMenu
-		towerMenu = new TowerMenu(world, scoreBoard);
+		// Load level wave info
+		final LevelInfoCsvFile currentLevelInfo = levelInfo.get(levelNumber);
+		levelWaves.addAll(LevelWaveCsvFile.readCsvFile(Gdx.files.internal("level/level_0" + currentLevelInfo.levelNumber + "_waves.csv")));
+
+		// Setup the car
+		car = new Car(world, spriteCar, currentLevelInfo.carStartPosition, currentLevelInfo.carStartAngle);
+		// Setup the finish line
+		finishline = new FinishLine(world, spriteFinishLine, currentLevelInfo.finishLinePosition, currentLevelInfo.finishLineAngle);
+
+		// TODO Check if the level can be updated via a method so that a map object does not need to be reassigned
+		map = new Map(currentLevelInfo, world, finishline.getBody(), spritePitStop.getHeight());
+
 		// unlock/lock the right tower
-		for (int i = 0; i < level.getTowersUnlocked().length; i++) {
-			if (level.getTowersUnlocked()[i]) {
-				towerMenu.unlockTower(i);
-			} else {
-				towerMenu.unlockTower(i, false);
-			}
+		for (int i = 0; i < currentLevelInfo.towerUnlocked.size(); i++) {
+			towerMenu.unlockTower(i, currentLevelInfo.towerUnlocked.get(i));
 		}
-		finishline = new FinishLine(world, spriteFinishLine,
-				level.getFinishLinePosition().x, level.getFinishLinePosition().y);
-		map = new Map(level, world, finishline.getBody(), spritePitStop.getHeight());
-		map.setSpawnPosition(level.getSpawnPoint());
-		trailerpos.set(map.getTargetPosition().x, map.getTargetPosition().y);
-		this.spritePitStop.setPosition(level.getPitStopPosition().x * PIXEL_TO_METER,
-				level.getPitStopPosition().y * PIXEL_TO_METER);
 
-		// Set checkpoints
-		for (final Vector2 checkpoint : level.getCheckPoints()) {
+		// Update checkpoints
+		for (final Vector2 checkpoint : currentLevelInfo.checkpointPositions) {
 			checkpoints.add(new NormalCheckpoint(world,
 					checkpoint.x * PIXEL_TO_METER,
 					checkpoint.y * PIXEL_TO_METER));
 		}
 
+		// Set the positions of already instantiated objects
+		// TODO finishline.setPosition(currentLevelInfo.finishLinePosition, currentLevelInfo.finishLineAngle);
+		map.setSpawnPosition(currentLevelInfo.enemySpawnPosition);
+		// TODO car.setPosition(currentLevelInfo.carStartPosition, currentLevelInfo.carStartAngle);
+		trailerpos.set(map.getTargetPosition().x, map.getTargetPosition().y);
+		spritePitStop.setPosition(currentLevelInfo.pitStopPosition.x * PIXEL_TO_METER,
+				currentLevelInfo.pitStopPosition.y * PIXEL_TO_METER);
+
 		// Update the scoreboard because a new level was loaded
 		scoreBoard.resetNewLevelLoaded();
 		levelLoaded = true;
 
-		Gdx.app.debug("play_state:loadLevel", MainGame.getCurrentTimeStampLogString() + "Level #" + (levelNumber + 1) + " was loaded in " + (System.currentTimeMillis() - time) + "ms");
+		// Play sounds if the user enabled sounds and the game is currently not paused
+		if (preferencesManager.getSoundEffectsOn() && !pausedByUser) {
+			soundCarStart.play();
+		}
+		if (preferencesManager.getMusicOn() && !pausedByUser) {
+			musicBackground.play();
+		}
+
+		Gdx.app.debug("play_state:loadLevel", MainGame.getCurrentTimeStampLogString() + "Level #" + (levelNumber + 1) + " was loaded in " + (System.currentTimeMillis() - timeStampLevelLoadingWasStarted) + "ms");
 	}
 
 	private static Sprite createScaledSprite(AssetManager assetManager, String location) {
@@ -563,27 +580,27 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 		// manually instantiate enemies
 		if (Gdx.input.isKeyJustPressed(Keys.F)) {
-			final Zombie zombie = new ZombieSmall(map.getSpawnPosition(), world, assetManager, map, 0, this);
+			final Zombie zombie = new ZombieSmall(map.getSpawnPosition(), world, assetManager, map, 0, this, "[debug]");
 			zombie.spawn();
 			zombies.add(zombie);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.G)) {
-			final Zombie zombie = new ZombieFat(map.getSpawnPosition(), world, assetManager, map, 0, this);
+			final Zombie zombie = new ZombieFat(map.getSpawnPosition(), world, assetManager, map, 0, this, "[debug]");
 			zombie.spawn();
 			zombies.add(zombie);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.H)) {
-			final Zombie zombie = new ZombieBicycle(map.getSpawnPosition(), world, assetManager, map, 0, this);
+			final Zombie zombie = new ZombieBicycle(map.getSpawnPosition(), world, assetManager, map, 0, this, "[debug]");
 			zombie.spawn();
 			zombies.add(zombie);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.J)) {
-			final Zombie zombie = new ZombieLincoln(map.getSpawnPosition(), world, assetManager, map, 0, this);
+			final Zombie zombie = new ZombieLincoln(map.getSpawnPosition(), world, assetManager, map, 0, this, "[debug]");
 			zombie.spawn();
 			zombies.add(zombie);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.K)) {
-			final Zombie zombie = new ZombieSpider(map.getSpawnPosition(), world, assetManager, map, 0, this);
+			final Zombie zombie = new ZombieSpider(map.getSpawnPosition(), world, assetManager, map, 0, this, "[debug]");
 			zombie.spawn();
 			zombies.add(zombie);
 		}
@@ -623,12 +640,11 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		if (Gdx.input.isKeyJustPressed(Keys.T)) {
 			unlockAllTowers = !unlockAllTowers;
 			if (unlockAllTowers) {
-				for (int i = 0; i < 4; i++)
+				for (int i = 0; i < levelInfo.get(levelNumber).towerUnlocked.size(); i++)
 					towerMenu.unlockTower(i);
 			} else {
-				final boolean[] towersUnlockedForThisLevel = levels[scoreBoard.getLevel() - 1].getTowersUnlocked();
-				for (int i = 0; i < towersUnlockedForThisLevel.length; i++)
-					towerMenu.unlockTower(i, towersUnlockedForThisLevel[i]);
+				for (int i = 0; i < levelInfo.get(levelNumber).towerUnlocked.size(); i++)
+					towerMenu.unlockTower(i, levelInfo.get(levelNumber).towerUnlocked.get(i));
 			}
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.E)) {
@@ -670,6 +686,21 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 			return;
 		}
 
+		// Handle loading the next state (so that all race conditions can be prevented)
+		if (loadNextState) {
+			// Check if highscore values are properly set in the preferences
+			preferencesManager.checkHighscore();
+			// If the user got a top 5 score go to the high score create entry state otherwise go to the game over state
+			if (preferencesManager.scoreIsInTop5(scoreBoard.getScore()))
+				gameStateManager.setGameState(
+						new CreateHighscoreEntryState(gameStateManager, scoreBoard.getScore(),
+								scoreBoard.getLevel(), scoreBoard.getLaps(), false));
+			else {
+				gameStateManager.setGameState(new GameOverState(gameStateManager, scoreBoard.getLevel()));
+			}
+			return;
+		}
+
 		// minimize time for wave text - only if it's not pause
 		timeToDisplayWaveTextInS -= deltaTime;
 
@@ -682,8 +713,8 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		}
 
 		// Update all zombies
-		for (final Zombie zombie : zombies) {
-			zombie.update(deltaTime, scoreBoard.getTime());
+		for (int i=0; i < zombies.size; i++) {
+			zombies.get(i).update(deltaTime, scoreBoard.getTime());
 		}
 
 		// update building tower
@@ -785,6 +816,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 				spritePitStop = createScaledSprite(assetManager, ASSET_ID_PIT_STOP_TEXTURE);
 				spriteSmoke = createScaledSprite(assetManager, ASSET_ID_SMOKE_TEXTURE);
 
+				// TODO Remove static textures and implement it like in the other classes
 				// set textures (tower buttons)
 				TowerMenu.cannonButton = assetManager.get(ASSET_ID_TOWER_CANNON_TEXTURE);
 				TowerMenu.laserButton = assetManager.get(ASSET_ID_TOWER_LASER_TEXTURE);
@@ -805,6 +837,14 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 				musicBackground.setVolume(0.75f);
 				musicCar.setLooping(true);
 				musicCar.setVolume(1f);
+
+				// Setup the tower menu
+				towerMenu = new TowerMenu(world, scoreBoard);
+
+				// Output how long it took to load all resources
+				Gdx.app.debug("play_state:render", MainGame.getCurrentTimeStampLogString() +
+						"It took " + (System.currentTimeMillis() - timeStampStateStarted) +
+						"ms to load all resources");
 
 				// load level
 				loadLevel(levelNumber);
@@ -1122,7 +1162,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 		physicsaccumulator += Math.min(deltaTime, 0.25f);
 		while (physicsaccumulator >= TIME_STEP) {
-			world.step(TIME_STEP * this.speedFactor, 6, 2);
+			world.step(TIME_STEP * speedFactor, 6, 2);
 			physicsaccumulator -= TIME_STEP;
 		}
 	}
@@ -1231,9 +1271,9 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		// when all checkpoints were checked
 		if (allCheckpointsChecked) {
 			// add fast bonus and money per lap to the purse
-			int lapmoney = (int) levels[scoreBoard.getLevel() - 1].getMoneyPerLap() - towers.size;
-			final int fastBonus = (int) (levels[scoreBoard.getLevel() - 1].getTimebonus()
-					- scoreBoard.getCurrentTime() * 2);
+			int lapmoney = levelInfo.get(levelNumber).moneyPerLap;
+			final int fastBonus = (int) (levelInfo.get(levelNumber).timeBonus -
+					scoreBoard.getCurrentTime() * 2);
 			scoreBoard.newLap((fastBonus > 0) ? lapmoney + fastBonus : lapmoney);
 			// play cash sound if sound activated
 			if (preferencesManager.getSoundEffectsOn())
@@ -1258,26 +1298,82 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		// Check if all enemies did spawn and are dead
 		if (areAllEnemiesSpawned() && areAllEnemiesDead()) {
 			// TODO Rewrite this so that there is only a single level object
-			final Array<Wave> currentLevelWaves = levels[scoreBoard.getLevel() - 1].getWaves();
+			//final Array<Wave> currentLevelWaves = levels[scoreBoard.getLevel() - 1].getWaves();
 			final int currentWave = scoreBoard.getWaveNumber();
-			// and the current wave is the maximum wave
-			if (currentWave >= currentLevelWaves.size) {
-				// means the level is finished
+			// If the current wave was the last wave of the level load the next level
+			if (currentWave >= levelWaves.size()) {
+				Gdx.app.debug("play_state:updateWaves", MainGame.getCurrentTimeStampLogString() + "current wave " + currentWave + " >= level waves " + levelWaves.size() + " -> load next level");
 				loadNextLevel();
 			} else {
-				// if not the maximum wave load the next wave
-				scoreBoard.setWaveNumber(currentWave + 1);
-				// display feedback of new wave on screen
-				if (currentWave + 1 < currentLevelWaves.size)
-					setWaveText("WAVE " + (currentWave + 1));
-				else
+				// If there are no zombies do not increase the wave count
+				if (zombies.size != 0) {
+					Gdx.app.debug("play_state:updateWaves", MainGame.getCurrentTimeStampLogString() + "zombies.size != 0 " + (zombies.size != 0) + "new wave number is " + (currentWave + 1));
+					scoreBoard.setWaveNumber(currentWave + 1);
+				}
+				final int newWave = scoreBoard.getWaveNumber();
+
+				// Update the wave text
+				if (newWave + 1 < levelWaves.size()) {
+					setWaveText("WAVE " + (newWave + 1));
+				} else {
 					setWaveText("FINAL WAVE");
+				}
 				// create and add all enemies of the current wave to all enemies
-				zombies
-						.addAll(currentLevelWaves.get(currentWave).createEnemies(map.getSpawnPosition(), world, assetManager, map,
-						scoreBoard.getTime(), this));
+				zombies.clear();
+				zombies.addAll(createEnemiesForCurrentWave(scoreBoard.getWaveNumber(), map.getSpawnPosition(), scoreBoard.getTime()));
 			}
 		}
+	}
+
+	public Array<Zombie> createEnemiesForCurrentWave(final int waveIndex, final Vector2 entryPosition, final float currentTime) {
+		final Array<Zombie> allEnemies = new Array<>();
+
+		// Sanity check
+		if (waveIndex >= levelWaves.size()) {
+			Gdx.app.error("play_state:createEnemiesForCurrentWave", MainGame.getCurrentTimeStampLogString() + "give wave index " + waveIndex + " is bigger than the given level count " + levelWaves.size());
+			return allEnemies;
+		}
+
+		final String extra = "[level=" + (scoreBoard.getLevel() + 1) + ",wave=" + (waveIndex + 1) + "]";
+
+		int counter;
+		for (final ZombieSpawn zombieSpawn : levelWaves.get(waveIndex).zombieSpawns.get(ZombieType.SPIDER)) {
+			counter = 0;
+			for (int i = 0; i < zombieSpawn.count; i++) {
+				allEnemies.add(new ZombieSpider(entryPosition, world, assetManager, map,
+						currentTime + zombieSpawn.timeAfterWaveStarted + (counter++ * zombieSpawn.timeDelta), this, extra));
+			}
+		}
+		for (final ZombieSpawn zombieSpawn : levelWaves.get(waveIndex).zombieSpawns.get(ZombieType.BICYCLE)) {
+			counter = 0;
+			for (int i = 0; i < zombieSpawn.count; i++) {
+				allEnemies.add(new ZombieBicycle(entryPosition, world, assetManager, map,
+						currentTime + zombieSpawn.timeAfterWaveStarted + (counter++ * zombieSpawn.timeDelta), this, extra));
+			}
+		}
+		for (final ZombieSpawn zombieSpawn : levelWaves.get(waveIndex).zombieSpawns.get(ZombieType.FAT)) {
+			counter = 0;
+			for (int i = 0; i < zombieSpawn.count; i++) {
+				allEnemies.add(new ZombieFat(entryPosition, world, assetManager, map,
+						currentTime + zombieSpawn.timeAfterWaveStarted + (counter++ * zombieSpawn.timeDelta), this, extra));
+			}
+		}
+		for (final ZombieSpawn zombieSpawn : levelWaves.get(waveIndex).zombieSpawns.get(ZombieType.SMALL)) {
+			counter = 0;
+			for (int i = 0; i < zombieSpawn.count; i++) {
+				allEnemies.add(new ZombieSmall(entryPosition, world, assetManager, map,
+						currentTime + zombieSpawn.timeAfterWaveStarted + (counter++ * zombieSpawn.timeDelta), this, extra));
+			}
+		}
+		for (final ZombieSpawn zombieSpawn : levelWaves.get(waveIndex).zombieSpawns.get(ZombieType.LINCOLN)) {
+			counter = 0;
+			for (int i = 0; i < zombieSpawn.count; i++) {
+				allEnemies.add(new ZombieLincoln(entryPosition, world, assetManager, map,
+						currentTime + zombieSpawn.timeAfterWaveStarted + (counter++ * zombieSpawn.timeDelta), this, extra));
+			}
+		}
+
+		return allEnemies;
 	}
 
 	/**
@@ -1322,15 +1418,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	@Override
 	public void trailerHealthIs0() {
-		// Check if highscore values are properly set in the preferences
-		preferencesManager.checkHighscore();
-		// If the user got a top 5 score go to the high score create entry state otherwise go to the game over state
-		if (preferencesManager.scoreIsInTop5(scoreBoard.getScore()))
-			gameStateManager.setGameState(
-					new CreateHighscoreEntryState(gameStateManager, scoreBoard.getScore(), scoreBoard.getLevel(), scoreBoard.getLaps(), false));
-		else {
-			gameStateManager.setGameState(new GameOverState(gameStateManager, scoreBoard.getLevel()));
-		}
+			loadNextState = true;
 	}
 
 	@Override

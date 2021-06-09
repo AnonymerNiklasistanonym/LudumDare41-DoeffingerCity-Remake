@@ -50,11 +50,11 @@ public class ScoreBoard {
 		MainGame.font.draw(spriteBatch, "Score: " + (int) score, 0.2f, 35);
 		MainGame.font.draw(spriteBatch, "Kills: " + (int) killCount, 0.2f, 34);
 
-		MainGame.font.draw(spriteBatch, "Level: " + level, 0.2f, 2);
-		MainGame.font.draw(spriteBatch, "Wave: " + waveNumber, 0.2f, 1);
+		MainGame.font.draw(spriteBatch, "Level: " + (level + 1), 0.2f, 2);
+		MainGame.font.draw(spriteBatch, "Wave: " + (waveNumber + 1), 0.2f, 1);
 
 		MainGame.font.draw(spriteBatch, "Money: " + (int) money + " $", COLUMN, 2);
-		MainGame.font.draw(spriteBatch, "Lap: " + (int) currentTime + " sec (#" + lapNumber + ")", COLUMN, 1);
+		MainGame.font.draw(spriteBatch, "Lap: #" + lapNumber + " (" + (int) currentTime + "s)", COLUMN, 1);
 	}
 
 	private void debugPanel(final SpriteBatch spriteBatch) {

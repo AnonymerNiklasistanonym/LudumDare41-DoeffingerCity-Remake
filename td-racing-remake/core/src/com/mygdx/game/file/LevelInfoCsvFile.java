@@ -13,6 +13,7 @@ public class LevelInfoCsvFile {
   public final String mapName;
   public final int moneyPerLap;
   public final int timeBonus;
+  public final float carStartAngle;
 
   public final Vector2 carStartPosition;
   public final Vector2 enemySpawnPosition;
@@ -22,17 +23,19 @@ public class LevelInfoCsvFile {
 
   public final ArrayList<Vector2> checkpointPositions;
   public final ArrayList<Boolean> towerUnlocked;
+  public final float finishLineAngle;
 
-  public LevelInfoCsvFile(int levelNumber, String mapName,
-      int moneyPerLap, int timeBonus, Vector2 carStartPosition, Vector2 enemySpawnPosition,
-      Vector2 finishLinePosition, Vector2 healthBarPosition,
-      Vector2 pitStopPosition,
-      ArrayList<Vector2> checkpointPositions,
+  public LevelInfoCsvFile(int levelNumber, String mapName, int moneyPerLap, int timeBonus,
+      float carStartAngle, float finishLineAngle, Vector2 carStartPosition,
+      Vector2 enemySpawnPosition, Vector2 finishLinePosition, Vector2 healthBarPosition,
+      Vector2 pitStopPosition, ArrayList<Vector2> checkpointPositions,
       ArrayList<Boolean> towerUnlocked) {
     this.levelNumber = levelNumber;
     this.mapName = mapName;
     this.moneyPerLap = moneyPerLap;
     this.timeBonus = timeBonus;
+    this.carStartAngle = carStartAngle;
+    this.finishLineAngle = finishLineAngle;
     this.carStartPosition = carStartPosition;
     this.enemySpawnPosition = enemySpawnPosition;
     this.finishLinePosition = finishLinePosition;
@@ -82,6 +85,8 @@ public class LevelInfoCsvFile {
           record.get("Map name"),
           Integer.parseInt(record.get("Money per lap")),
           Integer.parseInt(record.get("Time Bonus")),
+          Float.parseFloat(record.get("Car start angle")),
+          Float.parseFloat(record.get("Finish line angle")),
           new Vector2(Float.parseFloat(record.get("Car start position x")),
               Float.parseFloat(record.get("Car start position y"))),
           new Vector2(Float.parseFloat(record.get("Enemy spawn position x")),
@@ -106,6 +111,7 @@ public class LevelInfoCsvFile {
         ", mapName='" + mapName + '\'' +
         ", moneyPerLap=" + moneyPerLap +
         ", timeBonus=" + timeBonus +
+        ", carStartAngle=" + carStartAngle +
         ", carStartPosition=" + carStartPosition +
         ", enemySpawnPosition=" + enemySpawnPosition +
         ", finishLinePosition=" + finishLinePosition +
@@ -113,7 +119,7 @@ public class LevelInfoCsvFile {
         ", pitStopPosition=" + pitStopPosition +
         ", checkpointPositions=" + checkpointPositions +
         ", towerUnlocked=" + towerUnlocked +
+        ", finishLineAngle=" + finishLineAngle +
         '}';
   }
-
 }
