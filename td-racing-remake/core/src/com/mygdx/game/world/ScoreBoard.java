@@ -102,8 +102,8 @@ public class ScoreBoard {
 
 	public void killEnemy(final Zombie zombie) {
 		killCount++;
-		this.score += zombie.getScore();
-		this.money += zombie.getMoney();
+		score += zombie.getScore();
+		money += zombie.getMoney();
 	}
 
 	public void newLap(final int newMoney) {

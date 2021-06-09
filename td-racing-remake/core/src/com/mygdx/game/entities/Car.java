@@ -24,8 +24,10 @@ public class Car implements Disposable {
 	private final Sprite sprite;
 
 	private float deltaTime;
+	private final World world;
 
 	public Car(final World world, final Sprite sprite, final Vector2 position, final float angle) {
+		this.world = world;
 		final BodyDef bodydef = new BodyDef();
 		bodydef.type = BodyDef.BodyType.DynamicBody;
 		bodydef.position.set(position.x * PlayState.PIXEL_TO_METER, position.y * PlayState.PIXEL_TO_METER);
@@ -155,4 +157,7 @@ public class Car implements Disposable {
 		sprite.getTexture().dispose();
 	}
 
+  public void removeMapFromWorld() {
+		world.destroyBody(body);
+  }
 }

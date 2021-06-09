@@ -17,41 +17,55 @@ import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.file.LevelInfoCsvFile;
 import com.mygdx.game.gamestate.states.PlayState;
-import com.mygdx.game.world.BodyEditorLoader;
-import com.mygdx.game.world.Node;
 
 public class Map {
 
-	private final Array<Node> nodesList;
+	private final Array<Node> nodesList = new Array<>();
 	private final Vector2 healthBarPosition;
 
-	private Body mapModel, mapZiel, finishLine, mapZombieWay;
-	private Vector2 spawnPosition, targetPosition;
+	private Body mapModel;
+	private Body mapGoal;
+	private final Body finishLine;
+	private Body mapZombieWay;
+	private final Vector2 spawnPosition = new Vector2();
+	private final Vector2 targetPosition = new Vector2();
 	private Node[][] nodes2DList;
 	private Sprite map;
-	private Array<Array<Node>> paths;
-	private Array<Array<Node>> motorpaths;
-	private float spawnheighty;
+	private final Array<Array<Node>> paths = new Array<>();
+	private final Array<Array<Node>> motorPaths = new Array<>();
+	private final float spawnHeight;
+	private final World world;
 
-	public Map(final LevelInfoCsvFile currentLevel, final World world, final Body finishLine, final float sizePitstop) {
-		nodesList = new Array<Node>();
+	public void removeMapFromWorld() {
+		if (mapModel != null) {
+			world.destroyBody(mapModel);
+		}
+		if (mapGoal != null) {
+			world.destroyBody(mapGoal);
+		}
+		if (finishLine != null) {
+			world.destroyBody(finishLine);
+		}
+		if (mapZombieWay != null) {
+			world.destroyBody(mapZombieWay);
+		}
+	}
+
+	public Map(final LevelInfoCsvFile currentLevel, final World world, final Body finishLine, final float sizePitStop) {
 		createSolidMap(currentLevel.mapName, world);
 		this.finishLine = finishLine;
-		spawnPosition = new Vector2();
-		targetPosition = new Vector2();
+		this.world = world;
 		createAStarArray();
-		motorpaths = new Array<Array<Node>>();
-		paths = new Array<Array<Node>>();
 		healthBarPosition = currentLevel.healthBarPosition;
-		spawnheighty = currentLevel.pitStopPosition.y * PlayState.PIXEL_TO_METER + sizePitstop;
+		spawnHeight = currentLevel.pitStopPosition.y * PlayState.PIXEL_TO_METER + sizePitStop;
 
 		// Create x calculated ways
-		final PolygonShape ps = (PolygonShape) mapZiel.getFixtureList().first().getShape();
+		final PolygonShape ps = (PolygonShape) mapGoal.getFixtureList().first().getShape();
 		final Vector2 vector = new Vector2();
 		ps.getVertex(0, vector);
 
 		for (int i = 0; i < 2; i++) {
-			motorpaths.add(getPath(new Vector2(currentLevel.enemySpawnPosition.x, currentLevel.enemySpawnPosition.y),
+			motorPaths.add(getPath(new Vector2(currentLevel.enemySpawnPosition.x, currentLevel.enemySpawnPosition.y),
 					new Vector2(vector.x * PlayState.METER_TO_PIXEL, vector.y * PlayState.METER_TO_PIXEL),0));
 		}
 		
@@ -100,12 +114,12 @@ public class Map {
 
 		// 3. Create a Body, as usual.
 		mapModel = world.createBody(bd);
-		mapZiel = world.createBody(ziel);
+		mapGoal = world.createBody(ziel);
 		mapZombieWay = world.createBody(ziel);
 
 		// // 4. Create the body fixture automatically by using the loader.
 		loader.attachFixture(mapModel, "Map", solid, MainGame.GAME_WIDTH * PlayState.PIXEL_TO_METER);
-		loaderZiel.attachFixture(mapZiel, "Ziel", nonSolid, MainGame.GAME_WIDTH * PlayState.PIXEL_TO_METER);
+		loaderZiel.attachFixture(mapGoal, "Ziel", nonSolid, MainGame.GAME_WIDTH * PlayState.PIXEL_TO_METER);
 		loaderZombieWay.attachFixture(mapZombieWay, "Zombieway", nonSolid,
 				MainGame.GAME_WIDTH * PlayState.PIXEL_TO_METER);
 	}
@@ -120,7 +134,7 @@ public class Map {
 
 	private void createAStarArray() {
 		boolean inEnemyMoveArea = true;
-		final PolygonShape ps = (PolygonShape) mapZiel.getFixtureList().first().getShape();
+		final PolygonShape ps = (PolygonShape) mapGoal.getFixtureList().first().getShape();
 		final Vector2 vector = new Vector2();
 		ps.getVertex(0, vector);
 
@@ -220,8 +234,8 @@ public class Map {
 		return spawnPosition;
 	}
 
-	public void setSpawnPosition(final Vector2 spawn) {
-		this.spawnPosition = spawn;
+	public void setSpawnPosition(final Vector2 spawnPosition) {
+		this.spawnPosition.set(spawnPosition);
 	}
 
 	public void draw(SpriteBatch spriteBatch) {
@@ -325,19 +339,19 @@ public class Map {
 	}
 
 	public Array<Node> getRandomPath() {
-		return new Array<Node>(paths.random());
+		return new Array<>(paths.random());
 	}
 	
 	public Array<Node> getRandomMotorPath() {
-		return new Array<Node>(motorpaths.random());
+		return new Array<>(motorPaths.random());
 	}
 
 	public Vector2 getHealthBarPos() {
 		return healthBarPosition;
 	}
 
-	public float getSpawnheighty() {
-		return spawnheighty;
+	public float getSpawnHeight() {
+		return spawnHeight;
 	}
 
 }

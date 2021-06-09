@@ -115,7 +115,7 @@ public class PreferencesManager {
     final HighscoreEntry[] entries = new HighscoreEntry[NUMBER_HIGHSCORE_ENTRIES];
     for (int i = 0; i < entries.length; i++) {
       Gdx.app.debug("preferences_manager:retrieveHighscore",
-          MainGame.getCurrentTimeStampLogString() + "-> Retrieve score (" + prefs
+          MainGame.getCurrentTimeStampLogString() + "-> Retrieve score #" + i + " (" + prefs
               .getInteger(PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE + i) + ") from \"" + prefs
               .getString(PREFERENCE_HIGHSCORE_NAME_STRING_BASE + i) + "\" [level=" + prefs
               .getInteger(PREFERENCE_HIGHSCORE_LEVEL_VALUE_BASE + i) + ",laps=" + prefs

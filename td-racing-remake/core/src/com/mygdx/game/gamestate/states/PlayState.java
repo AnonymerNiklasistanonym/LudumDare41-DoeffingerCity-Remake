@@ -190,6 +190,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	private long timeStampStateStarted = System.currentTimeMillis();
 
 	private boolean levelLoaded = false;
+	private boolean firstWave = false;
 
 	public PlayState(final GameStateManager gameStateManager, final int levelNumber) {
 		super(gameStateManager, STATE_NAME);
@@ -320,6 +321,9 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		}
 
 		// Clear all level related lists
+		for (final Zombie zombie : zombies) {
+			zombie.removeZombieFromWorld();
+		}
 		zombies.clear();
 		towers.clear();
 		enemiesDead.clear();
@@ -332,11 +336,17 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		levelWaves.addAll(LevelWaveCsvFile.readCsvFile(Gdx.files.internal("level/level_0" + currentLevelInfo.levelNumber + "_waves.csv")));
 
 		// Setup the car
+		if (car != null) {
+			car.removeMapFromWorld();
+		}
 		car = new Car(world, spriteCar, currentLevelInfo.carStartPosition, currentLevelInfo.carStartAngle);
 		// Setup the finish line
 		finishline = new FinishLine(world, spriteFinishLine, currentLevelInfo.finishLinePosition, currentLevelInfo.finishLineAngle);
 
 		// TODO Check if the level can be updated via a method so that a map object does not need to be reassigned
+		if (map != null) {
+			map.removeMapFromWorld();
+		}
 		map = new Map(currentLevelInfo, world, finishline.getBody(), spritePitStop.getHeight());
 
 		// unlock/lock the right tower
@@ -362,6 +372,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		// Update the scoreboard because a new level was loaded
 		scoreBoard.resetNewLevelLoaded();
 		levelLoaded = true;
+		firstWave = true;
 
 		// Play sounds if the user enabled sounds and the game is currently not paused
 		if (preferencesManager.getSoundEffectsOn() && !pausedByUser) {
@@ -581,27 +592,22 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		// manually instantiate enemies
 		if (Gdx.input.isKeyJustPressed(Keys.F)) {
 			final Zombie zombie = new ZombieSmall(map.getSpawnPosition(), world, assetManager, map, 0, this, "[debug]");
-			zombie.spawn();
 			zombies.add(zombie);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.G)) {
 			final Zombie zombie = new ZombieFat(map.getSpawnPosition(), world, assetManager, map, 0, this, "[debug]");
-			zombie.spawn();
 			zombies.add(zombie);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.H)) {
 			final Zombie zombie = new ZombieBicycle(map.getSpawnPosition(), world, assetManager, map, 0, this, "[debug]");
-			zombie.spawn();
 			zombies.add(zombie);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.J)) {
 			final Zombie zombie = new ZombieLincoln(map.getSpawnPosition(), world, assetManager, map, 0, this, "[debug]");
-			zombie.spawn();
 			zombies.add(zombie);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.K)) {
 			final Zombie zombie = new ZombieSpider(map.getSpawnPosition(), world, assetManager, map, 0, this, "[debug]");
-			zombie.spawn();
 			zombies.add(zombie);
 		}
 
@@ -625,12 +631,8 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		if (Gdx.input.isKeyJustPressed(Keys.NUM_8))
 			scoreBoard.debugKillTrailer();
 		if (Gdx.input.isKeyJustPressed(Keys.NUM_9)) {
-			for (int i = 0; i < zombies.size; i++) {
-				final Zombie zombie = zombies.get(i);
-				if (!zombie.isSpawned())
-					zombie.spawn();
-				if (!zombie.isDead())
-					zombie.takeDamage(zombie.getHealth());
+			for (final Zombie zombie : zombies) {
+				zombie.die();
 			}
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.NUM_0))
@@ -1160,6 +1162,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		if (pausedByUser)
 			return;
 
+		// TODO What is this code section doing
 		physicsaccumulator += Math.min(deltaTime, 0.25f);
 		while (physicsaccumulator >= TIME_STEP) {
 			world.step(TIME_STEP * speedFactor, 6, 2);
@@ -1173,12 +1176,12 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		Controllers.removeListener(controllerCallbackPlayState);
 
 		// dispose loaded objects
-		for (final Zombie zombie : zombies)
+		for (final Zombie zombie : zombies) {
 			zombie.dispose();
-		zombies.clear();
-		for (final Tower tower : towers)
+		}
+		for (final Tower tower : towers) {
 			tower.dispose();
-		towers.clear();
+		}
 		car.dispose();
 		towerMenu.dispose();
 		// dispose images, sounds and other resources
@@ -1301,16 +1304,19 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 			//final Array<Wave> currentLevelWaves = levels[scoreBoard.getLevel() - 1].getWaves();
 			final int currentWave = scoreBoard.getWaveNumber();
 			// If the current wave was the last wave of the level load the next level
+			// TODO Somehow the wave is not increment when reach wave 5y
 			if (currentWave >= levelWaves.size()) {
 				Gdx.app.debug("play_state:updateWaves", MainGame.getCurrentTimeStampLogString() + "current wave " + currentWave + " >= level waves " + levelWaves.size() + " -> load next level");
 				loadNextLevel();
 			} else {
-				// If there are no zombies do not increase the wave count
-				if (zombies.size != 0) {
-					Gdx.app.debug("play_state:updateWaves", MainGame.getCurrentTimeStampLogString() + "zombies.size != 0 " + (zombies.size != 0) + "new wave number is " + (currentWave + 1));
+				// If not the first wave increase the wave number
+				if (firstWave) {
+					firstWave = false;
+				} else {
 					scoreBoard.setWaveNumber(currentWave + 1);
 				}
 				final int newWave = scoreBoard.getWaveNumber();
+				Gdx.app.debug("play_state:updateWaves", MainGame.getCurrentTimeStampLogString() + "-> the new wave number is " + newWave + " [old one is " + currentWave + "]");
 
 				// Update the wave text
 				if (newWave + 1 < levelWaves.size()) {
@@ -1319,6 +1325,9 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 					setWaveText("FINAL WAVE");
 				}
 				// create and add all enemies of the current wave to all enemies
+				for (final Zombie zombie : zombies) {
+					zombie.removeZombieFromWorld();
+				}
 				zombies.clear();
 				zombies.addAll(createEnemiesForCurrentWave(scoreBoard.getWaveNumber(), map.getSpawnPosition(), scoreBoard.getTime()));
 			}

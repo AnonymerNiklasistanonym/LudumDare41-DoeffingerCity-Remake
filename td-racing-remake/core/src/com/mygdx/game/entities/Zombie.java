@@ -63,6 +63,8 @@ public abstract class Zombie implements Disposable {
 
 	private static int countSpawns = 0;
 
+	private World world;
+
 	public Zombie(final String name, final Vector2 position, final float damage, final float health,
 			final float money, final float score, final float spawnTimeStamp, final float speed,
 			final World world, final AssetManager assetManager, final String textureSpriteAlive,
@@ -78,6 +80,7 @@ public abstract class Zombie implements Disposable {
 		this.spawnTimeStamp = spawnTimeStamp;
 		this.map = map;
 		this.callbackInterface = callbackInterface;
+		this.world = world;
 		showHealthBar = zombieOptions.showHealthBar;
 		density = zombieOptions.density;
 
@@ -133,7 +136,6 @@ public abstract class Zombie implements Disposable {
 	}
 
 	public void spawn() {
-		Gdx.app.debug("zombie:spawn", MainGame.getCurrentTimeStampLogString() + "spawn count = " + (++countSpawns) + "after spawn of " + name);
 		spawned = true;
 		body.setActive(true);
 	}
@@ -148,7 +150,9 @@ public abstract class Zombie implements Disposable {
 	}
 	*/
 
-	private void die() {
+	public void die() {
+		// kill zombie even when not yet spawned
+		spawned = true;
 		// set dead
 		dead = true;
 		// set position of dead sprite to the current one
@@ -216,6 +220,7 @@ public abstract class Zombie implements Disposable {
 						"Spawn zombie " + name + " since the spawn time stamp " + spawnTimeStamp +
 						"s < game time stamp " + gameTimeStamp + "s");
 				spawn();
+				Gdx.app.debug("zombie:update", MainGame.getCurrentTimeStampLogString() + "spawn count = " + (++countSpawns) + " after spawn of " + name);
 			} else {
 				return;
 			}
@@ -446,7 +451,7 @@ public abstract class Zombie implements Disposable {
 	}
 
 	public boolean hasLeftSpawn() {
-		if (getY() > map.getSpawnheighty())
+		if (getY() > map.getSpawnHeight())
 			leftSpawn = true;
 
 		return leftSpawn;
@@ -458,5 +463,13 @@ public abstract class Zombie implements Disposable {
 
   public String getName() {
 		return name;
+	}
+
+	public void removeZombieFromWorld() {
+		spawn();
+		die();
+		if (body != null) {
+			world.destroyBody(body);
+		}
 	}
 }
