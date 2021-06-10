@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.HtmlPlatformInfo;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.controller.ControllerInputMapping;
+import com.mygdx.game.controller.generic.menu_button_grid.NextMenuButtonDirection;
 import com.mygdx.game.gamestate.states.PlayState;
 import java.util.Date;
 
@@ -27,6 +28,23 @@ public class ControllerCallbackPlayState implements ControllerListener {
   private final Vector2 steerCarForwardsBackwards = new Vector2();
   private float steerCarLeftRight;
   private long timeStampControllerCursorPositionWasChanged = 0;
+
+  /**
+   * The threshold for an "ignore inputs after a registered input" time span so that menu inputs are
+   * not spammed (otherwise a simple axis up input quickly creates 5 UP callbacks but we only want
+   * to register one)
+   */
+  private static final float THRESHOLD_BETWEEN_AXIS_INPUTS_IN_MS = 300;
+  /**
+   * Used to save a timestamp (new Date().getTime()) of when the last time a vertical axis input was
+   * made
+   */
+  private long lastTimeAxisVerticalInputCallback = 0;
+  /**
+   * Used to save a timestamp (new Date().getTime()) of when the last time a horizontal axis input
+   * was made
+   */
+  private long lastTimeAxisHorizontalInputCallback = 0;
 
   public ControllerCallbackPlayState(
       IControllerCallbackPlayState controllerCallbackClass) {
@@ -128,6 +146,40 @@ public class ControllerCallbackPlayState implements ControllerListener {
             <= MainGame.GAME_HEIGHT * PlayState.PIXEL_TO_METER)) {
           timeStampControllerCursorPositionWasChanged = new Date().getTime();
           cursorPositionPlaceTower.set(newControllerCursor);
+        }
+        break;
+      case AXIS_BOTTOM_LEFT_PAD_HORIZONTAL_HTML_COMPATIBILITY:
+        // Reduce spamming of one axis input by only allowing one input for a certain time
+        final long timeDifferenceSinceLastLeftRightInput =
+            new Date().getTime() - lastTimeAxisHorizontalInputCallback;
+        Gdx.app.debug("controller_callback_play_state:axisMoved",
+            MainGame.getCurrentTimeStampLogString() + "(horizontal) time difference "
+                + timeDifferenceSinceLastLeftRightInput + "ms < "
+                + THRESHOLD_BETWEEN_AXIS_INPUTS_IN_MS + "ms");
+        if (timeDifferenceSinceLastLeftRightInput > THRESHOLD_BETWEEN_AXIS_INPUTS_IN_MS) {
+          lastTimeAxisHorizontalInputCallback = new Date().getTime();
+          if (value > 0) {
+            controllerCallbackClass.controllerCallbackSelectTowerToBuild(0);
+          } else {
+            controllerCallbackClass.controllerCallbackSelectTowerToBuild(2);
+          }
+        }
+        break;
+      case AXIS_BOTTOM_LEFT_PAD_VERTICAL_HTML_COMPATIBILITY:
+        // Reduce spamming of one axis input by only allowing one input for a certain time
+        final long timeDifferenceSinceLastUpDownInput =
+            new Date().getTime() - lastTimeAxisVerticalInputCallback;
+        Gdx.app.debug("controller_callback_generic_menu_button_grid:axisMoved",
+            MainGame.getCurrentTimeStampLogString() + "(vertical) time difference "
+                + timeDifferenceSinceLastUpDownInput + "ms < "
+                + THRESHOLD_BETWEEN_AXIS_INPUTS_IN_MS + "ms");
+        if (timeDifferenceSinceLastUpDownInput > THRESHOLD_BETWEEN_AXIS_INPUTS_IN_MS) {
+          lastTimeAxisVerticalInputCallback = new Date().getTime();
+          if (value > 0) {
+            controllerCallbackClass.controllerCallbackSelectTowerToBuild(1);
+          } else {
+            controllerCallbackClass.controllerCallbackSelectTowerToBuild(3);
+          }
         }
         break;
       default:
