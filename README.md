@@ -2,7 +2,7 @@
 
 A remake of [LudumDare41-DoeffingerCity](https://github.com/AnonymerNiklasistanonym/LudumDare41-DoeffingerCity)/[itch.io](https://thecze.itch.io/tnt)
 
-Tracks ‘n Towers is a Tower Defense/Racing game.
+*TnT: Tracks 'n Towers* is a Tower Defense/Racing game.
 Zombies are coming for your lovely trailer and you have to defend it to survive.
 Finish laps to earn cash to build towers and use your Road Warrior car to mow down hundreds of Zombies.
 The faster you finish a lap the more bonus money you will earn!
@@ -30,14 +30,14 @@ Go kill some Zombies!
 | Car > Brake | `S` / `Down` | Left trigger `LT` |
 | Car > Steer left | `A` / `Left` | Left pad to the left |
 | Car > Steer right | `D` / `Right` | Left pad to the right |
-| Fullscreen toggle | `F11` | `RB` / `LB` button |
-| Exit (in menu), go back or stop bulding a tower | `Escape` | `Back` button |
+| Fullscreen toggle | `F11` | `RB` / `LB` |
+| Exit (in menu), go back or stop bulding a tower | `Escape` | `Back` / `B` |
 | Select tower | `1`,`2`,`3`,`4` | Bottom left pad (1=up, 2=right, 3=down, 4=left) |
 | Move tower if selected | Move mouse | Right pad |
-| Build tower if selected | Left mouse click | `A` button |
-| Toggle sounds | `U` | `Y` button |
-| Toggle music | `M` | `X` button |
-| Toggle pause | `P` | `Start` button |
+| Build tower if selected | Left mouse click | `A` |
+| Toggle sounds | `U` | `Y` |
+| Toggle music | `M` | `X` |
+| Toggle pause | `P` | `Start` |
 
 ## Setup
 
@@ -131,7 +131,7 @@ You can either just run the command `make` in the directory to export a desktop 
         }
     }
   ```
-  
+
   Then you can add an `android.signingConfigs` section in which you either manually enter all the paths (not recommended) or replace them with system environment variables so that you can locally define the paths and keep them a secret which also means multiple configurations can exist on multiple devices without any code changes:
 
   ```gradle
@@ -144,18 +144,18 @@ You can either just run the command `make` in the directory to export a desktop 
         }
     }
   ```
-  
+
   You can now for example have a shell script somewhere with these environment variables (or save them as secret on your CI/CD platform) and just source (`source keyinfo.sh && ./gradlew android:assembleRelease`) this script before creating the android file:
-  
+
   ```sh
   export KEY_STORE_PATH="/your/key/store/path.jks"
   export KEY_STORE_PASSWORD="YourKeyStorePassword"
   export KEY_ALIAS="YourKeyName"
   export KEY_ALIAS_PASSWORD="YourKeyPassword"
   ```
-  
+
   Here for example 2 new targets for the `Makefile` to easily automize this process:
-  
+
   ```Makefile
   build_android:
 	# I recommend saving the following necessary variables in a shell file as
@@ -175,9 +175,9 @@ You can either just run the command `make` in the directory to export a desktop 
 	# Run the gradle command to build a debug executable (APK file)
 	./gradlew android:assembleDebug
   ```
-  
+
 - To create a custom Android Icon you open Android Studio in the `Android` perspective and make a right click on the `android/res` directory, then click `New`, `Image Asset` and create one - after that it could be that you need to edit the [`android/manifest/AndroidManifest.xml`](td-racing-remake/android/AndroidManifest.xml) file to update the line `android:icon="@drawable/ic_launcher"` with `@mipmap` (The name of the app can be changed by updating the [`android/values/strings.xml`](td-racing-remake/android/res/values/strings.xml) file)
-  
+
 ### Run the exported files
 
 **Linux:**
@@ -224,6 +224,6 @@ You can either just run the command `make` in the directory to export a desktop 
 
 ## Used Software
 
-- Originally the Java (6 because of libGDX at the time) code was written and debugged using [Eclipse Java Oxygen](https://www.eclipse.org/oxygen/) 
+- Originally the Java (6 because of libGDX at the time) code was written and debugged using [Eclipse Java Oxygen](https://www.eclipse.org/oxygen/)
 - To create the bounding maps for the box2D physics the [box2d-editor](https://code.google.com/archive/p/box2d-editor/downloads) was used
 - To create the Bitmap fonts the program [Hiero](https://libgdx.badlogicgames.com/tools.html) was used

@@ -13,6 +13,7 @@ web_page: clean
 	# Copy website files
 	cp -R css "$(DIST_DIR_WEB_PAGE)"
 	cp -R js "$(DIST_DIR_WEB_PAGE)"
+	cp -R favicon "$(DIST_DIR_WEB_PAGE)"
 	cp index.html "$(DIST_DIR_WEB_PAGE)"
 	# Copy HTML build
 	cp -R "../td-racing-remake/bin/html-$(VERSION)" "$(DIST_DIR_WEB_PAGE)/html"
