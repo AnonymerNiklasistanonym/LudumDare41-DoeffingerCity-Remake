@@ -16,6 +16,10 @@ clean: clean_android clean_desktop clean_html
 	./gradlew clean
 	# Remove the created dist directory
 	rm -rf "$(DIST_DIR)"
+	# Remove gradle build directory
+	rm -rf "build"
+	# Remove the gradle directory
+	rm -rf ".gradle"
 
 clean_android:
 	# Run the gradle command to clean the desktop build files
@@ -34,6 +38,8 @@ clean_html:
 	./gradlew html:clean
 	# Remove the created HTML directory
 	rm -rf "$(DIST_DIR_HTML)"
+	# Remove the war directory that is not removed by gradle
+	rm -rf "html/war"
 
 build: build_android build_desktop build_html
 
