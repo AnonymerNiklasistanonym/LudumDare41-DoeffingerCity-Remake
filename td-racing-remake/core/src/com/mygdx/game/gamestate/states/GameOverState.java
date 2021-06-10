@@ -128,10 +128,16 @@ public class GameOverState extends GameState implements IControllerCallbackGener
       return;
     }
 
-    if (Gdx.app.getType() == ApplicationType.Desktop) {
-      // Toggle full screen when full screen keys are pressed
-      if (controllerToggleFullScreenPressed || Gdx.input.isKeyJustPressed(Keys.F11)) {
+    // Toggle full screen when full screen keys are pressed on different platforms
+    if (Gdx.app.getType() == ApplicationType.Desktop
+        || Gdx.app.getType() == ApplicationType.WebGL) {
+      if (controllerToggleFullScreenPressed || Gdx.input.isKeyJustPressed(Keys.F)) {
         controllerToggleFullScreenPressed = false;
+        gameStateManager.toggleFullScreen();
+      }
+    }
+    if (Gdx.app.getType() == ApplicationType.Desktop) {
+      if (Gdx.input.isKeyJustPressed(Keys.F11)) {
         gameStateManager.toggleFullScreen();
       }
     }
