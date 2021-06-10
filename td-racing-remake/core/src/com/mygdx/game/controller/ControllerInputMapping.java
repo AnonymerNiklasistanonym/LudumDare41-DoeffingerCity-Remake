@@ -194,7 +194,13 @@ public class ControllerInputMapping {
     // Both axis lt and rt are not recognized on the XBox One and 360 controller via the chrome web browser
     if (platformInfo != null && platformInfo.isFirefox) {
       if (axisCode == 5) {
-        return ControllerInputMappingAxes.AXIS_LT;
+        return ControllerInputMappingAxes.AXIS_RT;
+      }
+      if (axisCode == 6) {
+        return ControllerInputMappingAxes.AXIS_BOTTOM_LEFT_PAD_VERTICAL_HTML_COMPATIBILITY;
+      }
+      if (axisCode == 7) {
+        return ControllerInputMappingAxes.AXIS_BOTTOM_LEFT_PAD_HORIZONTAL_HTML_COMPATIBILITY;
       }
     }
     return ControllerInputMappingAxes.UNKNOWN;
