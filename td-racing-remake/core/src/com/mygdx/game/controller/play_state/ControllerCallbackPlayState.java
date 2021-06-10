@@ -5,6 +5,7 @@ import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerListener;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.HtmlPlatformInfo;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.controller.ControllerInputMapping;
 import com.mygdx.game.gamestate.states.PlayState;
@@ -89,12 +90,21 @@ public class ControllerCallbackPlayState implements ControllerListener {
             + ControllerInputMapping.getControllerAxis(controller, axisCode).name()
             + ") with the value " + value);
     Vector2 newControllerCursor;
+    final HtmlPlatformInfo htmlPlatformInfo = MainGame.getPlatformInfo();
     switch (ControllerInputMapping.getControllerAxis(controller, axisCode)) {
       case AXIS_LT:
-        steerCarForwardsBackwards.set(value, steerCarForwardsBackwards.y);
+        if (htmlPlatformInfo != null && htmlPlatformInfo.isFirefox) {
+          steerCarForwardsBackwards.set((value + 1) / 2, steerCarForwardsBackwards.y);
+        } else {
+          steerCarForwardsBackwards.set(value, steerCarForwardsBackwards.y);
+        }
         break;
       case AXIS_RT:
-        steerCarForwardsBackwards.set(steerCarForwardsBackwards.x, value);
+        if (htmlPlatformInfo != null && htmlPlatformInfo.isFirefox) {
+          steerCarForwardsBackwards.set(steerCarForwardsBackwards.x, (value + 1) / 2);
+        } else {
+          steerCarForwardsBackwards.set(steerCarForwardsBackwards.x, value);
+        }
         break;
       case AXIS_LEFT_PAD_HORIZONTAL:
         steerCarLeftRight = value;

@@ -190,6 +190,20 @@ public class MainGame implements ApplicationListener {
     return "zombie/zombie_" + zombieName + ".png";
   }
 
+  private static HtmlPlatformInfo htmlPlatformInfo;
+
+  public MainGame() {
+    System.out.println("[main:constructor] " + MainGame.getCurrentTimeStampLogString() + "default constructor");
+  }
+  public MainGame(HtmlPlatformInfo htmlPlatformInfo) {
+    MainGame.htmlPlatformInfo = htmlPlatformInfo;
+    System.out.println("[main:constructor] " + MainGame.getCurrentTimeStampLogString() + "html platform info was given: " + htmlPlatformInfo);
+  }
+
+  public static HtmlPlatformInfo getPlatformInfo() {
+    return htmlPlatformInfo;
+  }
+
   @Override
   public void create() {
     // If in developer mode proved additional logging output, otherwise only errors

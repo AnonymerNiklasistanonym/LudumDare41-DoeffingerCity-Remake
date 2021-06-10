@@ -90,6 +90,7 @@ public class ControllerCallbackGenericMenuButtonGrid implements ControllerListen
       switch (ControllerInputMapping.getControllerAxis(controller, axisCode)) {
         case AXIS_LEFT_PAD_HORIZONTAL:
         case AXIS_RIGHT_PAD_HORIZONTAL:
+        case AXIS_BOTTOM_LEFT_PAD_HORIZONTAL_HTML_COMPATIBILITY:
           // Reduce spamming of one axis input by only allowing one input for a certain time
           final long timeDifferenceSinceLastLeftRightInput =
               new Date().getTime() - lastTimeAxisHorizontalInputCallback;
@@ -108,6 +109,7 @@ public class ControllerCallbackGenericMenuButtonGrid implements ControllerListen
           break;
         case AXIS_LEFT_PAD_VERTICAL:
         case AXIS_RIGHT_PAD_VERTICAL:
+        case AXIS_BOTTOM_LEFT_PAD_VERTICAL_HTML_COMPATIBILITY:
           // Reduce spamming of one axis input by only allowing one input for a certain time
           final long timeDifferenceSinceLastUpDownInput =
               new Date().getTime() - lastTimeAxisVerticalInputCallback;

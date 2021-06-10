@@ -3,6 +3,7 @@ package com.mygdx.game.controller;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.controllers.Controller;
+import com.mygdx.game.HtmlPlatformInfo;
 import com.mygdx.game.MainGame;
 
 /**
@@ -52,6 +53,7 @@ public class ControllerInputMapping {
   }
 
   private static ControllerInputMappingButtons getControllerButtonHtmlXbox(int buttonCode) {
+    final HtmlPlatformInfo platformInfo = MainGame.getPlatformInfo();
     if (buttonCode == 0) {
       return ControllerInputMappingButtons.BUTTON_A;
     }
@@ -70,17 +72,27 @@ public class ControllerInputMapping {
     if (buttonCode == 5) {
       return ControllerInputMappingButtons.BUTTON_RB;
     }
-    if (buttonCode == 6) {
-      return ControllerInputMappingButtons.BUTTON_LT_HTML_COMPATIBILITY;
-    }
-    if (buttonCode == 7) {
-      return ControllerInputMappingButtons.BUTTON_RT_HTML_COMPATIBILITY;
-    }
-    if (buttonCode == 8) {
-      return ControllerInputMappingButtons.BUTTON_BACK;
-    }
-    if (buttonCode == 9) {
-      return ControllerInputMappingButtons.BUTTON_START;
+    if (platformInfo != null && platformInfo.isFirefox) {
+      if (buttonCode == 6) {
+        return ControllerInputMappingButtons.BUTTON_BACK;
+      }
+      if (buttonCode == 7) {
+        return ControllerInputMappingButtons.BUTTON_START;
+      }
+    } else {
+      // (Chrome)
+      if (buttonCode == 6) {
+        return ControllerInputMappingButtons.BUTTON_LT_HTML_COMPATIBILITY;
+      }
+      if (buttonCode == 7) {
+        return ControllerInputMappingButtons.BUTTON_RT_HTML_COMPATIBILITY;
+      }
+      if (buttonCode == 8) {
+        return ControllerInputMappingButtons.BUTTON_BACK;
+      }
+      if (buttonCode == 9) {
+        return ControllerInputMappingButtons.BUTTON_START;
+      }
     }
     if (buttonCode == 12) {
       return ControllerInputMappingButtons.BUTTON_UP;
@@ -153,24 +165,37 @@ public class ControllerInputMapping {
   }
 
   private static ControllerInputMappingAxes getControllerAxisHtmlXbox(int axisCode) {
+    final HtmlPlatformInfo platformInfo = MainGame.getPlatformInfo();
+
     if (axisCode == 0) {
       return ControllerInputMappingAxes.AXIS_LEFT_PAD_HORIZONTAL;
     }
     if (axisCode == 1) {
       return ControllerInputMappingAxes.AXIS_LEFT_PAD_VERTICAL;
     }
-    if (axisCode == 2) {
-      return ControllerInputMappingAxes.AXIS_RIGHT_PAD_HORIZONTAL;
+    if (platformInfo != null && platformInfo.isFirefox) {
+      if (axisCode == 2) {
+        return ControllerInputMappingAxes.AXIS_LT;
+      }
+    } else {
+      if (axisCode == 2) {
+        return ControllerInputMappingAxes.AXIS_RIGHT_PAD_HORIZONTAL;
+      }
     }
     if (axisCode == 3) {
       return ControllerInputMappingAxes.AXIS_RIGHT_PAD_VERTICAL;
     }
-    // Both axis lt and rt are not recognized on the XBox One and 360 controller via the chrome web browser
-    if (axisCode == 4) {
-      return ControllerInputMappingAxes.AXIS_LT;
+    if (platformInfo != null && platformInfo.isFirefox) {
+      if (axisCode == 4) {
+        return ControllerInputMappingAxes.AXIS_RIGHT_PAD_HORIZONTAL;
+      }
     }
-    if (axisCode == 5) {
-      return ControllerInputMappingAxes.AXIS_RT;
+
+    // Both axis lt and rt are not recognized on the XBox One and 360 controller via the chrome web browser
+    if (platformInfo != null && platformInfo.isFirefox) {
+      if (axisCode == 5) {
+        return ControllerInputMappingAxes.AXIS_LT;
+      }
     }
     return ControllerInputMappingAxes.UNKNOWN;
   }
@@ -179,6 +204,8 @@ public class ControllerInputMapping {
     switch (controller.getName()) {
       case "Microsoft Controller (STANDARD GAMEPAD Vendor: 045e Product: 02ea)":
       case "©Microsoft Corporation Controller (STANDARD GAMEPAD Vendor: 045e Product: 028e)":
+      case "045e-028e-Microsoft X-Box 360 pad":
+      case "045e-02ea-Microsoft X-Box One S pad":
         return getControllerAxisHtmlXbox(axisCode);
       case "Xbox One Wireless Controller (Model 1708)":
       case "X360 Controller":
