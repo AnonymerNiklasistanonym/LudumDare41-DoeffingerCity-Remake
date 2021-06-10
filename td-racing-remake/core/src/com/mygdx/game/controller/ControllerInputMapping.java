@@ -114,6 +114,8 @@ public class ControllerInputMapping {
     switch (controller.getName()) {
       case "Microsoft Controller (STANDARD GAMEPAD Vendor: 045e Product: 02ea)":
       case "©Microsoft Corporation Controller (STANDARD GAMEPAD Vendor: 045e Product: 028e)":
+      case "045e-028e-Microsoft X-Box 360 pad":
+      case "045e-02ea-Microsoft X-Box One S pad":
         return getControllerButtonHtmlXbox(buttonCode);
       case "Xbox One Wireless Controller (Model 1708)":
       case "X360 Controller":
@@ -177,17 +179,18 @@ public class ControllerInputMapping {
       if (axisCode == 2) {
         return ControllerInputMappingAxes.AXIS_LT;
       }
+      if (axisCode == 3) {
+        return ControllerInputMappingAxes.AXIS_RIGHT_PAD_HORIZONTAL;
+      }
+      if (axisCode == 4) {
+        return ControllerInputMappingAxes.AXIS_RIGHT_PAD_VERTICAL;
+      }
     } else {
       if (axisCode == 2) {
         return ControllerInputMappingAxes.AXIS_RIGHT_PAD_HORIZONTAL;
       }
-    }
-    if (axisCode == 3) {
-      return ControllerInputMappingAxes.AXIS_RIGHT_PAD_VERTICAL;
-    }
-    if (platformInfo != null && platformInfo.isFirefox) {
-      if (axisCode == 4) {
-        return ControllerInputMappingAxes.AXIS_RIGHT_PAD_HORIZONTAL;
+      if (axisCode == 3) {
+        return ControllerInputMappingAxes.AXIS_RIGHT_PAD_VERTICAL;
       }
     }
 
@@ -197,10 +200,10 @@ public class ControllerInputMapping {
         return ControllerInputMappingAxes.AXIS_RT;
       }
       if (axisCode == 6) {
-        return ControllerInputMappingAxes.AXIS_BOTTOM_LEFT_PAD_VERTICAL_HTML_COMPATIBILITY;
+        return ControllerInputMappingAxes.AXIS_BOTTOM_LEFT_PAD_HORIZONTAL_HTML_COMPATIBILITY;
       }
       if (axisCode == 7) {
-        return ControllerInputMappingAxes.AXIS_BOTTOM_LEFT_PAD_HORIZONTAL_HTML_COMPATIBILITY;
+        return ControllerInputMappingAxes.AXIS_BOTTOM_LEFT_PAD_VERTICAL_HTML_COMPATIBILITY;
       }
     }
     return ControllerInputMappingAxes.UNKNOWN;
