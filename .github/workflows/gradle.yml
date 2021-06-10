@@ -25,14 +25,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Install gradle
-      run: |
-        wget https://downloads.gradle-dn.com/distributions/gradle-6.7.1-bin.zip
-        unzip -d /opt/gradle gradle-6.7.1-bin.zip
-        /opt/gradle/gradle-6.7.1/bin/gradle -v
-    - name: Install gradle wrapper
-      working-directory: ./td-racing-remake/
-      run: /opt/gradle/gradle-6.7.1/bin/gradle wrapper
+    #- name: Install gradle
+    #  run: |
+    #    wget https://downloads.gradle-dn.com/distributions/gradle-6.7.1-bin.zip
+    #    unzip -d /opt/gradle gradle-6.7.1-bin.zip
+    #    /opt/gradle/gradle-6.7.1/bin/gradle -v
+    #- name: Install gradle wrapper
+    #  working-directory: ./td-racing-remake/
+    #  run: /opt/gradle/gradle-6.7.1/bin/gradle wrapper
     - name: Build with Gradle the desktop binary (via Makefile)
       working-directory: ./td-racing-remake/
       run: make dist_desktop

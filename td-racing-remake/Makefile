@@ -2,6 +2,7 @@
 .PHONY: build_android build_android_debug build_desktop build_html
 .PHONY: dist dist_android dist_desktop dist_html
 .PHONY: run_desktop run_html
+.PHONY: setup_gradle
 
 VERSION=1.0
 DIST_DIR=bin
@@ -20,6 +21,9 @@ clean: clean_android clean_desktop clean_html
 	rm -rf "build"
 	# Remove the gradle directory
 	rm -rf ".gradle"
+
+setup_gradle:
+	gradle wrapper --gradle-version 6.7.1 --distribution-type bin
 
 clean_android:
 	# Run the gradle command to clean the desktop build files

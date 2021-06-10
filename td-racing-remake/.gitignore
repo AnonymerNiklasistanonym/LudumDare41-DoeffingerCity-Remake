@@ -119,3 +119,6 @@ Thumbs.db
 
 # Ignore custom export/binary directory
 bin/
+
+# Avoid ignoring Gradle wrapper jar file
+!gradle-wrapper.jar
