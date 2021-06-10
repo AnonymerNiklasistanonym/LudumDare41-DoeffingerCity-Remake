@@ -45,12 +45,12 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
   private static final String ASSET_ID_BACKGROUND_STARS_TEXTURE = MainGame
       .getGameBackgroundFilePath("stars");
   private static final String ASSET_ID_LOGO_TNT_TEXTURE = MainGame.getGameLogoFilePath("tnt");
-  private static final String ASSET_MANAGER_ID_FONT_DEVELOPER_INFO = MainGame
+  private static final String ASSET_MANAGER_ID_FONT_TEXT = MainGame
       .getGameFontFilePath("cornerstone");
   private static final String TEXT_MENU_BUTTON_START = "START";
   private static final String TEXT_MENU_BUTTON_ABOUT = "ABOUT";
   private static final String TEXT_MENU_BUTTON_HIGHSCORES = "HIGHSCORES";
-  private static final float FONT_SCALE_DEVELOPER_INFO = 1;
+  private static final float FONT_SCALE_TEXT = 1;
   /**
    * Controller callback class that gets this class in its constructor which implements some
    * callback methods and can then be added as a controller listener which can then call the
@@ -74,7 +74,7 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
    * Tracker for the menu button id that was selected before the current one
    */
   private String lastSelectedMenuButtonId = START_ID;
-  private BitmapFont fontDeveloperInfo;
+  private BitmapFont fontText;
 
   /**
    * Constructor that creates the main menu (state)
@@ -96,7 +96,7 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
     assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED, Texture.class);
     assetManager.load(ASSET_ID_BACKGROUND_STARS_TEXTURE, Texture.class);
     assetManager.load(ASSET_ID_LOGO_TNT_TEXTURE, Texture.class);
-    assetManager.load(ASSET_MANAGER_ID_FONT_DEVELOPER_INFO, BitmapFont.class);
+    assetManager.load(ASSET_MANAGER_ID_FONT_TEXT, BitmapFont.class);
 
     // Register controller callback so that controller input can be managed
     controllerCallbackGenericMenuButtonGrid = new ControllerCallbackGenericMenuButtonGrid(this);
@@ -298,11 +298,9 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
             }
         };
 
-        if (MainGame.DEVELOPER_MODE) {
-          fontDeveloperInfo = assetManager.get(ASSET_MANAGER_ID_FONT_DEVELOPER_INFO);
-          fontDeveloperInfo.setUseIntegerPositions(false);
-          fontDeveloperInfo.getData().setScale(FONT_SCALE_DEVELOPER_INFO);
-        }
+        fontText = assetManager.get(ASSET_MANAGER_ID_FONT_TEXT);
+        fontText.setUseIntegerPositions(false);
+        fontText.getData().setScale(FONT_SCALE_TEXT);
       }
       // Render menu
       spriteBatch.setProjectionMatrix(camera.combined);
@@ -316,11 +314,15 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
       }
       // > Draw logo
       spriteBatch.draw(logoTnt, 0, 0);
+      // > Draw version
+      fontText.getData().setScale(1);
+      fontText.setColor(1, 1, 1, 1);
+      fontText.draw(spriteBatch, "v" + MainGame.VERSION, 10, 30);
       // > Draw additional elements when in developer mode
       if (MainGame.DEVELOPER_MODE) {
-        fontDeveloperInfo.getData().setScale(1);
-        fontDeveloperInfo.setColor(1, 1, 1, 1);
-        fontDeveloperInfo.draw(spriteBatch, "Reset preferences: R", 10, 30);
+        fontText.getData().setScale(1);
+        fontText.setColor(1, 1, 1, 1);
+        fontText.draw(spriteBatch, "Reset preferences: R", 1030, 30);
       }
       spriteBatch.end();
     } else {
@@ -359,7 +361,7 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
         MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED,
         ASSET_ID_BACKGROUND_STARS_TEXTURE,
         ASSET_ID_LOGO_TNT_TEXTURE,
-        ASSET_MANAGER_ID_FONT_DEVELOPER_INFO,
+        ASSET_MANAGER_ID_FONT_TEXT,
     });
   }
 
