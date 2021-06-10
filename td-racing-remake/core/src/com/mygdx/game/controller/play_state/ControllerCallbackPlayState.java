@@ -159,9 +159,9 @@ public class ControllerCallbackPlayState implements ControllerListener {
         if (timeDifferenceSinceLastLeftRightInput > THRESHOLD_BETWEEN_AXIS_INPUTS_IN_MS) {
           lastTimeAxisHorizontalInputCallback = new Date().getTime();
           if (value > 0) {
-            controllerCallbackClass.controllerCallbackSelectTowerToBuild(0);
+            controllerCallbackClass.controllerCallbackSelectTowerToBuild(1);
           } else {
-            controllerCallbackClass.controllerCallbackSelectTowerToBuild(2);
+            controllerCallbackClass.controllerCallbackSelectTowerToBuild(3);
           }
         }
         break;
@@ -176,9 +176,9 @@ public class ControllerCallbackPlayState implements ControllerListener {
         if (timeDifferenceSinceLastUpDownInput > THRESHOLD_BETWEEN_AXIS_INPUTS_IN_MS) {
           lastTimeAxisVerticalInputCallback = new Date().getTime();
           if (value > 0) {
-            controllerCallbackClass.controllerCallbackSelectTowerToBuild(1);
+            controllerCallbackClass.controllerCallbackSelectTowerToBuild(0);
           } else {
-            controllerCallbackClass.controllerCallbackSelectTowerToBuild(3);
+            controllerCallbackClass.controllerCallbackSelectTowerToBuild(2);
           }
         }
         break;
