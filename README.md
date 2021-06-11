@@ -225,5 +225,11 @@ You can either just run the command `make` in the directory to export a desktop 
 ## Used Software
 
 - Originally the Java (6 because of libGDX at the time) code was written and debugged using [Eclipse Java Oxygen](https://www.eclipse.org/oxygen/)
-- To create the bounding maps for the box2D physics the [box2d-editor](https://code.google.com/archive/p/box2d-editor/downloads) was used
-- To create the Bitmap fonts the program [Hiero](https://libgdx.badlogicgames.com/tools.html) was used
+- To create the bounding maps for the box2D physics the [`physics-body-editor` (Physics Body Editor v2.9.2)](https://code.google.com/archive/p/box2d-editor/downloads) was used
+- To create the Bitmap fonts the program [`hiero` (Hiero v5)](https://github.com/libgdx/libgdx/wiki/Hiero) was used
+
+For the remake additionally the following software was used:
+
+- For managing the Java (and Android specific) source code and debugging [Android Studio](https://developer.android.com/studio) was used
+- For managing the other source code (HTML, CSS, JS, Makefile, ...) [Visual Studio Code](https://code.visualstudio.com/) was used
+
