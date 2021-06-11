@@ -16,13 +16,111 @@
 </head>
 
 <body>
-	<!-- Remove refresh button
-	<a class="superdev" href="javascript:%7B%20window.__gwt_bookmarklet_params%20%3D%20%7B'server_url'%3A'http%3A%2F%2Flocalhost%3A9876%2F'%7D%3B%20var%20s%20%3D%20document.createElement('script')%3B%20s.src%20%3D%20'http%3A%2F%2Flocalhost%3A9876%2Fdev_mode_on.js'%3B%20void(document.getElementsByTagName('head')%5B0%5D.appendChild(s))%3B%7D">&#8635;</a>
-	-->
 	<div align="center" id="embed-html"></div>
 	<script type="text/javascript" src="html/html.nocache.js"></script>
+
+	<div class="info">
+		<button class="collapsible">Description</button>
+		<div class="content">
+			<div class="content-padding">
+				<p><i>TnT: Tracks 'n Towers</i> is a Tower Defense/Racing game.</p>
+				<p>Zombies are coming for your lovely trailer and you have to defend it to survive.</p>
+				<p>Finish laps to earn cash to build towers and use your Road Warrior car to mow down
+					hundreds of Zombies.</p>
+				<p>The faster you finish a lap the more bonus money you will earn!</p>
+				<br>
+				<p>Go kill some Zombies!</p>
+			</div>
+		</div>
+		<button class="collapsible">Controls</button>
+		<div class="content">
+			<table>
+				<tr>
+					<th>Action</td>
+					<th>Keyboard</td>
+					<th>XBox 360/One Controller</td>
+				</tr>
+				<tr>
+					<td>Car &gt; Accelerate</td>
+					<td><kbd>W</kbd> / <kbd>Up</kbd></td>
+					<td>Right trigger <kbd>RT</kbd></td>
+				</tr>
+				<tr>
+					<td>Car &gt; Brake</td>
+					<td><kbd>S</kbd> / <kbd>Down</kbd></td>
+					<td>Left trigger <kbd>LT</kbd></td>
+				</tr>
+				<tr>
+					<td>Car &gt; Steer left</td>
+					<td><kbd>A</kbd> / <kbd>Left</kbd></td>
+					<td>Left pad to the left</td>
+				</tr>
+				<tr>
+					<td>Car &gt; Steer right</td>
+					<td><kbd>D</kbd> / <kbd>Right</kbd></td>
+					<td>Left pad to the right</td>
+				</tr>
+				<tr>
+					<td>Fullscreen toggle</td>
+					<td><kbd>F11</kbd> / <kbd>F</kbd></td>
+					<td><kbd class="controller rb">RB</kbd> / <kbd class="controller lb">LB</kbd> button
+					</td>
+				</tr>
+				<tr>
+					<td>Exit (in menu), go back or stop bulding a tower</td>
+					<td><kbd>Escape</kbd></td>
+					<td><kbd class="button-back">Back</kbd> / <kbd class="controller button-b">B</kbd>
+					</td>
+				</tr>
+				<tr>
+					<td>Select tower</td>
+					<td><kbd>1</kbd>,<kbd>2</kbd>,<kbd>3</kbd>,<kbd>4</kbd></td>
+					<td>Bottom left pad (1=up, 2=right, 3=down, 4=left)</td>
+				</tr>
+				<tr>
+					<td>Move tower if selected</td>
+					<td>Move mouse</td>
+					<td>Right pad</td>
+				</tr>
+				<tr>
+					<td>Build tower if selected</td>
+					<td>Left mouse click</td>
+					<td><kbd class="controller button-a">A</kbd></td>
+				</tr>
+				<tr>
+					<td>Toggle sounds</td>
+					<td><kbd>U</kbd></td>
+					<td><kbd class="controller button-y">Y</kbd></td>
+				</tr>
+				<tr>
+					<td>Toggle music</td>
+					<td><kbd>M</kbd></td>
+					<td><kbd class="controller button-x">X</kbd></td>
+				</tr>
+				<tr>
+					<td>Toggle pause</td>
+					<td><kbd>P</kbd></td>
+					<td><kbd class="button-start">Start</kbd></td>
+				</tr>
+			</table>
+		</div>
+	</div>
 </body>
 
+<script>
+	const collapsibleElements = document.getElementsByClassName("collapsible")
+	for (let collapsibleElement of collapsibleElements) {
+		collapsibleElement.addEventListener("click", () => {
+			collapsibleElement.classList.toggle("active")
+			var content = collapsibleElement.nextElementSibling
+			if (content.style.maxHeight) {
+				content.style.maxHeight = null;
+			} else {
+				content.style.maxHeight = content.scrollHeight + "px";
+			}
+		});
+	}
+</script>
 <script>
 	function handleMouseDown(evt) {
 		evt.preventDefault();

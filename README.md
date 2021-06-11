@@ -30,7 +30,7 @@ Go kill some Zombies!
 | Car > Brake | `S` / `Down` | Left trigger `LT` |
 | Car > Steer left | `A` / `Left` | Left pad to the left |
 | Car > Steer right | `D` / `Right` | Left pad to the right |
-| Fullscreen toggle | `F11`, `F` | `RB` / `LB` |
+| Fullscreen toggle | `F11` / `F` | `RB` / `LB` |
 | Exit (in menu), go back or stop bulding a tower | `Escape` | `Back` / `B` |
 | Select tower | `1`,`2`,`3`,`4` | Bottom left pad (1=up, 2=right, 3=down, 4=left) |
 | Move tower if selected | Move mouse | Right pad |
