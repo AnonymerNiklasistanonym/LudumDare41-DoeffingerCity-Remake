@@ -4,11 +4,13 @@
 .PHONY: run_desktop run_html
 .PHONY: setup_gradle
 
+NAME=td-racing
 VERSION=1.0
 DIST_DIR=bin
-DIST_FILE_ANDROID=$(DIST_DIR)/android-$(VERSION).apk
-DIST_FILE_DESKTOP=$(DIST_DIR)/desktop-$(VERSION).jar
-DIST_DIR_HTML=$(DIST_DIR)/html-$(VERSION)
+DIST_FILE_ANDROID=$(DIST_DIR)/$(NAME)-android-$(VERSION).apk
+DIST_FILE_DESKTOP=$(DIST_DIR)/$(NAME)-desktop-$(VERSION).jar
+DIST_DIR_HTML=$(DIST_DIR)/$(NAME)-html-$(VERSION)
+DIST_ZIP_HTML=$(DIST_DIR)/$(NAME)-html-$(VERSION).zip
 
 all: dist_desktop
 
@@ -91,6 +93,7 @@ dist_html: build_html
 	# Remove if existing the previously created HTML directory
 	rm -rf "$(DIST_DIR_HTML)"
 	cp -R "html/build/dist" "$(DIST_DIR_HTML)"
+	cd "html/build/dist" && zip -r "../../../$(DIST_ZIP_HTML)" . -i "*"
 
 run_desktop: dist_desktop
 	java -jar "$(DIST_FILE_DESKTOP)"

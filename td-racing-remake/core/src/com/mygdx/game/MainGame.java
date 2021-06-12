@@ -43,7 +43,7 @@ public class MainGame implements ApplicationListener {
   /**
    * Indicator if release or development version of the game
    */
-  public static final boolean DEVELOPER_MODE = true;
+  public static final boolean DEVELOPER_MODE = false;
   /**
    * Font "cornerstone_70"
    */
@@ -194,11 +194,11 @@ public class MainGame implements ApplicationListener {
   private static HtmlPlatformInfo htmlPlatformInfo;
 
   public MainGame() {
-    System.out.println("[main:constructor] " + MainGame.getCurrentTimeStampLogString() + "default constructor");
+    System.out.println(MainGame.GAME_NAME + " v" + MainGame.VERSION);
   }
   public MainGame(HtmlPlatformInfo htmlPlatformInfo) {
     MainGame.htmlPlatformInfo = htmlPlatformInfo;
-    System.out.println("[main:constructor] " + MainGame.getCurrentTimeStampLogString() + "html platform info was given: " + htmlPlatformInfo);
+    System.out.println(MainGame.GAME_NAME + " v" + MainGame.VERSION + " (html platform info: " + htmlPlatformInfo + ")");
   }
 
   public static HtmlPlatformInfo getPlatformInfo() {
