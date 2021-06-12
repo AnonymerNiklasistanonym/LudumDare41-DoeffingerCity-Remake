@@ -124,3 +124,23 @@ th {
 	background-color: #8E8E8E;
 	color: white;
 }
+
+ul.button-list {
+	list-style-type: none;
+}
+
+.btn {
+	background-color: rgb(255, 255, 255);
+	border: solid 1px grey;
+	border-radius: 10px;
+	color: rgb(0, 0, 0);
+	padding: 12px 30px;
+	cursor: pointer;
+	font-size: 20px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.btn:hover {
+	background-color: #8E8E8E;
+}
