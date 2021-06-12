@@ -26,7 +26,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install zip
-      run: apt install zip
+      run: apt update && apt install zip
     #- name: Install gradle
     #  run: |
     #    wget https://downloads.gradle-dn.com/distributions/gradle-6.7.1-bin.zip
