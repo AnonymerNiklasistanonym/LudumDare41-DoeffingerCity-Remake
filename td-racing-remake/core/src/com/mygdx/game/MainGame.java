@@ -43,7 +43,7 @@ public class MainGame implements ApplicationListener {
   /**
    * Indicator if release or development version of the game
    */
-  public static final boolean DEVELOPER_MODE = false;
+  public static final boolean DEVELOPER_MODE = true;
   /**
    * Font "cornerstone_70"
    */
