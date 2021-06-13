@@ -996,7 +996,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 			// Render loading information
 			float progress = assetManager.getProgress() * 100;
 			if (progress != assetsLoadedLastProgress) {
-				loadingText = TEXT_LOADING + " " + Math.floor(progress);
+				loadingText = TEXT_LOADING + " " + (int) Math.floor(progress) + "%";
 				loadingTextPosition.set(GameStateManager.calculateCenteredTextPosition(fontLoading, loadingText,
 						MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT));
 				assetsLoadedLastProgress = progress;
@@ -1041,50 +1041,44 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	}
 
 	private void renderDebugEntfernung(SpriteBatch spriteBatch) {
-		final Node[][] test = this.map.getNodesList();
+		// Reduce font size for readability
 		MainGame.font.getData().setScale(0.02f);
-		for (int i = 0; i < MainGame.GAME_WIDTH; i = i + 10) {
-			for (int j = 0; j < MainGame.GAME_HEIGHT; j = j + 10) {
-				if (test[i][j].getH() <= 0) // black
-					MainGame.font.setColor(0, 0, 0, 0.75f);
-				else if (test[i][j].getH() <= 10) // blue
-					MainGame.font.setColor(0, 0, 1f, 0.75f);
-				else if (test[i][j].getH() <= 20) // teal
-					MainGame.font.setColor(0, 1, 0.5f, 0.75f);
-				else if (test[i][j].getH() <= 30) // green
-					MainGame.font.setColor(0.25f, 1, 0, 0.75f);
-				else if (test[i][j].getH() <= 40) // yellow
-					MainGame.font.setColor(1, 0.8f, 0, 0.75f);
-				else if (test[i][j].getH() <= 50) // orange
-					MainGame.font.setColor(1, 0.5f, 0, 0.75f);
-				else if (test[i][j].getH() <= 70) // dark red
-					MainGame.font.setColor(1, 0.25f, 0.1f, 0.75f);
-				else if (test[i][j].getH() <= 100) // pink
-					MainGame.font.setColor(1, 0, 0.5f, 0.57f);
-				else if (test[i][j].getH() <= 200) // purple
-					MainGame.font.setColor(0.6f, 0.1f, 1, 0.75f);
-				else
-					MainGame.font.setColor(1, 0, 0, 0.75f);
-
-				MainGame.font.draw(spriteBatch, test[i][j].getH() + "", i * PlayState.PIXEL_TO_METER,
-						j * PlayState.PIXEL_TO_METER);
+		for (final Node node : map.getNodesList()) {
+			// Set color depending on the distance to the map goal
+			if (node.getH() <= 0) // black
+				MainGame.font.setColor(0, 0, 0, 0.75f);
+			else if (node.getH() <= 10) // blue
+				MainGame.font.setColor(0, 0, 1f, 0.75f);
+			else if (node.getH() <= 20) // teal
+				MainGame.font.setColor(0, 1, 0.5f, 0.75f);
+			else if (node.getH() <= 30) // green
+				MainGame.font.setColor(0.25f, 1, 0, 0.75f);
+			else if (node.getH() <= 40) // yellow
+				MainGame.font.setColor(1, 0.8f, 0, 0.75f);
+			else if (node.getH() <= 50) // orange
+				MainGame.font.setColor(1, 0.5f, 0, 0.75f);
+			else if (node.getH() <= 70) // dark red
+				MainGame.font.setColor(1, 0.25f, 0.1f, 0.75f);
+			else if (node.getH() <= 100) // pink
+				MainGame.font.setColor(1, 0, 0.5f, 0.57f);
+			else if (node.getH() <= 200) // purple
+				MainGame.font.setColor(0.6f, 0.1f, 1, 0.75f);
+			else {
+				// TODO No node should have this color?
+				MainGame.font.setColor(1, 0, 0, 0.75f);
 			}
+
+			MainGame.font.draw(spriteBatch, node.getH() + "", node.getPosition().x * PlayState.PIXEL_TO_METER,
+					node.getPosition().y * PlayState.PIXEL_TO_METER);
 		}
 	}
 
 	private void renderDebugCollision(SpriteBatch spriteBatch) {
-		final Node[][] test = this.map.getNodesList();
+		// What does this mean?
 		MainGame.font.getData().setScale(0.05f);
-		for (int i = 0; i < MainGame.GAME_WIDTH; i = i + 10) {
-			for (int j = 0; j < MainGame.GAME_HEIGHT; j = j + 10) {
-				if (test[i][j].getNoUse()) {
-					MainGame.font.setColor(0, 0, 1, 0.5f);
-					MainGame.font.draw(spriteBatch, "O", i * PlayState.PIXEL_TO_METER, j * PlayState.PIXEL_TO_METER);
-				} else {
-					MainGame.font.setColor(1, 0, 0, 0.5f);
-					MainGame.font.draw(spriteBatch, "I", i * PlayState.PIXEL_TO_METER, j * PlayState.PIXEL_TO_METER);
-				}
-			}
+		for (final Node node : map.getNodesList()) {
+			MainGame.font.setColor(1, 0, 0, 0.5f);
+			MainGame.font.draw(spriteBatch, "o", node.getPosition().x * PlayState.PIXEL_TO_METER, node.getPosition().y * PlayState.PIXEL_TO_METER);
 		}
 	}
 
@@ -1173,7 +1167,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		// TODO What is this code section doing
 		physicsaccumulator += Math.min(deltaTime, 0.25f);
 		while (physicsaccumulator >= TIME_STEP) {
-			world.step(TIME_STEP * speedFactor, 6, 2);
+			world.step(TIME_STEP * speedFactor, 6 * speedFactor, 2 * speedFactor);
 			physicsaccumulator -= TIME_STEP;
 		}
 	}
