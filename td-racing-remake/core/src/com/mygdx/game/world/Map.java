@@ -21,6 +21,7 @@ import com.mygdx.game.gamestate.states.PlayState;
 
 public class Map extends Entity {
 
+	private static final int NODE_DISTANCE = 10;
 	private final Array<Node> nodesList = new Array<>();
 	private final Vector2 healthBarPosition;
 
@@ -29,8 +30,7 @@ public class Map extends Entity {
 	private final Body finishLine;
 	private Body mapZombieWay;
 	private final Vector2 spawnPosition = new Vector2();
-	private final Vector2 targetPosition = new Vector2();
-	private Node[][] nodes2DList;
+	private final Vector2 targetPosition;
 	private Sprite map;
 	private final Array<Array<Node>> paths = new Array<>();
 	private final Array<Array<Node>> motorPaths = new Array<>();
@@ -59,29 +59,39 @@ public class Map extends Entity {
 		createSolidMap(currentLevel.mapName, world);
 		this.finishLine = finishLine;
 		this.world = world;
+		targetPosition = calculateMapGoal();
 		createAStarArray();
 		healthBarPosition = currentLevel.healthBarPosition;
 		spawnHeight = currentLevel.pitStopPosition.y * PlayState.PIXEL_TO_METER + sizePitStop;
 
 		// Create x calculated ways
 		final PolygonShape ps = (PolygonShape) mapGoal.getFixtureList().first().getShape();
-		final Vector2 vector = new Vector2();
-		ps.getVertex(0, vector);
+		final Vector2 mapGoalPosition = new Vector2();
+		ps.getVertex(0, mapGoalPosition);
 
 		for (int i = 0; i < 2; i++) {
 			motorPaths.add(getPath(new Vector2(currentLevel.enemySpawnPosition.x, currentLevel.enemySpawnPosition.y),
-					new Vector2(vector.x * PlayState.METER_TO_PIXEL, vector.y * PlayState.METER_TO_PIXEL),0));
+					new Vector2(mapGoalPosition.x * PlayState.METER_TO_PIXEL, mapGoalPosition.y * PlayState.METER_TO_PIXEL),0));
 		}
 		
 		for (int i = 0; i < 200; i++) {
 			paths.add(getPath(new Vector2(currentLevel.enemySpawnPosition.x, currentLevel.enemySpawnPosition.y),
-					new Vector2(vector.x * PlayState.METER_TO_PIXEL, vector.y * PlayState.METER_TO_PIXEL),3));
+					new Vector2(mapGoalPosition.x * PlayState.METER_TO_PIXEL, mapGoalPosition.y * PlayState.METER_TO_PIXEL),3));
 		}
 
 	}
 
-	public Node[][] getNodesList() {
-		return nodes2DList;
+	public Array<Node> getNodesList() {
+		return nodesList;
+	}
+
+	public Node getNodesAtPos(final int x, final int y) {
+		for (final Node node : nodesList) {
+			if (node.epsilonEquals(new Vector2(x, y))) {
+				return node;
+			}
+		}
+		return null;
 	}
 
 	public void createSolidMap(String mapName, final World world) {
@@ -136,102 +146,103 @@ public class Map extends Entity {
 		return false;
 	}
 
-	private void createAStarArray() {
-		boolean inEnemyMoveArea = true;
-		final PolygonShape ps = (PolygonShape) mapGoal.getFixtureList().first().getShape();
-		final Vector2 vector = new Vector2();
-		ps.getVertex(0, vector);
-
-		// Create nodes
-		for (int i = 0; i <= MainGame.GAME_WIDTH; i += 10) {
-			for (int j = 0; j <= MainGame.GAME_HEIGHT; j += 10) {
-				// In enemy move area?
-				inEnemyMoveArea = true;
-				for (final Fixture f : mapZombieWay.getFixtureList()) {
-					if (f.testPoint(i * PlayState.PIXEL_TO_METER, j * PlayState.PIXEL_TO_METER))
-						inEnemyMoveArea = false;
-				}
-				for (final Fixture f : finishLine.getFixtureList()) {
-					if (f.testPoint(i * PlayState.PIXEL_TO_METER, j * PlayState.PIXEL_TO_METER))
-						inEnemyMoveArea = false;
-				}
-				if (inEnemyMoveArea)
-					nodesList.add(new Node((float) i, (float) j));
+	private boolean isNodeInZombieMoveArea(final Vector2 position) {
+		for (final Fixture fixture : mapZombieWay.getFixtureList()) {
+			if (fixture.testPoint(position)) {
+				return false;
 			}
 		}
-		// Write all neighbors into the nodes
-		final Vector2[] iterationHelper = new Vector2[] { new Vector2(10, 0), new Vector2(0, 10), new Vector2(-10, 0),
-				new Vector2(0, -10) };
+		for (final Fixture f : finishLine.getFixtureList()) {
+			if (f.testPoint(position))
+				return false;
+		}
+		return true;
+	}
+
+	private void createAStarArray() {
+		// Fill node list with nodes that are in an area where zombies can move
+		long timeStampStateStarted = System.currentTimeMillis();
+		final Vector2 nodePosition = new Vector2();
+		for (int x = 0; x <= MainGame.GAME_WIDTH; x += NODE_DISTANCE) {
+			for (int y = 0; y <= MainGame.GAME_HEIGHT; y += NODE_DISTANCE) {
+				nodePosition.set(x * PlayState.PIXEL_TO_METER, y * PlayState.PIXEL_TO_METER);
+				// If the node is in an area where zombies can move add it to the list
+				if (isNodeInZombieMoveArea(nodePosition)) {
+					nodesList.add(new Node((float) x, (float) y));
+				}
+			}
+		}
+		Gdx.app.debug("map:createAStarArray", MainGame.getCurrentTimeStampLogString() + nodesList.size + " nodes were created in " + (System.currentTimeMillis() - timeStampStateStarted) + "ms");
+
+		// Now add all neighbors of each node
+		timeStampStateStarted = System.currentTimeMillis();
+		final Vector2[] iterationHelper = new Vector2[] {
+				new Vector2(NODE_DISTANCE, 0), new Vector2(0, NODE_DISTANCE),
+				new Vector2(-NODE_DISTANCE, 0), new Vector2(0, -NODE_DISTANCE)
+		};
 		for (int i = 0; i < nodesList.size; i++) {
 			final Node nodeMain = nodesList.get(i);
 			for (int j = 0; j < nodesList.size; j++) {
 				final Node nodeNeighbor = nodesList.get(j);
-				for (int k = 0; k < iterationHelper.length; k++) {
-					if (((int) (nodeMain.getPosition().x + iterationHelper[k].x) == (int) (nodeNeighbor.getPosition().x)
-							&& (int) (nodeMain.getPosition().y
-									+ iterationHelper[k].y) == (int) (nodeNeighbor.getPosition().y))) {
-						nodeMain.getNachbarn().add(nodeNeighbor);
+				for (final Vector2 vector2 : iterationHelper) {
+					if (nodeMain.epsilonEqualsWithOffset(nodeNeighbor, vector2)) {
+						nodeMain.addNeighbor(nodeNeighbor);
+						// Stop now since there is only one position that matches
 						break;
 					}
 				}
 			}
 		}
+		Gdx.app.debug("map:createAStarArray", MainGame.getCurrentTimeStampLogString() + "Every node knows it's neighbors after " + (System.currentTimeMillis() - timeStampStateStarted) + "ms");
 
-		// Write from the target the distance into every node
-
-		// normalize end?
-		float zielX = 1, zielY = 1;
-		if (vector.x % 10 < 5)
-			zielX = vector.x - vector.x % 10;
-		if (vector.x % 10 >= 5)
-			zielX = vector.x + (10 - vector.x % 10);
-		if (vector.y % 10 < 5)
-			zielY = vector.y - vector.y % 10;
-		if (vector.y % 10 >= 5)
-			zielY = vector.y + (10 - vector.y % 10);
-
-		targetPosition.set(zielX, zielY);
-
-		for (int i = 0; i < nodesList.size; i++) {
-			final Node node = nodesList.get(i);
-			if ((int) node.getPosition().x == (int) (zielX * PlayState.METER_TO_PIXEL)
-					&& (int) node.getPosition().y == (int) (zielY * PlayState.METER_TO_PIXEL)) {
-				node.setH(1);
-				// set "target" node
-				werteSetzen(node);
+		// Set the goal distance at the map goal node to 1 and update recursively all neighbors
+		timeStampStateStarted = System.currentTimeMillis();
+		Node mapGoal = null;
+		for (final Node node : nodesList) {
+			if (node.epsilonEquals(targetPosition.cpy().scl(PlayState.METER_TO_PIXEL))) {
+				mapGoal = node;
 				break;
 			}
 		}
-
-		boolean isFound = false;
-		nodes2DList = new Node[MainGame.GAME_WIDTH][MainGame.GAME_HEIGHT];
-		// Write to 2D array
-		for (int i = 0; i < MainGame.GAME_WIDTH; i = i + 10) {
-			for (int j = 0; j < MainGame.GAME_HEIGHT; j = j + 10) {
-				isFound = false;
-				for (int k = 0; k < nodesList.size; k++) {
-					final Node node = nodesList.get(k);
-					if (node.getPosition().x == i && node.getPosition().y == j) {
-						isFound = true;
-						nodes2DList[i][j] = node;
-						break;
-					}
-				}
-				if (!isFound)
-					nodes2DList[i][j] = new Node(true);
-			}
+		if (mapGoal == null) {
+			Gdx.app.error("map:createAStarArray", MainGame.getCurrentTimeStampLogString() + "No map goal was found");
+			throw new RuntimeException("No map goal was found");
 		}
-
+		mapGoal.setH(1);
+		// Find all neighbors and update their distance to the goal node etc.
+		updateNodeNeighborDistances(mapGoal);
+		Gdx.app.debug("map:createAStarArray", MainGame.getCurrentTimeStampLogString() + "All node distances were updated after " + (System.currentTimeMillis() - timeStampStateStarted) + "ms");
 	}
 
-	private void werteSetzen(final Node meinNode) {
-		if (meinNode != null && meinNode.getNachbarn() != null)
-			for (final Node node : meinNode.getNachbarn()) {
-				if (node.getH() > meinNode.getH() + 1) {
-					node.setH(meinNode.getH() + 1);
-					werteSetzen(node);
-				}
+	private Vector2 calculateMapGoal() {
+		final PolygonShape ps = (PolygonShape) mapGoal.getFixtureList().first().getShape();
+		final Vector2 mapGoalPosition = new Vector2();
+		ps.getVertex(0, mapGoalPosition);
+
+		// normalize end?
+		Vector2 mapGoal = new Vector2(1, 1);
+		if (mapGoalPosition.x % NODE_DISTANCE < (NODE_DISTANCE / 2f))
+			mapGoal.x = mapGoalPosition.x - mapGoalPosition.x % NODE_DISTANCE;
+		if (mapGoalPosition.x % NODE_DISTANCE >= (NODE_DISTANCE / 2f))
+			mapGoal.x = mapGoalPosition.x + (NODE_DISTANCE - mapGoalPosition.x % NODE_DISTANCE);
+		if (mapGoalPosition.y % NODE_DISTANCE < (NODE_DISTANCE / 2f))
+			mapGoal.y = mapGoalPosition.y - mapGoalPosition.y % NODE_DISTANCE;
+		if (mapGoalPosition.y % NODE_DISTANCE >= (NODE_DISTANCE / 2f))
+			mapGoal.y = mapGoalPosition.y + (NODE_DISTANCE - mapGoalPosition.y % NODE_DISTANCE);
+
+		return mapGoal;
+	}
+
+	private void updateNodeNeighborDistances(final Node node) {
+		if (node == null || node.getNeighbors() == null) {
+			return;
+		}
+		for (final Node neighbor : node.getNeighbors()) {
+			if (neighbor.getH() > node.getH() + 1) {
+				neighbor.setH(node.getH() + 1);
+				updateNodeNeighborDistances(neighbor);
 			}
+		}
 	}
 
 	public Vector2 getSpawnPosition() {
@@ -251,22 +262,21 @@ public class Map extends Entity {
 	}
 
 	private Vector2 normalizeVectorForGrid(final Vector2 vector) {
-		if (vector.x % 10 < 5)
-			vector.x = vector.x - vector.x % 10;
+		if (vector.x % NODE_DISTANCE < 5)
+			vector.x = vector.x - vector.x % NODE_DISTANCE;
 		else
-			vector.x = vector.x + (10 - vector.x % 10);
-		if (vector.y % 10 < 5)
-			vector.y = vector.y - vector.y % 10;
+			vector.x = vector.x + (NODE_DISTANCE - vector.x % NODE_DISTANCE);
+		if (vector.y % NODE_DISTANCE < 5)
+			vector.y = vector.y - vector.y % NODE_DISTANCE;
 		else
-			vector.y = vector.y + (10 - vector.y % 10);
+			vector.y = vector.y + (NODE_DISTANCE - vector.y % NODE_DISTANCE);
 		return vector;
 	}
 
 	private Array<Node> getPath(final Vector2 startPosition, final Vector2 targetPosition, float maxDiff) {
-		Array<Node> openList = new Array<Node>();
-		Array<Node> closedList = new Array<Node>();
-		Node[][] tempNodes2DList = getNodesList();
-		Array<Node> tempweg = new Array<Node>();
+		Array<Node> openList = new Array<>();
+		Array<Node> closedList = new Array<>();
+		Array<Node> tempweg = new Array<>();
 		Node aktuellerNode;
 
 		// was the way found
@@ -277,16 +287,21 @@ public class Map extends Entity {
 		targetPosition.set(normalizeVectorForGrid(targetPosition));
 
 		// Which neighbor is the best
-		if (tempNodes2DList[(int) startPosition.x][(int) startPosition.y].getNoUse())
-			System.out.println("Halt, Start Node ist ungueltig");
+		Node startNode = getNodesAtPos((int) startPosition.x, (int) startPosition.y);
+		if (startNode == null) {
+			Gdx.app.error("map:getPath", MainGame.getCurrentTimeStampLogString() + "Start node is null");
+			throw new RuntimeException("Start node is null");
+		}
 
-		if (tempNodes2DList[(int) targetPosition.x][(int) targetPosition.y].getNoUse())
-			System.out.println("Halt, End Node ist ungueltig");
+		if (getNodesAtPos((int) targetPosition.x, (int) targetPosition.y) == null) {
+			Gdx.app.error("map:getPath", MainGame.getCurrentTimeStampLogString() + "End node is null");
+			throw new RuntimeException("End node is null");
+		}
 
-		openList.add(tempNodes2DList[(int) startPosition.x][(int) startPosition.y]);
-		aktuellerNode = tempNodes2DList[(int) startPosition.x][(int) startPosition.y];
+		openList.add(startNode);
+		aktuellerNode = startNode;
 
-		float lowCost = aktuellerNode.getCost();
+		float lowCost;
 
 		while (!foundWay) {
 			lowCost = 999999999;
@@ -300,10 +315,11 @@ public class Map extends Entity {
 			}
 
 			if (openList.indexOf(aktuellerNode, true) < 0) {
-				System.out.println("aktuellerNode ist auf openList nicht zu finden (MainMap)\n" + "openList size: "
-						+ openList.size + "\n" + "aktuellerNode size: " + aktuellerNode.getPosition().toString() + "\n"
+				Gdx.app.error("map:getPath", MainGame.getCurrentTimeStampLogString() + "Current node can not be found in openList (MainMap)\n"
+						+ "openList size: " + openList.size + "\n" + "current node position: " + aktuellerNode.getPosition() + "\n"
 						+ "tempweg size: " + openList.size);
-				return tempweg;
+				throw new RuntimeException("Current node can not be found in openList");
+				// return tempweg;
 			}
 
 			if (openList.indexOf(aktuellerNode, true) != -1)
@@ -311,8 +327,8 @@ public class Map extends Entity {
 
 			closedList.add(aktuellerNode);
 
-			for (int i = 0; i < aktuellerNode.getNachbarn().size; i++) {
-				final Node node = aktuellerNode.getNachbarn().get(i);
+			for (int i = 0; i < aktuellerNode.getNeighbors().size; i++) {
+				final Node node = aktuellerNode.getNeighbors().get(i);
 				if (closedList.indexOf(node, true) == -1) {
 					node.setG(aktuellerNode.getG() + 1);
 					node.setParent(aktuellerNode);
@@ -325,20 +341,21 @@ public class Map extends Entity {
 
 			if (aktuellerNode.getPosition().equals(targetPosition)) {
 				foundWay = true;
-				break;
 			}
 		}
 
+		Node node;
 		while (aktuellerNode != null) {
 			// Add for every way that is used an additional difficulty
-			getNodesList()[(int) aktuellerNode.getPosition().x][(int) aktuellerNode.getPosition().y]
-					.setAdditionalDifficulty(MathUtils.random(0f, maxDiff));
-			// Add node to way
-			tempweg.add(aktuellerNode);
-			// do it until there is no "parent" any more
+			node = getNodesAtPos((int) aktuellerNode.getPosition().x, (int) aktuellerNode.getPosition().y);
+			if (node != null) {
+				node.increaseAdditionalDifficulty(MathUtils.random(0f, maxDiff));
+				// Add node to the way
+				tempweg.add(aktuellerNode);
+			}
+			// Do this until there is no "parent" any more
 			aktuellerNode = aktuellerNode.getParent();
 		}
-
 		return tempweg;
 	}
 
