@@ -14,19 +14,15 @@ on:
   # Allows to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-jobs:
-  build:
 
+jobs:
+
+  # Uncomment and add these steps to a job if gradle is needed to be available instead of only ./gradlew
+  setup:
     runs-on: ubuntu-latest
-    container:
-      # Image that supports the specified android API
-      # (https://hub.docker.com/r/fabernovel/android/tags?page=1&ordering=last_updated)
-      image: docker://fabernovel/android:api-30-v1.3.0
 
     steps:
     - uses: actions/checkout@v2
-    - name: Install zip
-      run: apt update && apt install zip
     #- name: Install gradle
     #  run: |
     #    wget https://downloads.gradle-dn.com/distributions/gradle-6.7.1-bin.zip
@@ -35,25 +31,75 @@ jobs:
     #- name: Install gradle wrapper
     #  working-directory: ./td-racing-remake/
     #  run: /opt/gradle/gradle-6.7.1/bin/gradle wrapper
+
+
+  test:
+    needs:
+    - setup
+    runs-on: ubuntu-latest
+    container:
+      # Image that supports the specified android API
+      # (https://hub.docker.com/r/fabernovel/android/tags?page=1&ordering=last_updated)
+      image: docker://fabernovel/android:api-30-v1.3.0
+
+    steps:
+    - uses: actions/checkout@v2
     - name: Run tests (via Makefile)
       working-directory: ./td-racing-remake/
       run: make test
+
+
+  build:
+    needs:
+    - setup
+    runs-on: ubuntu-latest
+    container:
+      # Image that supports the specified android API
+      # (https://hub.docker.com/r/fabernovel/android/tags?page=1&ordering=last_updated)
+      image: docker://fabernovel/android:api-30-v1.3.0
+
+    steps:
+    - uses: actions/checkout@v2
     - name: Build with Gradle the desktop binary (via Makefile)
       working-directory: ./td-racing-remake/
       run: make dist_desktop
-    - name: Build with Gradle the html directory (via Makefile)
+    - name: Build with Gradle the html directory (via Makefile) which needs the program zip
       working-directory: ./td-racing-remake/
-      run: make dist_html
+      run: |
+        apt update
+        apt install zip
+        make dist_html
     # Do not build the release apk since this apk needs to be signed with a
     # private keystore and private credentials
     - name: Build with Gradle the android debug APK (via Makefile)
       working-directory: ./td-racing-remake/
       run: make build_android_debug
+    # This is used to share all created "binary" files between the separated jobs
+    - name: Temporarily save created "binary" files
+      uses: actions/upload-artifact@v2
+      with:
+        name: binary-artifacts
+        path: ./td-racing-remake/bin/
+        retention-days: 7
+
+  deploy:
+    needs:
+    - setup
+    - build
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Retrieve temporarily saved "binary" files from the build job
+      uses: actions/download-artifact@v2
+      with:
+        name: binary-artifacts
+        path: ./td-racing-remake/bin/
     - name: Create website
       working-directory: ./web-page
       run: make
     - name: Deploy to GitHub Pages
-      # Run this step on the main branch only
+      # Only deploy the website when pushing on the main branch
       if: github.ref == 'refs/heads/main'
       uses: crazy-max/ghaction-github-pages@v2
       with:
