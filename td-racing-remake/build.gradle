@@ -10,6 +10,8 @@ buildscript {
 		classpath 'org.wisepersist:gwt-gradle-plugin:1.0.13'
 		classpath 'org.gretty:gretty:3.0.2'
 		classpath 'com.android.tools.build:gradle:4.1.3'
+		// Test log output
+		//classpath 'com.adarshr:gradle-test-logger-plugin:3.0.0'
 	}
 }
 
@@ -91,10 +93,17 @@ project(":html") {
 
 project(":core") {
 	apply plugin: "java-library"
+	// Test log output
+	//apply plugin: "com.adarshr.test-logger"
+
+	// Test source directories
+	sourceSets.test.java.srcDirs = [ "test/" ]
 
 	dependencies {
 		api "com.badlogicgames.gdx:gdx:$gdxVersion"
 		api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
 		api "com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion"
+		// Test dependencies
+		testImplementation "junit:junit:4.13"
 	}
 }

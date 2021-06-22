@@ -35,6 +35,9 @@ jobs:
     #- name: Install gradle wrapper
     #  working-directory: ./td-racing-remake/
     #  run: /opt/gradle/gradle-6.7.1/bin/gradle wrapper
+    - name: Run tests (via Makefile)
+      working-directory: ./td-racing-remake/
+      run: make test
     - name: Build with Gradle the desktop binary (via Makefile)
       working-directory: ./td-racing-remake/
       run: make dist_desktop

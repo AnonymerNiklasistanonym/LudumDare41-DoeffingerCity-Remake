@@ -101,3 +101,6 @@ run_desktop: dist_desktop
 run_html: dist_html
 	@echo Make sure to reload the page and disable caching when updating the code
 	python -m http.server --directory "$(DIST_DIR_HTML)"
+
+test:
+	./gradlew --info test
