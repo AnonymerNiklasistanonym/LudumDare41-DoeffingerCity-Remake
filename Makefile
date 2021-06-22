@@ -22,3 +22,7 @@ dist:
 	# This builds the desktop, html and android version + the project website
 	$(MAKE) -C "td-racing-remake" dist
 	$(MAKE) -C "web-page" web_page
+
+test:
+	# This runs all tests
+	$(MAKE) -C "td-racing-remake" test
