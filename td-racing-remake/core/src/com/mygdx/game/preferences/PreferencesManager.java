@@ -10,8 +10,11 @@ import com.mygdx.game.MainGame;
 public class PreferencesManager {
 
   private static final String PREFERENCE_FULLSCREEN_ACTIVATED_BOOL = "FULLSCREEN_ACTIVATED_BOOL";
+  private static final boolean PREFERENCE_FULLSCREEN_ACTIVATED_BOOL_DEFAULT = false;
   private static final String PREFERENCE_MUSIC_ON_BOOL = "MUSIC_ON_BOOL";
+  private static final boolean PREFERENCE_MUSIC_ON_BOOL_DEFAULT = true;
   private static final String PREFERENCE_SOUND_EFFECTS_ON_BOOL = "SOUND_EFFECTS_ON_BOOL";
+  private static final boolean PREFERENCE_SOUND_EFFECTS_ON_BOOL_DEFAULT = true;
   private static final String PREFERENCE_HIGHSCORE_NAME_STRING_BASE = "HIGHSCORE_NAME_STRING_";
   private static final String PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE = "HIGHSCORE_SCORE_VALUE_";
   private static final String PREFERENCE_HIGHSCORE_LEVEL_VALUE_BASE = "HIGHSCORE_LEVEL_VALUE_";
@@ -42,20 +45,20 @@ public class PreferencesManager {
       // Set that the game was already launched (for the next start)
       setAlreadyLaunched(true);
       // Set that the game should be launched in windowed mode
-      setFullscreen(false);
+      setFullscreen(PREFERENCE_FULLSCREEN_ACTIVATED_BOOL_DEFAULT);
       // Set user name
       setHighscoreName("NOBODY");
       // Set music to on
-      setMusicOn(true);
+      setMusicOn(PREFERENCE_MUSIC_ON_BOOL_DEFAULT);
       // Set sound effects to on
-      setSoundEffectsOn(true);
+      setSoundEffectsOn(PREFERENCE_SOUND_EFFECTS_ON_BOOL_DEFAULT);
       // Reset highscore list (which creates default entries)
       resetHighscore();
     }
   }
 
   public boolean getFullscreen() {
-    return prefs.getBoolean(PREFERENCE_FULLSCREEN_ACTIVATED_BOOL, false);
+    return prefs.getBoolean(PREFERENCE_FULLSCREEN_ACTIVATED_BOOL, PREFERENCE_FULLSCREEN_ACTIVATED_BOOL_DEFAULT);
   }
 
   public void setFullscreen(final boolean fullscreenActivated) {
@@ -132,7 +135,7 @@ public class PreferencesManager {
   }
 
   public boolean getMusicOn() {
-    return prefs.getBoolean(PREFERENCE_MUSIC_ON_BOOL, true);
+    return prefs.getBoolean(PREFERENCE_MUSIC_ON_BOOL, PREFERENCE_MUSIC_ON_BOOL_DEFAULT);
   }
 
   public void setMusicOn(final boolean musicOn) {
