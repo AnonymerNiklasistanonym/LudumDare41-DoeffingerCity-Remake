@@ -3,9 +3,10 @@ package com.mygdx.game.world;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import java.util.Objects;
 
 /**
- * A node in the map for plotting zombie paths
+ * A node in the map for plotting paths
  */
 public class Node {
 
@@ -14,17 +15,16 @@ public class Node {
 	 */
 	private final Vector2 position;
 	/**
-	 * Cost from start to this node
+	 * The neighbors of the node
 	 */
-	private float g = 1;
-	/**
-	 * Cost from this node to the target
-	 */
-	private float h = 99999;
-	private float additionalDifficulty = 0;
-	private Node parentNode;
 	private final Array<Node> neighbors = new Array<>();
 
+	/**
+	 * When constructing a node the position needs to be given.
+	 *
+	 * @param x The x position on the map
+	 * @param y The y position on the map
+	 */
 	public Node(final float x, final float y) {
 		position = new Vector2(x, y);
 	}
@@ -33,16 +33,8 @@ public class Node {
 		this.position = position.cpy();
 	}
 
-	public float getCost() {
-		return g + h * 7 * additionalDifficulty;
-	}
-
 	public Vector2 getPosition() {
 		return position;
-	}
-
-	public float getH() {
-		return h;
 	}
 
 	public Array<Node> getNeighbors() {
@@ -53,58 +45,68 @@ public class Node {
 		neighbors.add(neighbor);
 	}
 
-	public boolean epsilonEqualsWithOffset(final Node nodeTwo, final Vector2 offset) {
-		return (position.cpy().add(offset)).epsilonEquals(nodeTwo.getPosition(), MathUtils.FLOAT_ROUNDING_ERROR);
+	/**
+	 * Get if another node has the same position as this node.
+	 *
+	 * @param otherNode The other node
+	 * @param offset An offset that is applied to the position of this node
+	 * @return True if both nodes (taking into account the offset) have the same position
+	 */
+	public boolean epsilonEqualsWithOffset(final Node otherNode, final Vector2 offset) {
+		return position.cpy().add(offset).epsilonEquals(otherNode.getPosition(), MathUtils.FLOAT_ROUNDING_ERROR);
 	}
 
-	public boolean epsilonEquals(final Node nodeTwo) {
-		return position.epsilonEquals(nodeTwo.getPosition(), MathUtils.FLOAT_ROUNDING_ERROR);
+	/**
+	 * Get if another node has the same position as this node.
+	 *
+	 * @param otherNode The other node
+	 * @return True if both nodes have the same position
+	 */
+	public boolean epsilonEquals(final Node otherNode) {
+		return position.epsilonEquals(otherNode.getPosition(), MathUtils.FLOAT_ROUNDING_ERROR);
 	}
 
-	public boolean epsilonEquals(final Vector2 position2) {
-		return position.epsilonEquals(position2, MathUtils.FLOAT_ROUNDING_ERROR);
-	}
-
-	public float getG() {
-		return g;
-	}
-
-	public void setG(final float g) {
-		this.g = g;
-	}
-
-	public void setParent(final Node node) {
-		parentNode = node;
-	}
-
-	public float getAdditionalDifficulty() {
-		return additionalDifficulty;
-	}
-
-	public Node getParent() {
-		return parentNode;
-	}
-
-	public void increaseAdditionalDifficulty(final float aD) {
-		additionalDifficulty = additionalDifficulty + aD;
-	}
-
-	public void setH(final float h) {
-		this.h = h;
-	}
-
-	public void setCost(final float cost) {
-		// TODO What happened with this method
+	/**
+	 * Get if another position is the same position as the one this node has.
+	 *
+	 * @param otherPosition The position that is compared to the node position
+	 * @return True if both positions are the same
+	 */
+	public boolean epsilonEquals(final Vector2 otherPosition) {
+		return position.epsilonEquals(otherPosition, MathUtils.FLOAT_ROUNDING_ERROR);
 	}
 
 	@Override
 	public String toString() {
 		return "Node{" +
 				"position=" + position +
-				", g=" + g +
-				", h=" + h +
-				", additionalDifficulty=" + additionalDifficulty +
-				", parentNode=" + parentNode +
 				'}';
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		Node node = (Node) o;
+		return position.epsilonEquals(node.position, MathUtils.FLOAT_ROUNDING_ERROR);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(position);
+	}
+
+	/**
+	 * Get the distance between this nodes position and the given position
+	 *
+	 * @param position The position to which the distance should be measured
+	 * @return The distance between the positions
+	 */
+	public float measureDistanceToPosition(final Vector2 position) {
+			return (float) Math.sqrt(Math.pow(this.position.x + position.x, 2) + Math.pow(this.position.y + position.y, 2));
 	}
 }

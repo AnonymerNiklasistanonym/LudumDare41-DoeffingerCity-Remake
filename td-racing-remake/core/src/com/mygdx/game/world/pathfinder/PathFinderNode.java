@@ -19,7 +19,7 @@ public abstract class PathFinderNode {
    * @param neighbor The neighbor node
    * @return The distance
    */
-  public abstract <T extends PathFinderNode> float getDistanceToNeighbor(T neighbor);
+  public abstract <T extends PathFinderNode> float getDistanceToSuccessor(T neighbor);
 
   /**
    * Get the successor/neighbor nodes
@@ -58,4 +58,12 @@ public abstract class PathFinderNode {
    * @return The current shortest calculated cost from the start node to this node
    */
   public abstract float getG();
+
+  /**
+   * Get the h(x) value of the node where h(x) is the estimated cost to the goal node from this
+   * node
+   *
+   * @return The current estimated cost from this node to the goal node
+   */
+  public abstract float getH();
 }

@@ -11,6 +11,8 @@ import java.util.Set;
  */
 public class PathFinder {
 
+  private static final boolean DEBUG_PATH_FINDER_ALGORITHM = false;
+
   /**
    * This method will find a path using A* with an additional difficulty factor to get different
    * paths.
@@ -43,41 +45,80 @@ public class PathFinder {
     // Add the start node to the open list which has a f value of 0
     startNode.setG(0, null);
     openList.add(startNode);
+    if (DEBUG_PATH_FINDER_ALGORITHM) {
+      System.out.println("Put start node into the priority queue (" + startNode + ")");
+    }
 
     // Repeat the following steps until the open list is empty
     T currentNode;
     do {
       // Remove the node with the smallest f value
       currentNode = openList.remove();
+      if (DEBUG_PATH_FINDER_ALGORITHM) {
+        System.out.println(
+            "Remove the node with the smallest f(x)=" + currentNode.getF() + " value ("
+                + currentNode + ")");
+      }
       // Now check if this node is the goal node
       if (currentNode == goalNode) {
+        if (DEBUG_PATH_FINDER_ALGORITHM) {
+          System.out.println("-> Node is goal node, return shortest path");
+        }
         // If yes then return the shortest path
         final Array<T> shortestPath = new Array<>();
         T currentPathNode = currentNode;
         while (currentPathNode != startNode) {
           shortestPath.add(currentPathNode);
           currentPathNode = currentPathNode.getPredecessor();
+          if (DEBUG_PATH_FINDER_ALGORITHM) {
+            System.out.println(currentPathNode + "\n|");
+          }
         }
         shortestPath.add(startNode);
+        if (DEBUG_PATH_FINDER_ALGORITHM) {
+          System.out.println(startNode);
+        }
         shortestPath.reverse();
         return shortestPath;
       }
       // To avoid cycles the node that is not the goal node is put into the closed list
       closedList.add(currentNode);
+      if (DEBUG_PATH_FINDER_ALGORITHM) {
+        System.out
+            .println("-> Node is not the goal node, add it to the closed list to avoid loops");
+      }
       // Now all child nodes of this node will be put into the open list
       for (final T nodeSuccessor : currentNode.<T>getSuccessors()) {
+        if (DEBUG_PATH_FINDER_ALGORITHM) {
+          System.out.println("-> Check successor node " + nodeSuccessor);
+        }
         // When the neighbor node is already on the close list do nothing
         if (closedList.contains(nodeSuccessor)) {
+          if (DEBUG_PATH_FINDER_ALGORITHM) {
+            System.out.println("--> Successor node was already visited, ignore it");
+          }
           continue;
         }
         // Else calculate the new g(x) value
-        float tentative_g = currentNode.getG() + currentNode.getDistanceToNeighbor(nodeSuccessor);
+        float tentative_g = currentNode.getG() + currentNode.getDistanceToSuccessor(nodeSuccessor);
+        if (DEBUG_PATH_FINDER_ALGORITHM) {
+          System.out.println(
+              "--> Calculate new g(x)=" + tentative_g + " from the current node to this node");
+        }
         // If the node is already on the open list but the g value is not smaller ignore it
         if (openList.contains(nodeSuccessor) && tentative_g >= nodeSuccessor.getG()) {
+          if (DEBUG_PATH_FINDER_ALGORITHM) {
+            System.out.println("--> Calculated g(x) is smaller than g(x)=" + nodeSuccessor.getG()
+                + " in the open list");
+          }
           continue;
         }
         // If it is smaller set the predecessor node and the new g value
         nodeSuccessor.setG(tentative_g, currentNode);
+        if (DEBUG_PATH_FINDER_ALGORITHM) {
+          System.out.println(
+              "--> Because the new g(x) is smaller update node to f(x)=" + nodeSuccessor.getF());
+        }
         // If the successor node is already in the open list do nothing
         // float f = tentative_g + nodeSuccessor.getH();
         if (openList.contains(nodeSuccessor)) {
@@ -85,13 +126,16 @@ public class PathFinder {
         }
         // Else add it to the open list
         openList.add(nodeSuccessor);
+        if (DEBUG_PATH_FINDER_ALGORITHM) {
+          System.out.println("--> Because the successor node is not yet in the open list add it");
+        }
       }
     } while (!openList.isEmpty());
 
     return null;
   }
 
-  private static float getNextRandomAdditionalDifficulty(final Random randomGenerator,
+  public static float getNextRandomAdditionalDifficulty(final Random randomGenerator,
       final float minAdditionalDifficulty, final float maxAdditionalDifficulty) {
     /*
      final float minAdditionalDifficulty, final float maxAdditionalDifficulty, final long seed

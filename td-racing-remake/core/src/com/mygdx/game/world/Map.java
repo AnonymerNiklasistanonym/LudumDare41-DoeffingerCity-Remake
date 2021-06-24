@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -18,11 +17,17 @@ import com.mygdx.game.MainGame;
 import com.mygdx.game.entities.Entity;
 import com.mygdx.game.file.LevelInfoCsvFile;
 import com.mygdx.game.gamestate.states.PlayState;
+import com.mygdx.game.world.pathfinder.EnemyGridNode;
+import com.mygdx.game.world.pathfinder.PathFinder;
+import java.util.HashSet;
+import java.util.PriorityQueue;
+import java.util.Random;
+import java.util.Set;
 
 public class Map extends Entity {
 
 	private static final int NODE_DISTANCE = 10;
-	private final Array<Node> nodesList = new Array<>();
+	private final Array<EnemyGridNode> nodesList = new Array<>();
 	private final Vector2 healthBarPosition;
 
 	private Body mapModel;
@@ -32,10 +37,13 @@ public class Map extends Entity {
 	private final Vector2 spawnPosition = new Vector2();
 	private final Vector2 targetPosition;
 	private Sprite map;
-	private final Array<Array<Node>> paths = new Array<>();
-	private final Array<Array<Node>> motorPaths = new Array<>();
+	private final Array<Array<EnemyGridNode>> paths = new Array<>();
+	private final Array<Array<EnemyGridNode>> motorPaths = new Array<>();
 	private final float spawnHeight;
 	private final World world;
+
+	private EnemyGridNode enemyGridGoalNode = null;
+	private EnemyGridNode enemyGridStartNode = null;
 
 	@Override
 	public void removeFromWorld() {
@@ -70,23 +78,44 @@ public class Map extends Entity {
 		ps.getVertex(0, mapGoalPosition);
 
 		for (int i = 0; i < 2; i++) {
-			motorPaths.add(getPath(new Vector2(currentLevel.enemySpawnPosition.x, currentLevel.enemySpawnPosition.y),
-					new Vector2(mapGoalPosition.x * PlayState.METER_TO_PIXEL, mapGoalPosition.y * PlayState.METER_TO_PIXEL),0));
+			motorPaths.add(getPath(currentLevel.enemySpawnPosition, targetPosition.cpy().scl(PlayState.METER_TO_PIXEL), 0));
 		}
 		
 		for (int i = 0; i < 200; i++) {
-			paths.add(getPath(new Vector2(currentLevel.enemySpawnPosition.x, currentLevel.enemySpawnPosition.y),
-					new Vector2(mapGoalPosition.x * PlayState.METER_TO_PIXEL, mapGoalPosition.y * PlayState.METER_TO_PIXEL),3));
+			paths.add(getPath(currentLevel.enemySpawnPosition, targetPosition.cpy().scl(PlayState.METER_TO_PIXEL), 3));
 		}
 
 	}
 
-	public Array<Node> getNodesList() {
+	public Array<EnemyGridNode> getNodesList() {
 		return nodesList;
 	}
 
-	public Node getNodesAtPos(final int x, final int y) {
-		for (final Node node : nodesList) {
+	public EnemyGridNode getNearestNodeAtPos(final Vector2 position) {
+		EnemyGridNode nearestNode = nodesList.get(0);
+		float nearestDistance = Float.POSITIVE_INFINITY;
+		float currentDistance;
+		for (final EnemyGridNode node : nodesList) {
+			currentDistance = node.getPosition().dst(position);
+			if (currentDistance < nearestDistance) {
+				nearestDistance = currentDistance;
+				nearestNode = node;
+			}
+		}
+		return nearestNode;
+	}
+
+	public EnemyGridNode getNodeAtPos(final Vector2 position) {
+		for (final EnemyGridNode node : nodesList) {
+			if (node.epsilonEquals(position)) {
+				return node;
+			}
+		}
+		return null;
+	}
+
+	public EnemyGridNode getNodeAtPos(final float x, final float y) {
+		for (final EnemyGridNode node : nodesList) {
 			if (node.epsilonEquals(new Vector2(x, y))) {
 				return node;
 			}
@@ -159,6 +188,9 @@ public class Map extends Entity {
 		return true;
 	}
 
+	/**
+	 * Create an array of nodes that is used for path finding
+	 */
 	private void createAStarArray() {
 		// Fill node list with nodes that are in an area where zombies can move
 		long timeStampStateStarted = System.currentTimeMillis();
@@ -168,7 +200,7 @@ public class Map extends Entity {
 				nodePosition.set(x * PlayState.PIXEL_TO_METER, y * PlayState.PIXEL_TO_METER);
 				// If the node is in an area where zombies can move add it to the list
 				if (isNodeInZombieMoveArea(nodePosition)) {
-					nodesList.add(new Node((float) x, (float) y));
+					nodesList.add(new EnemyGridNode((float) x, (float) y, nodePosition.dst(targetPosition)));
 				}
 			}
 		}
@@ -181,12 +213,12 @@ public class Map extends Entity {
 				new Vector2(-NODE_DISTANCE, 0), new Vector2(0, -NODE_DISTANCE)
 		};
 		for (int i = 0; i < nodesList.size; i++) {
-			final Node nodeMain = nodesList.get(i);
+			final EnemyGridNode nodeMain = nodesList.get(i);
 			for (int j = 0; j < nodesList.size; j++) {
-				final Node nodeNeighbor = nodesList.get(j);
+				final EnemyGridNode nodeNeighbor = nodesList.get(j);
 				for (final Vector2 vector2 : iterationHelper) {
 					if (nodeMain.epsilonEqualsWithOffset(nodeNeighbor, vector2)) {
-						nodeMain.addNeighbor(nodeNeighbor);
+						nodeMain.addSuccessor(nodeNeighbor);
 						// Stop now since there is only one position that matches
 						break;
 					}
@@ -194,55 +226,20 @@ public class Map extends Entity {
 			}
 		}
 		Gdx.app.debug("map:createAStarArray", MainGame.getCurrentTimeStampLogString() + "Every node knows it's neighbors after " + (System.currentTimeMillis() - timeStampStateStarted) + "ms");
-
-		// Set the goal distance at the map goal node to 1 and update recursively all neighbors
-		timeStampStateStarted = System.currentTimeMillis();
-		Node mapGoal = null;
-		for (final Node node : nodesList) {
-			if (node.epsilonEquals(targetPosition.cpy().scl(PlayState.METER_TO_PIXEL))) {
-				mapGoal = node;
-				break;
-			}
-		}
-		if (mapGoal == null) {
-			Gdx.app.error("map:createAStarArray", MainGame.getCurrentTimeStampLogString() + "No map goal was found");
-			throw new RuntimeException("No map goal was found");
-		}
-		mapGoal.setH(1);
-		// Find all neighbors and update their distance to the goal node etc.
-		updateNodeNeighborDistances(mapGoal);
-		Gdx.app.debug("map:createAStarArray", MainGame.getCurrentTimeStampLogString() + "All node distances were updated after " + (System.currentTimeMillis() - timeStampStateStarted) + "ms");
 	}
 
+	/**
+	 * Calculate the target/goal position from the hit box
+	 *
+	 * TODO Do not just use the first vertex but get the average of all vertices
+	 *
+	 * @return The map goal position
+	 */
 	private Vector2 calculateMapGoal() {
 		final PolygonShape ps = (PolygonShape) mapGoal.getFixtureList().first().getShape();
 		final Vector2 mapGoalPosition = new Vector2();
 		ps.getVertex(0, mapGoalPosition);
-
-		// normalize end?
-		Vector2 mapGoal = new Vector2(1, 1);
-		if (mapGoalPosition.x % NODE_DISTANCE < (NODE_DISTANCE / 2f))
-			mapGoal.x = mapGoalPosition.x - mapGoalPosition.x % NODE_DISTANCE;
-		if (mapGoalPosition.x % NODE_DISTANCE >= (NODE_DISTANCE / 2f))
-			mapGoal.x = mapGoalPosition.x + (NODE_DISTANCE - mapGoalPosition.x % NODE_DISTANCE);
-		if (mapGoalPosition.y % NODE_DISTANCE < (NODE_DISTANCE / 2f))
-			mapGoal.y = mapGoalPosition.y - mapGoalPosition.y % NODE_DISTANCE;
-		if (mapGoalPosition.y % NODE_DISTANCE >= (NODE_DISTANCE / 2f))
-			mapGoal.y = mapGoalPosition.y + (NODE_DISTANCE - mapGoalPosition.y % NODE_DISTANCE);
-
-		return mapGoal;
-	}
-
-	private void updateNodeNeighborDistances(final Node node) {
-		if (node == null || node.getNeighbors() == null) {
-			return;
-		}
-		for (final Node neighbor : node.getNeighbors()) {
-			if (neighbor.getH() > node.getH() + 1) {
-				neighbor.setH(node.getH() + 1);
-				updateNodeNeighborDistances(neighbor);
-			}
-		}
+		return mapGoalPosition;
 	}
 
 	public Vector2 getSpawnPosition() {
@@ -261,109 +258,89 @@ public class Map extends Entity {
 		return targetPosition;
 	}
 
-	private Vector2 normalizeVectorForGrid(final Vector2 vector) {
-		if (vector.x % NODE_DISTANCE < 5)
-			vector.x = vector.x - vector.x % NODE_DISTANCE;
-		else
-			vector.x = vector.x + (NODE_DISTANCE - vector.x % NODE_DISTANCE);
-		if (vector.y % NODE_DISTANCE < 5)
-			vector.y = vector.y - vector.y % NODE_DISTANCE;
-		else
-			vector.y = vector.y + (NODE_DISTANCE - vector.y % NODE_DISTANCE);
-		return vector;
+	public EnemyGridNode getEnemyGridGoalNode() {
+		return enemyGridGoalNode;
+	}
+	public EnemyGridNode getEnemyGridStartNode() {
+		return enemyGridStartNode;
 	}
 
-	private Array<Node> getPath(final Vector2 startPosition, final Vector2 targetPosition, float maxDiff) {
-		Array<Node> openList = new Array<>();
-		Array<Node> closedList = new Array<>();
-		Array<Node> tempweg = new Array<>();
-		Node aktuellerNode;
 
-		// was the way found
-		boolean foundWay = false;
+	private Vector2 normalizeVectorForGrid(final Vector2 vector) {
+		final Vector2 newVector = vector.cpy();
+		if (vector.x % NODE_DISTANCE < (NODE_DISTANCE / 2f))
+			newVector.x = vector.x - vector.x % NODE_DISTANCE;
+		else
+			newVector.x = vector.x + (NODE_DISTANCE - vector.x % NODE_DISTANCE);
+		if (vector.y % NODE_DISTANCE < (NODE_DISTANCE / 2f))
+			newVector.y = vector.y - vector.y % NODE_DISTANCE;
+		else
+			newVector.y = vector.y + (NODE_DISTANCE - vector.y % NODE_DISTANCE);
+		return newVector;
+	}
 
-		// Which node is the next
-		startPosition.set(normalizeVectorForGrid(startPosition));
-		targetPosition.set(normalizeVectorForGrid(targetPosition));
+	/**
+	 * TODO Add description
+	 *
+	 * Search for a path from a given start position to the given target position using the A* algorithm and return this path.
+	 * If there is no path found then the method will throw an exception.
+	 *
+	 * @param startPosition The position from which the path should start
+	 * @param targetPosition The position to where the path should end
+	 * @param maxDiff The maximum value of random additional difficulty that is added on the nodes of the found path so that other paths will be calculated on reruns of this method
+	 * @return The "shortest" (when taking into account the current additional difficulty on the nodes) path between the given start and target position
+	 */
+	private Array<EnemyGridNode> getPath(final Vector2 startPosition, final Vector2 targetPosition, float maxDiff) {
 
-		// Which neighbor is the best
-		Node startNode = getNodesAtPos((int) startPosition.x, (int) startPosition.y);
+		// Find the nearest nodes for the given start and target positions (throw exception if no node was found)
+		final EnemyGridNode startNode = getNearestNodeAtPos(startPosition);
+
 		if (startNode == null) {
 			Gdx.app.error("map:getPath", MainGame.getCurrentTimeStampLogString() + "Start node is null");
 			throw new RuntimeException("Start node is null");
 		}
+		enemyGridStartNode = startNode;
 
-		if (getNodesAtPos((int) targetPosition.x, (int) targetPosition.y) == null) {
+		final EnemyGridNode goalNode = getNearestNodeAtPos(targetPosition);
+		if (goalNode == null) {
 			Gdx.app.error("map:getPath", MainGame.getCurrentTimeStampLogString() + "End node is null");
 			throw new RuntimeException("End node is null");
 		}
+		enemyGridGoalNode = goalNode;
 
-		openList.add(startNode);
-		aktuellerNode = startNode;
+		Gdx.app.debug("map:getPath", MainGame.getCurrentTimeStampLogString() + "Start node: " + startNode);
+		Gdx.app.debug("map:getPath", MainGame.getCurrentTimeStampLogString() + "Goal node: " + goalNode);
 
-		float lowCost;
 
-		while (!foundWay) {
-			lowCost = 999999999;
+		final float minAdditionalDifficulty = 20f;
+		final float maxAdditionalDifficulty = minAdditionalDifficulty + (maxDiff * 100);
+		final long seed = 42;
+		Random generator = new Random(seed);
+		float randomAdditionalDifficulty;
 
-			for (int i = 0; i < openList.size; i++) {
-				final Node node = openList.get(i);
-				if (lowCost > node.getCost()) {
-					aktuellerNode = node;
-					lowCost = node.getCost();
-				}
-			}
+		for (final EnemyGridNode node : nodesList) {
+			randomAdditionalDifficulty = PathFinder.getNextRandomAdditionalDifficulty(generator, minAdditionalDifficulty, maxAdditionalDifficulty);
+			node.resetTemporaryAdditionalCost();
+			node.setTemporaryAdditionalCost(randomAdditionalDifficulty);
+		}
 
-			if (openList.indexOf(aktuellerNode, true) < 0) {
-				Gdx.app.error("map:getPath", MainGame.getCurrentTimeStampLogString() + "Current node can not be found in openList (MainMap)\n"
-						+ "openList size: " + openList.size + "\n" + "current node position: " + aktuellerNode.getPosition() + "\n"
-						+ "tempweg size: " + openList.size);
-				throw new RuntimeException("Current node can not be found in openList");
-				// return tempweg;
-			}
+		Array<EnemyGridNode> path = PathFinder.findPathAStar(nodesList, startNode, goalNode);
 
-			if (openList.indexOf(aktuellerNode, true) != -1)
-				openList.removeIndex(openList.indexOf(aktuellerNode, true));
-
-			closedList.add(aktuellerNode);
-
-			for (int i = 0; i < aktuellerNode.getNeighbors().size; i++) {
-				final Node node = aktuellerNode.getNeighbors().get(i);
-				if (closedList.indexOf(node, true) == -1) {
-					node.setG(aktuellerNode.getG() + 1);
-					node.setParent(aktuellerNode);
-					if (openList.indexOf(node, true) == -1) {
-						node.setCost(node.getCost());
-						openList.add(node);
-					}
-				}
-			}
-
-			if (aktuellerNode.getPosition().equals(targetPosition)) {
-				foundWay = true;
+		if (path != null) {
+			for (final EnemyGridNode node : path) {
+				randomAdditionalDifficulty = PathFinder.getNextRandomAdditionalDifficulty(generator, minAdditionalDifficulty, maxAdditionalDifficulty * 10);
+				node.increasePermanentAdditionalCost(randomAdditionalDifficulty);
 			}
 		}
 
-		Node node;
-		while (aktuellerNode != null) {
-			// Add for every way that is used an additional difficulty
-			node = getNodesAtPos((int) aktuellerNode.getPosition().x, (int) aktuellerNode.getPosition().y);
-			if (node != null) {
-				node.increaseAdditionalDifficulty(MathUtils.random(0f, maxDiff));
-				// Add node to the way
-				tempweg.add(aktuellerNode);
-			}
-			// Do this until there is no "parent" any more
-			aktuellerNode = aktuellerNode.getParent();
-		}
-		return tempweg;
+		return path;
 	}
 
-	public Array<Node> getRandomPath() {
+	public Array<EnemyGridNode> getRandomPath() {
 		return new Array<>(paths.random());
 	}
 	
-	public Array<Node> getRandomMotorPath() {
+	public Array<EnemyGridNode> getRandomMotorPath() {
 		return new Array<>(motorPaths.random());
 	}
 

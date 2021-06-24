@@ -12,6 +12,6 @@ public class PathFinderNodeComparator implements Comparator<PathFinderNode> {
     //  1 - if x value is greater
     // -1 - if y value is lesser
 
-    return Float.compare(y.getF(), x.getF());
+    return Float.compare(x.getF(), y.getF());
   }
 }

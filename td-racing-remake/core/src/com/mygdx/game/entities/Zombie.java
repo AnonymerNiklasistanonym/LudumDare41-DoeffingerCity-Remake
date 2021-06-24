@@ -19,6 +19,7 @@ import com.mygdx.game.MainGame;
 import com.mygdx.game.gamestate.states.PlayState;
 import com.mygdx.game.world.Map;
 import com.mygdx.game.world.Node;
+import com.mygdx.game.world.pathfinder.EnemyGridNode;
 
 public abstract class Zombie extends Entity {
 
@@ -45,7 +46,7 @@ public abstract class Zombie extends Entity {
 	private float timesincedeepsearch = 0;
 	private final Body body;
 	protected Map map;
-	protected Array<Node> path;
+	protected Array<EnemyGridNode> path;
 	private final float distancetonode;
 	private float wasHitTime;
 	private final Vector2 hitRandom = new Vector2();
@@ -100,6 +101,7 @@ public abstract class Zombie extends Entity {
 		distancetonode = sprite.getWidth();
 
 		path = findPath();
+		path.reverse();
 		if (path.size < 1) {
 			Gdx.app.error("enemy:findWay", MainGame.getCurrentTimeStampLogString() + "the zombie \"" + name + "\" did not find a path");
 		}
@@ -167,11 +169,11 @@ public abstract class Zombie extends Entity {
 		}
 	}
 
-	protected Array<Node> findPath() {
+	protected Array<EnemyGridNode> findPath() {
 		return map.getRandomPath();
 	}
 
-	public Array<Node> getPath() {
+	public Array<EnemyGridNode> getPath() {
 		return path;
 	}
 
@@ -300,18 +302,18 @@ public abstract class Zombie extends Entity {
 		sprite.setRotation(MathUtils.radDeg * body.getAngle());
 	}
 
-	private boolean isCloseEnough(Node n, float distance) {
+	private boolean isCloseEnough(EnemyGridNode n, float distance) {
 		return getDistanceToTarget(n) < distance;
 	}
 
-	private float getDistanceToTarget(Node n) {
+	private float getDistanceToTarget(EnemyGridNode n) {
 		return body.getPosition().dst(n.getPosition().x * PlayState.PIXEL_TO_METER,
 				n.getPosition().y * PlayState.PIXEL_TO_METER);
 	}
 
 	private void doDeepSearch(float factor) {
-		Node skipnode = null;
-		for (Node n : path) {
+		EnemyGridNode skipnode = null;
+		for (final EnemyGridNode n : path) {
 			if (isCloseEnough(n, distancetonode * factor)) {
 				if(path.indexOf(n, true)> path.size/2)
 				if (skipnode == null)

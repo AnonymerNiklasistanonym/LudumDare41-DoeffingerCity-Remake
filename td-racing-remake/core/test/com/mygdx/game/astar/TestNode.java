@@ -5,14 +5,15 @@ import com.mygdx.game.world.pathfinder.PathFinderNode;
 
 public class TestNode extends PathFinderNode {
 
-  public TestNode(final float distanceToGoalNode) {
-    super(distanceToGoalNode);
-  }
-
-  private Array<TestNode> successors = new Array<>();
-  private Array<Float> successorDistances = new Array<>();
+  private final String id;
+  private final Array<TestNode> successors = new Array<>();
+  private final Array<Float> successorDistances = new Array<>();
   private float g = Float.POSITIVE_INFINITY;
   private TestNode predecessor;
+  public TestNode(final String id, final float distanceToGoalNode) {
+    super(distanceToGoalNode);
+    this.id = id;
+  }
 
   public void addSuccessor(final TestNode successor, final float distanceToSuccessor) {
     successors.add(successor);
@@ -20,7 +21,7 @@ public class TestNode extends PathFinderNode {
   }
 
   @Override
-  public <T extends PathFinderNode> float getDistanceToNeighbor(T neighbor) {
+  public <T extends PathFinderNode> float getDistanceToSuccessor(T neighbor) {
     int indexOfSuccessor = successors.indexOf((TestNode) neighbor, true);
     if (indexOfSuccessor > -1) {
       return successorDistances.get(indexOfSuccessor);
@@ -55,13 +56,22 @@ public class TestNode extends PathFinderNode {
   }
 
   @Override
+  public float getH() {
+    return distanceToGoalNode;
+  }
+
+  @Override
   public String toString() {
     return "TestNode{" +
-        "distanceToGoalNode=" + distanceToGoalNode +
+        "id=" + id +
+        ", distanceToGoalNode=" + distanceToGoalNode +
         ", g=" + g +
         ", f=" + getF() +
         ", predecessor=" + predecessor +
         '}';
   }
 
+  public String getId() {
+    return id;
+  }
 }
