@@ -55,7 +55,7 @@ import com.mygdx.game.entities.towers.FlameTower;
 import com.mygdx.game.entities.towers.LaserTower;
 import com.mygdx.game.entities.towers.CannonTower;
 import com.mygdx.game.entities.towers.SniperTower;
-import com.mygdx.game.world.Node;
+import com.mygdx.game.world.pathfinder.EnemyGridNode;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -190,6 +190,10 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	private boolean levelLoaded = false;
 	private boolean firstWave = false;
+
+	float mapEnemyGridNodeAverageH;
+	float mapEnemyGridNodeMinimumH;
+	float mapEnemyGridNodeMaximumH;
 
 	public PlayState(final GameStateManager gameStateManager, final int levelNumber) {
 		super(gameStateManager, STATE_NAME);
@@ -345,11 +349,26 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		// Setup the finish line
 		finishline = new FinishLine(world, spriteFinishLine, currentLevelInfo.finishLinePosition, currentLevelInfo.finishLineAngle);
 
-		// TODO Check if the level can be updated via a method so that a map object does not need to be reassigned
+		// Setup the map
 		if (map != null) {
 			map.removeFromWorld();
 		}
 		map = new Map(currentLevelInfo, world, finishline.getBody(), spritePitStop.getHeight());
+		// Calculate the average, maximum and minimum H (distance to map goal) value for debugging purposes
+		mapEnemyGridNodeAverageH = 0;
+		mapEnemyGridNodeMinimumH = Float.POSITIVE_INFINITY;
+		mapEnemyGridNodeMaximumH = Float.NEGATIVE_INFINITY;
+		float nodeH;
+		for (final EnemyGridNode node : map.getNodesList()) {
+			nodeH = node.getH();
+			mapEnemyGridNodeAverageH += nodeH;
+			if (nodeH > mapEnemyGridNodeMaximumH) {
+				mapEnemyGridNodeMaximumH = nodeH;
+			} else if (nodeH < mapEnemyGridNodeMinimumH) {
+				mapEnemyGridNodeMinimumH = nodeH;
+			}
+		}
+		mapEnemyGridNodeAverageH /= map.getNodesList().size;
 
 		// unlock/lock the right tower
 		for (int i = 0; i < currentLevelInfo.towerUnlocked.size(); i++) {
@@ -978,7 +997,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 					if (debugCollision)
 						renderDebugCollision(spriteBatch);
 					if (debugDistance)
-						renderDebugEntfernung(spriteBatch);
+						renderDebugEnemyGridNodeDistanceToMapGoal(spriteBatch);
 					if (debugWay)
 						renderDebugWay(spriteBatch);
 
@@ -1030,55 +1049,71 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	private void renderDebugWay(SpriteBatch spriteBatch) {
 		MainGame.font.getData().setScale(0.06f);
+		Vector2 currentNodePos;
 		for (final Zombie e : zombies) {
 			if (e.isSpawned() && !e.isDead()) {
 				MainGame.font.setColor(e.getColor());
-				for (final Node node : e.getPath())
-					MainGame.font.draw(spriteBatch, "x", node.getPosition().x * PlayState.PIXEL_TO_METER,
-							node.getPosition().y * PlayState.PIXEL_TO_METER);
+				for (final EnemyGridNode node : e.getPath()) {
+					currentNodePos = node.getPosition();
+					MainGame.font.draw(spriteBatch, "x", currentNodePos.x * PlayState.PIXEL_TO_METER,
+							currentNodePos.y * PlayState.PIXEL_TO_METER);
+				}
 			}
 		}
 	}
 
-	private void renderDebugEntfernung(SpriteBatch spriteBatch) {
+	private void renderDebugEnemyGridNodeDistanceToMapGoal(SpriteBatch spriteBatch) {
+		// Draw all enemy grid nodes
+		float nodeH;
+		Vector2 currentPosition;
 		// Reduce font size for readability
 		MainGame.font.getData().setScale(0.02f);
-		for (final Node node : map.getNodesList()) {
+		for (final EnemyGridNode node : map.getNodesList()) {
 			// Set color depending on the distance to the map goal
-			if (node.getH() <= 0) // black
+			nodeH = node.getH();
+			if (nodeH <= mapEnemyGridNodeMinimumH) // black
 				MainGame.font.setColor(0, 0, 0, 0.75f);
-			else if (node.getH() <= 10) // blue
+			else if (nodeH <= mapEnemyGridNodeAverageH * 1/4) // blue
 				MainGame.font.setColor(0, 0, 1f, 0.75f);
-			else if (node.getH() <= 20) // teal
+			else if (nodeH <= mapEnemyGridNodeAverageH * 2/4) // teal
 				MainGame.font.setColor(0, 1, 0.5f, 0.75f);
-			else if (node.getH() <= 30) // green
+			else if (nodeH <= mapEnemyGridNodeAverageH * 3/4) // green
 				MainGame.font.setColor(0.25f, 1, 0, 0.75f);
-			else if (node.getH() <= 40) // yellow
+			else if (nodeH <= mapEnemyGridNodeAverageH) // yellow
 				MainGame.font.setColor(1, 0.8f, 0, 0.75f);
-			else if (node.getH() <= 50) // orange
+			else if (nodeH <= mapEnemyGridNodeAverageH * 5/4) // orange
 				MainGame.font.setColor(1, 0.5f, 0, 0.75f);
-			else if (node.getH() <= 70) // dark red
+			else if (nodeH <= mapEnemyGridNodeAverageH * 6/4) // dark red
 				MainGame.font.setColor(1, 0.25f, 0.1f, 0.75f);
-			else if (node.getH() <= 100) // pink
+			else if (nodeH <= mapEnemyGridNodeAverageH * 7/4) // pink
 				MainGame.font.setColor(1, 0, 0.5f, 0.57f);
-			else if (node.getH() <= 200) // purple
+			else if (nodeH <= mapEnemyGridNodeAverageH * 2) // purple
 				MainGame.font.setColor(0.6f, 0.1f, 1, 0.75f);
-			else {
-				// TODO No node should have this color?
+			else if (nodeH <= mapEnemyGridNodeMaximumH) {
 				MainGame.font.setColor(1, 0, 0, 0.75f);
 			}
+			currentPosition = node.getPosition();
+			MainGame.font.draw(spriteBatch, "o", currentPosition.x * PlayState.PIXEL_TO_METER,
+					currentPosition.y * PlayState.PIXEL_TO_METER);
 
-			MainGame.font.draw(spriteBatch, node.getH() + "", node.getPosition().x * PlayState.PIXEL_TO_METER,
-					node.getPosition().y * PlayState.PIXEL_TO_METER);
 		}
+		// Draw map start and goal position
+		MainGame.font.getData().setScale(0.2f);
+		MainGame.font.setColor(0, 0, 0, 1);
+		MainGame.font.draw(spriteBatch, "START", map.getSpawnPosition().x * PlayState.PIXEL_TO_METER,
+				map.getSpawnPosition().y * PlayState.PIXEL_TO_METER);
+		MainGame.font.draw(spriteBatch, "GOAL", map.getTargetPosition().x,
+				map.getTargetPosition().y);
 	}
 
 	private void renderDebugCollision(SpriteBatch spriteBatch) {
 		// What does this mean?
 		MainGame.font.getData().setScale(0.05f);
-		for (final Node node : map.getNodesList()) {
+		Vector2 currentPosition;
+		for (final EnemyGridNode node : map.getNodesList()) {
 			MainGame.font.setColor(1, 0, 0, 0.5f);
-			MainGame.font.draw(spriteBatch, "o", node.getPosition().x * PlayState.PIXEL_TO_METER, node.getPosition().y * PlayState.PIXEL_TO_METER);
+			currentPosition = node.getPosition();
+			MainGame.font.draw(spriteBatch, "o", currentPosition.x * PlayState.PIXEL_TO_METER, currentPosition.y * PlayState.PIXEL_TO_METER);
 		}
 	}
 

@@ -12,7 +12,7 @@ import com.mygdx.game.entities.ZombieCallbackInterface;
 import com.mygdx.game.entities.ZombieOptions;
 import com.mygdx.game.gamestate.states.PlayState;
 import com.mygdx.game.world.Map;
-import com.mygdx.game.world.Node;
+import com.mygdx.game.world.pathfinder.EnemyGridNode;
 
 public class ZombieBicycle extends Zombie {
 
@@ -62,7 +62,7 @@ public class ZombieBicycle extends Zombie {
   }
 
   @Override
-  protected Array<Node> findPath() {
+  protected Array<EnemyGridNode> findPath() {
     return map.getRandomMotorPath();
   }
 }
