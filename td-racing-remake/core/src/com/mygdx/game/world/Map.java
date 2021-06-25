@@ -73,18 +73,17 @@ public class Map extends Entity {
 		spawnHeight = currentLevel.pitStopPosition.y * PlayState.PIXEL_TO_METER + sizePitStop;
 
 		// Create x calculated ways
-		final PolygonShape ps = (PolygonShape) mapGoal.getFixtureList().first().getShape();
-		final Vector2 mapGoalPosition = new Vector2();
-		ps.getVertex(0, mapGoalPosition);
+		//final PolygonShape ps = (PolygonShape) mapGoal.getFixtureList().first().getShape();
+		//final Vector2 mapGoalPosition = new Vector2();
+		//ps.getVertex(0, mapGoalPosition);
 
-		for (int i = 0; i < 2; i++) {
-			motorPaths.add(getPath(currentLevel.enemySpawnPosition, targetPosition.cpy().scl(PlayState.METER_TO_PIXEL), 0));
+		// Precaculate zombie paths
+		for (int i = 0; i < 10; i++) {
+			motorPaths.add(getPath(currentLevel.enemySpawnPosition, targetPosition.cpy().scl(PlayState.METER_TO_PIXEL), 100));
 		}
-		
 		for (int i = 0; i < 200; i++) {
-			paths.add(getPath(currentLevel.enemySpawnPosition, targetPosition.cpy().scl(PlayState.METER_TO_PIXEL), 3));
+			paths.add(getPath(currentLevel.enemySpawnPosition, targetPosition.cpy().scl(PlayState.METER_TO_PIXEL), 200));
 		}
-
 	}
 
 	public Array<EnemyGridNode> getNodesList() {
@@ -287,10 +286,10 @@ public class Map extends Entity {
 	 *
 	 * @param startPosition The position from which the path should start
 	 * @param targetPosition The position to where the path should end
-	 * @param maxDiff The maximum value of random additional difficulty that is added on the nodes of the found path so that other paths will be calculated on reruns of this method
+	 * @param maxRandomAdditionalDifficulty The maximum value of random additional difficulty that is added on the nodes of the found path so that other paths will be calculated on reruns of this method
 	 * @return The "shortest" (when taking into account the current additional difficulty on the nodes) path between the given start and target position
 	 */
-	private Array<EnemyGridNode> getPath(final Vector2 startPosition, final Vector2 targetPosition, float maxDiff) {
+	private Array<EnemyGridNode> getPath(final Vector2 startPosition, final Vector2 targetPosition, float maxRandomAdditionalDifficulty) {
 
 		// Find the nearest nodes for the given start and target positions (throw exception if no node was found)
 		final EnemyGridNode startNode = getNearestNodeAtPos(startPosition);
@@ -312,24 +311,30 @@ public class Map extends Entity {
 		Gdx.app.debug("map:getPath", MainGame.getCurrentTimeStampLogString() + "Goal node: " + goalNode);
 
 
+
 		final float minAdditionalDifficulty = 20f;
-		final float maxAdditionalDifficulty = minAdditionalDifficulty + (maxDiff * 100);
-		final long seed = 42;
-		Random generator = new Random(seed);
+		final float maxAdditionalDifficulty = minAdditionalDifficulty + (maxRandomAdditionalDifficulty * 10);
+		// final long seed = 42;
+		Random generator = new Random();
 		float randomAdditionalDifficulty;
 
+		// Add for each path to find a random additional difficulty to each path so that each path will be different and does not just go straight to the map goal
 		for (final EnemyGridNode node : nodesList) {
 			randomAdditionalDifficulty = PathFinder.getNextRandomAdditionalDifficulty(generator, minAdditionalDifficulty, maxAdditionalDifficulty);
 			node.resetTemporaryAdditionalCost();
-			node.setTemporaryAdditionalCost(randomAdditionalDifficulty);
+			// If a node has less successors increase the additional difficulty
+			node.setTemporaryAdditionalCost(randomAdditionalDifficulty * 8 / node.getSuccessors().size);
 		}
 
+		// Try to find the "shortest" path between the start and goal note in respect of the permanent and temporary additional difficulty
 		Array<EnemyGridNode> path = PathFinder.findPathAStar(nodesList, startNode, goalNode);
 
+		// If a path was found increase the permanent additional cost for each node in this path
 		if (path != null) {
 			for (final EnemyGridNode node : path) {
 				randomAdditionalDifficulty = PathFinder.getNextRandomAdditionalDifficulty(generator, minAdditionalDifficulty, maxAdditionalDifficulty * 10);
-				node.increasePermanentAdditionalCost(randomAdditionalDifficulty);
+				// If a node has less successors increase the additional difficulty
+				node.increasePermanentAdditionalCost(randomAdditionalDifficulty * 8 / node.getSuccessors().size);
 			}
 		}
 
