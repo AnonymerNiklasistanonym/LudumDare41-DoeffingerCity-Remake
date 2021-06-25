@@ -1,0 +1,162 @@
+canvas {
+	cursor: default;
+	outline: none;
+}
+
+body {
+	background-color: #222222;
+	font-family: sans-serif;
+	line-height: 1.25em;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/**
+ * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/kbd
+ */
+kbd:not(controller) {
+	background-color: #eee;
+	border-radius: 3px;
+	border: 1px solid #b4b4b4;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, .2), 0 2px 0 0 rgba(255, 255, 255, .7) inset;
+	color: #333;
+	display: inline-block;
+	font-weight: 700;
+	line-height: 1;
+	padding: 2px 4px;
+	white-space: nowrap;
+	font-size: 1rem;
+}
+
+kbd.controller.button-a,
+kbd.controller.button-b,
+kbd.controller.button-x,
+kbd.controller.button-y {
+	background-color: #eee;
+	border-radius: 50px;
+	border: 1px solid #b4b4b4;
+	line-height: 25px;
+	width: 20px;
+	height: 25px;
+	text-align: center;
+	font-size: 1.3rem;
+	color: black;
+	text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, .2), 0 2px 0 0 rgba(255, 255, 255, .7) inset;
+}
+
+kbd.controller.button-a {
+	color: lime;
+}
+
+kbd.controller.button-b {
+	color: red;
+}
+
+kbd.controller.button-x {
+	color: rgb(0, 119, 255);
+}
+
+kbd.controller.button-y {
+	color: rgb(255, 230, 0);
+}
+
+kbd.button-start,
+kbd.button-back {
+	position: relative;
+}
+
+kbd.button-start {
+	padding-left: 1em;
+}
+
+kbd.button-back {
+	padding-right: 1em;
+}
+
+kbd.button-start:before {
+	position: absolute;
+	content: "";
+	border-left: 0.5em solid rgb(0, 0, 0);
+	border-top: 0.5em solid transparent;
+	border-bottom: 0.5em solid transparent;
+	top: 0;
+	left: 0;
+	margin-left: 0.3em;
+	margin-top: 0.15em;
+}
+
+kbd.button-back:before {
+	position: absolute;
+	content: "";
+	border-right: 0.5em solid rgb(0, 0, 0);
+	border-top: 0.5em solid transparent;
+	border-bottom: 0.5em solid transparent;
+	top: 0;
+	right: 0;
+	margin-right: 0.3em;
+	margin-top: 0.15em;
+}
+
+div.info table {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+div.info th,
+div.info td {
+	text-align: left;
+	padding: 8px;
+}
+
+div.info tr:nth-child(even) {
+	background-color: #f2f2f2
+}
+
+div.info th {
+	background-color: #8E8E8E;
+	color: white;
+}
+
+div.info {
+	max-width: 800px;
+	margin: auto;
+}
+
+div.info button.collapsible {
+	background-color: #777;
+	color: white;
+	cursor: pointer;
+	padding: 18px;
+	width: 100%;
+	border: none;
+	text-align: left;
+	outline: none;
+	font-size: 15px;
+}
+
+div.info button.active,
+div.info button.collapsible:hover {
+	background-color: #555;
+}
+
+div.info button.active::before {
+	content: "Hide ";
+}
+
+div.info button:not(.active)::before {
+	content: "Show ";
+}
+
+div.info div.content {
+	padding: 0;
+	margin: 0;
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height 0.2s ease-out;
+	background-color: #f1f1f1;
+}
+
+div.info div.content div.content-padding {
+	padding: 2rem;
+}

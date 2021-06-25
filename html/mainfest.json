@@ -1,0 +1,14 @@
+{
+	"name": "Tracks 'n Towers",
+	"short_name": "TnT",
+	"display": "standalone",
+	"background_color": "#fff",
+	"description": "A Tower Defense/Racing game",
+	"icons": [
+		{
+			"src": "./favicon_192.png",
+			"sizes": "192x192",
+			"type": "image/png"
+		}
+	]
+}
