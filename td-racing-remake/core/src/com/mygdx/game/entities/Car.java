@@ -10,7 +10,6 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.utils.Disposable;
 import com.mygdx.game.MainGame;
 import com.mygdx.game.gamestate.states.PlayState;
 
@@ -39,7 +38,7 @@ public class Car extends Entity {
 		fdef.shape = carBox;
 		fdef.density = 1f;
 		fdef.friction = 1f;
-		fdef.filter.categoryBits = PlayState.ENEMY_BOX;
+		fdef.filter.categoryBits = PlayState.CAR_BOX;
 		body.createFixture(fdef);
 		body.setUserData(this);
 		body.setAngularDamping(2);

@@ -22,7 +22,7 @@ public class ZombieBicycle extends Zombie {
   private static final float DAMAGE = 2;
   private static final float HEALTH = 15;
   private static final float MONEY = 2;
-  private static final float SPEED = 15;
+  private static final float SPEED = 10;
   private static final float SCORE = 20;
   private static final String ENEMY_NAME = "Bicycle";
 
@@ -45,14 +45,13 @@ public class ZombieBicycle extends Zombie {
 
   @Override
   protected FixtureDef createFixture() {
-    final PolygonShape zBox = new PolygonShape();
-    zBox.setAsBox(sprite.getWidth() * PlayState.PIXEL_TO_METER * 0.4f,
-        sprite.getHeight() * PlayState.PIXEL_TO_METER * 0.4f);
+    final PolygonShape enemyShape = new PolygonShape();
+    enemyShape.setAsBox(sprite.getWidth() * 0.4f, sprite.getHeight() * 0.4f);
     final FixtureDef fdef = new FixtureDef();
-    fdef.shape = zBox;
+    fdef.shape = enemyShape;
+    fdef.friction = 0;
     fdef.density = zombieOptions.density;
-    // fdef.isSensor=true;
-    fdef.filter.categoryBits = PlayState.PLAYER_BOX;
+    fdef.filter.categoryBits = PlayState.ZOMBIE_BICYCLE_BOX;
     return fdef;
   }
 

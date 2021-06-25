@@ -93,8 +93,8 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	public static final int foregroundFps = 60;
 
 	// Identify collision entities
-	public static final short PLAYER_BOX = 0x1; // 0001
-	public static final short ENEMY_BOX = 0x1 << 1; // 0010 or 0x2 in hex
+	public static final short ZOMBIE_BICYCLE_BOX = 0x1; // 0001
+	public static final short CAR_BOX = 0x1 << 1; // 0010 or 0x2 in hex
 	public static final float TIME_STEP = (float) 1 / foregroundFps; // time for physics step
 	public static final float PIXEL_TO_METER = 0.05f;
 	public static final float METER_TO_PIXEL = 20f;
