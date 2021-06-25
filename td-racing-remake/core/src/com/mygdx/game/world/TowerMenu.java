@@ -1,5 +1,6 @@
 package com.mygdx.game.world;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -9,6 +10,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
+import com.mygdx.game.MainGame;
 import com.mygdx.game.entities.Tower;
 import com.mygdx.game.entities.Zombie;
 import com.mygdx.game.gamestate.states.PlayState;
@@ -16,13 +18,9 @@ import com.mygdx.game.entities.towers.FlameTower;
 import com.mygdx.game.entities.towers.LaserTower;
 import com.mygdx.game.entities.towers.CannonTower;
 import com.mygdx.game.entities.towers.SniperTower;
+import java.util.Arrays;
 
 public class TowerMenu implements Disposable {
-
-	public static Texture cannonButton;
-	public static Texture laserButton;
-	public static Texture flameButton;
-	public static Texture sniperButton;
 
 	private static final float SCALE_FACTOR = 1;
 
@@ -36,17 +34,24 @@ public class TowerMenu implements Disposable {
 	private boolean[] towerUnlocked;
 	private boolean[] towerSelected;
 
-	public TowerMenu(final World world, final ScoreBoard scoreboard) {
+	public TowerMenu(final AssetManager assetManager, final String textureTowerCannonButton,
+			final String textureTowerLaserButton, final String textureTowerFlameButton,
+			final String textureTowerSniperButton, final World world, final ScoreBoard scoreboard) {
 		this.world = world;
 		this.scoreboard = scoreboard;
+		Texture cannonButton = assetManager.get(textureTowerCannonButton);
+		Texture laserButton = assetManager.get(textureTowerLaserButton);
+		Texture flameButton = assetManager.get(textureTowerFlameButton);
+		Texture sniperButton = assetManager.get(textureTowerSniperButton);
 		this.sprites = new Sprite[] { new Sprite(cannonButton), new Sprite(laserButton), new Sprite(flameButton),
 				new Sprite(sniperButton) };
 		this.towerSelected = new boolean[sprites.length];
 		this.towerUnlocked = new boolean[sprites.length];
 
+		Vector2 spriteSize = new Vector2();
 		for (final Sprite sprite : sprites) {
-			sprite.setSize(sprite.getWidth() * PlayState.PIXEL_TO_METER * SCALE_FACTOR,
-					sprite.getHeight() * PlayState.PIXEL_TO_METER * SCALE_FACTOR);
+			spriteSize.set(sprite.getWidth(), sprite.getHeight()).scl(PlayState.PIXEL_TO_METER).scl(SCALE_FACTOR);
+			sprite.setSize(spriteSize.x, spriteSize.y);
 			sprite.setOriginCenter();
 		}
 
@@ -64,17 +69,14 @@ public class TowerMenu implements Disposable {
 			sprite.draw(batch);
 	}
 
-	public boolean selectTower(int i, final Vector3 mousePos, final Array<Zombie> enemies,
+	public void selectTower(int i, final Vector3 mousePos, final Array<Zombie> enemies,
 			final AssetManager assetManager) {
-		boolean unselect = false;
-		if (!towerUnlocked[i])
-			unselect = true;
+		boolean unselect = !towerUnlocked[i];
 
 		if (towerSelected[i])
 			unselect = true;
 
-		for (int j = 0; j < towerSelected.length; j++)
-			towerSelected[j] = false;
+		Arrays.fill(towerSelected, false);
 
 		if (!unselect) {
 			if (canAfford(i))
@@ -84,7 +86,7 @@ public class TowerMenu implements Disposable {
 				world.destroyBody(buildingtower.body);
 			if (buildingtower != null)
 				buildingtower = null;
-			return false;
+			return;
 		}
 
 		if (buildingtower != null && buildingtower.body != null) {
@@ -96,24 +98,23 @@ public class TowerMenu implements Disposable {
 		if (towerSelected[i] && towerUnlocked[i]) {
 			buildingtower = getTower(i, mousePos, enemies, assetManager);
 			buildingtower.activateRange(true);
-			return true;
 		}
-		return false;
 	}
 
 	public Tower getTower(final int tower, final Vector3 mousePos, final Array<Zombie> enemies,
 			final AssetManager assetManager) {
+		final Vector2 mousePos2 = new Vector2(mousePos.x, mousePos.y);
 		switch (tower) {
 		case 0:
-			return new CannonTower(new Vector2(mousePos.x, mousePos.y), enemies, world, assetManager);
+			return new CannonTower(mousePos2.cpy(), enemies, world, assetManager);
 		case 1:
-			return new LaserTower(new Vector2(mousePos.x, mousePos.y), enemies, world, assetManager);
+			return new LaserTower(mousePos2.cpy(), enemies, world, assetManager);
 		case 2:
-			return new FlameTower(new Vector2(mousePos.x, mousePos.y), enemies, world, assetManager);
+			return new FlameTower(mousePos2.cpy(), enemies, world, assetManager);
 		case 3:
-			return new SniperTower(new Vector2(mousePos.x, mousePos.y), enemies, world, assetManager);
+			return new SniperTower(mousePos2.cpy(), enemies, world, assetManager);
 		}
-		System.out.println("ERROR: not found correct Tower at getTower");
+		Gdx.app.error("towerMenu:getTower", MainGame.getCurrentTimeStampLogString() + "not found correct Tower at id=" + tower);
 		return null;
 	}
 

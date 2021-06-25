@@ -99,6 +99,8 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	public static final float PIXEL_TO_METER = 0.05f;
 	public static final float METER_TO_PIXEL = 20f;
 
+	private static final float SMOKE_VISIBILITY_REDUCTION = 0.01f;
+
 	private Music musicBackground;
 	private Music musicCar;
 	private Sound splatt;
@@ -786,34 +788,36 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		// check if the current wave is dead and a new one should start
 		updateWaves();
 
-		updateSmoke();
+		updateSmoke(deltaTime);
 
 		// update box2D physics
 		updatePhysics(deltaTime);
 	}
 
-	private void updateSmoke() {
+	private void updateSmoke(float deltaTime) {
 		if (pausedByUser || scoreBoard.getHealth() == 100)
 			return;
 		float smokeseconds = 15 / (100f - scoreBoard.getHealth());
-		timesincesmoke = timesincesmoke + Gdx.graphics.getDeltaTime();
+		timesincesmoke += deltaTime;
 		while (timesincesmoke > smokeseconds) {
 			spawnSmoke();
-			timesincesmoke = timesincesmoke - smokeseconds;
+			timesincesmoke -= smokeseconds;
 		}
 		Array<Sprite> deadsmoke = new Array<Sprite>();
 		for (Sprite s : trailerSmokes) {
 			s.setPosition(s.getX() + MathUtils.random(0.05f), s.getY() + 0.05f);
-			if (s.getWidth() > spriteSmoke.getWidth())
-				s.setColor(1, 1, 1, s.getColor().a - 0.01f);
+			if (s.getWidth() > spriteSmoke.getWidth()) {
+				s.setColor(1, 1, 1, s.getColor().a - SMOKE_VISIBILITY_REDUCTION);
+			}
 			s.setSize(s.getWidth() + 0.02f, s.getHeight() + 0.02f);
 			s.setRotation(s.getRotation() + MathUtils.random(-2.5f, -0.5f));
-			if (s.getColor().a < 0.1f)
+			// Remove smoke that isn't visible any more
+			if (s.getColor().a < SMOKE_VISIBILITY_REDUCTION * 2) {
 				deadsmoke.add(s);
-
+			}
 		}
-		for (Sprite s : deadsmoke) {
-			trailerSmokes.removeValue(s, true);
+		for (Sprite smoke : deadsmoke) {
+			trailerSmokes.removeValue(smoke, true);
 		}
 	}
 
@@ -821,8 +825,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		Sprite s = new Sprite(spriteSmoke);
 		s.setRotation(MathUtils.random(360));
 		s.setSize(s.getWidth() / 8, s.getHeight() / 8);
-		s.setPosition((map.getHealthBarPos().x + 50) * PIXEL_TO_METER + MathUtils.random(-1, 1),
-				(map.getHealthBarPos().y) * PIXEL_TO_METER - 2f);
+		s.setPosition(healthBarPos.x + MathUtils.random(-1, 1) + (50 * PIXEL_TO_METER), healthBarPos.y - 2f);
 		trailerSmokes.add(s);
 	}
 
@@ -849,13 +852,6 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 				spritePitStop = createScaledSprite(assetManager, ASSET_ID_PIT_STOP_TEXTURE);
 				spriteSmoke = createScaledSprite(assetManager, ASSET_ID_SMOKE_TEXTURE);
 
-				// TODO Remove static textures and implement it like in the other classes
-				// set textures (tower buttons)
-				TowerMenu.cannonButton = assetManager.get(ASSET_ID_TOWER_CANNON_TEXTURE);
-				TowerMenu.laserButton = assetManager.get(ASSET_ID_TOWER_LASER_TEXTURE);
-				TowerMenu.sniperButton = assetManager.get(ASSET_ID_TOWER_SNIPER_TEXTURE);
-				TowerMenu.flameButton = assetManager.get(ASSET_ID_TOWER_FLAME_TEXTURE);
-
 				// set audio files (other)
 				musicBackground = assetManager.get(ASSET_ID_THEME_MUSIC);
 				musicCar = assetManager.get(ASSET_ID_CAR_ENGINE_MUSIC);
@@ -872,7 +868,8 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 				musicCar.setVolume(1f);
 
 				// Setup the tower menu
-				towerMenu = new TowerMenu(world, scoreBoard);
+				towerMenu = new TowerMenu(assetManager, ASSET_ID_TOWER_CANNON_TEXTURE, ASSET_ID_TOWER_LASER_TEXTURE,
+						ASSET_ID_TOWER_SNIPER_TEXTURE, ASSET_ID_TOWER_FLAME_TEXTURE, world, scoreBoard);
 
 				// Output how long it took to load all resources
 				Gdx.app.debug("play_state:render", MainGame.getCurrentTimeStampLogString() +
