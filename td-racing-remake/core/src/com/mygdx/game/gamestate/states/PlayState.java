@@ -120,7 +120,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	private Sprite spriteSmoke;
 	// private final Level[] levels;
 	//private Level level;
-	private Texture backgroundLoading;
+	private final Texture backgroundLoading;
 
 	private Tower buildingtower;
 	// private final CollisionListener collis;
@@ -185,7 +185,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	/**
 	 * The number of the current level
 	 */
-	private int levelNumber;
+	private final int levelNumberWithWhichTheStateWasCalled;
 	private long timeStampStateStarted = System.currentTimeMillis();
 
 	private boolean levelLoaded = false;
@@ -195,9 +195,9 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	float mapEnemyGridNodeMinimumH;
 	float mapEnemyGridNodeMaximumH;
 
-	public PlayState(final GameStateManager gameStateManager, final int levelNumber) {
+	public PlayState(final GameStateManager gameStateManager, final int levelNumberWithWhichTheStateWasCalled) {
 		super(gameStateManager, STATE_NAME);
-		this.levelNumber = levelNumber;
+		this.levelNumberWithWhichTheStateWasCalled = levelNumberWithWhichTheStateWasCalled;
 
 		// Sets this camera to an orthographic projection, centered at (viewportWidth/2,
 		// viewportHeight/2), with the y-axis pointing up or down.
@@ -669,11 +669,11 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		if (Gdx.input.isKeyJustPressed(Keys.T)) {
 			unlockAllTowers = !unlockAllTowers;
 			if (unlockAllTowers) {
-				for (int i = 0; i < levelInfo.get(levelNumber).towerUnlocked.size(); i++)
+				for (int i = 0; i < levelInfo.get(0).towerUnlocked.size(); i++)
 					towerMenu.unlockTower(i);
 			} else {
-				for (int i = 0; i < levelInfo.get(levelNumber).towerUnlocked.size(); i++)
-					towerMenu.unlockTower(i, levelInfo.get(levelNumber).towerUnlocked.get(i));
+				for (int i = 0; i < levelInfo.get(0).towerUnlocked.size(); i++)
+					towerMenu.unlockTower(i, levelInfo.get(0).towerUnlocked.get(i));
 			}
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.E)) {
@@ -801,7 +801,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		for (Sprite s : trailerSmokes) {
 			s.setPosition(s.getX() + MathUtils.random(0.05f), s.getY() + 0.05f);
 			if (s.getWidth() > spriteSmoke.getWidth())
-				s.setColor(1, 1, 1, s.getColor().a - 0.0000001f);
+				s.setColor(1, 1, 1, s.getColor().a - 0.01f);
 			s.setSize(s.getWidth() + 0.02f, s.getHeight() + 0.02f);
 			s.setRotation(s.getRotation() + MathUtils.random(-2.5f, -0.5f));
 			if (s.getColor().a < 0.1f)
@@ -876,7 +876,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 						"ms to load all resources");
 
 				// load level
-				loadLevel(levelNumber);
+				loadLevel(levelNumberWithWhichTheStateWasCalled);
 			} else {
 				// set projection matrices
 				spriteBatch.setProjectionMatrix(camera.combined);
@@ -1312,8 +1312,8 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		// when all checkpoints were checked
 		if (allCheckpointsChecked) {
 			// add fast bonus and money per lap to the purse
-			int lapmoney = levelInfo.get(levelNumber).moneyPerLap;
-			final int fastBonus = (int) (levelInfo.get(levelNumber).timeBonus -
+			int lapmoney = levelInfo.get(levelNumberWithWhichTheStateWasCalled).moneyPerLap;
+			final int fastBonus = (int) (levelInfo.get(levelNumberWithWhichTheStateWasCalled).timeBonus -
 					scoreBoard.getCurrentTime() * 2);
 			scoreBoard.newLap((fastBonus > 0) ? lapmoney + fastBonus : lapmoney);
 			// play cash sound if sound activated

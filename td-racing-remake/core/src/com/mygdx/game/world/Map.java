@@ -68,21 +68,21 @@ public class Map extends Entity {
 		this.finishLine = finishLine;
 		this.world = world;
 		targetPosition = calculateMapGoal();
-		createAStarArray();
 		healthBarPosition = currentLevel.healthBarPosition;
 		spawnHeight = currentLevel.pitStopPosition.y * PlayState.PIXEL_TO_METER + sizePitStop;
 
-		// Create x calculated ways
-		//final PolygonShape ps = (PolygonShape) mapGoal.getFixtureList().first().getShape();
-		//final Vector2 mapGoalPosition = new Vector2();
-		//ps.getVertex(0, mapGoalPosition);
+		// Create node array for path finding
+		createAStarArray();
 
-		// Precaculate zombie paths
+		// Find goal and start node of the map
+		findEnemyGridStartAndGoalNodes(currentLevel.enemySpawnPosition, targetPosition.cpy().scl(PlayState.METER_TO_PIXEL));
+
+		// Calculate zombie paths
 		for (int i = 0; i < 10; i++) {
-			motorPaths.add(getPath(currentLevel.enemySpawnPosition, targetPosition.cpy().scl(PlayState.METER_TO_PIXEL), 100));
+			motorPaths.add(getPath(100));
 		}
 		for (int i = 0; i < 200; i++) {
-			paths.add(getPath(currentLevel.enemySpawnPosition, targetPosition.cpy().scl(PlayState.METER_TO_PIXEL), 200));
+			paths.add(getPath(200));
 		}
 	}
 
@@ -281,16 +281,10 @@ public class Map extends Entity {
 	/**
 	 * TODO Add description
 	 *
-	 * Search for a path from a given start position to the given target position using the A* algorithm and return this path.
-	 * If there is no path found then the method will throw an exception.
-	 *
 	 * @param startPosition The position from which the path should start
 	 * @param targetPosition The position to where the path should end
-	 * @param maxRandomAdditionalDifficulty The maximum value of random additional difficulty that is added on the nodes of the found path so that other paths will be calculated on reruns of this method
-	 * @return The "shortest" (when taking into account the current additional difficulty on the nodes) path between the given start and target position
 	 */
-	private Array<EnemyGridNode> getPath(final Vector2 startPosition, final Vector2 targetPosition, float maxRandomAdditionalDifficulty) {
-
+	private void findEnemyGridStartAndGoalNodes(final Vector2 startPosition, final Vector2 targetPosition) {
 		// Find the nearest nodes for the given start and target positions (throw exception if no node was found)
 		final EnemyGridNode startNode = getNearestNodeAtPos(startPosition);
 
@@ -309,9 +303,18 @@ public class Map extends Entity {
 
 		Gdx.app.debug("map:getPath", MainGame.getCurrentTimeStampLogString() + "Start node: " + startNode);
 		Gdx.app.debug("map:getPath", MainGame.getCurrentTimeStampLogString() + "Goal node: " + goalNode);
+	}
 
-
-
+	/**
+	 * TODO Add description
+	 *
+	 * Search for a path from a given start position to the given target position using the A* algorithm and return this path.
+	 * If there is no path found then the method will throw an exception.
+	 *
+	 * @param maxRandomAdditionalDifficulty The maximum value of random additional difficulty that is added on the nodes of the found path so that other paths will be calculated on reruns of this method
+	 * @return The "shortest" (when taking into account the current additional difficulty on the nodes) path between the given start and target position
+	 */
+	private Array<EnemyGridNode> getPath(float maxRandomAdditionalDifficulty) {
 		final float minAdditionalDifficulty = 20f;
 		final float maxAdditionalDifficulty = minAdditionalDifficulty + (maxRandomAdditionalDifficulty * 10);
 		// final long seed = 42;
@@ -327,7 +330,7 @@ public class Map extends Entity {
 		}
 
 		// Try to find the "shortest" path between the start and goal note in respect of the permanent and temporary additional difficulty
-		Array<EnemyGridNode> path = PathFinder.findPathAStar(nodesList, startNode, goalNode);
+		Array<EnemyGridNode> path = PathFinder.findPathAStar(nodesList, enemyGridStartNode, enemyGridGoalNode);
 
 		// If a path was found increase the permanent additional cost for each node in this path
 		if (path != null) {
