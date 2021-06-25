@@ -1204,6 +1204,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		// TODO What is this code section doing
 		physicsaccumulator += Math.min(deltaTime, 0.25f);
 		while (physicsaccumulator >= TIME_STEP) {
+			world.step(TIME_STEP * speedFactor, 6 * speedFactor, 2 * speedFactor);
 			physicsaccumulator -= TIME_STEP;
 		}
 		*/
