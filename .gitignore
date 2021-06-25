@@ -24,3 +24,6 @@ hs_err_pid*
 
 # web page builds
 web-page/bin
+
+# don't ignore vendor jar files
+!vendor/*.jar

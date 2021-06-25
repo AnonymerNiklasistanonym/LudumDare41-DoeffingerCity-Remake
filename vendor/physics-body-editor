@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+cd ../td-racing-remake/android/assets/map
+java -jar ../../../../vendor/physics-body-editor-v2-9-2.jar
