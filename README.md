@@ -59,7 +59,9 @@ To easily test this application run configurations can be added:
 
 Per default an `android` run configuration is already there which runs out of the box which can be run by clicking the green triangle (emulator or local Android device is both possible). When clicking on the entry select `Edit Configurations`, then click the plus symbol (`Add New Configuration`) and select `Application`. Give it the name `DesktopLauncher` and select an Android version, the desktop main class and append to the working directory `android/assets` so that resources in this directory can be found.
 
-![Screenshot of the Android Studio new run configuration for desktop testing](screenshots/android_studio_desktop_launch_configuration_setup.png)
+| Linux                                                        | Windows                                                      |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| ![Screenshot of the Android Studio new run configuration for desktop testing on Linux](screenshots/android_studio_desktop_launch_configuration_setup_linux.png) | ![Screenshot of the Android Studio new run configuration for desktop testing on Windows](screenshots/android_studio_desktop_launch_configuration_setup_windows.png) |
 
 After clicking `OK` you should be able to press the green triangle while having the `DesktopLauncher` run configuration selected and a native desktop build should be compiled and run which means you are ready to build and test the game for desktop and Android devices.
 
