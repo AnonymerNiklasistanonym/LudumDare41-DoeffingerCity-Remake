@@ -161,7 +161,7 @@ public class GameStateManager {
    */
   public void update(final float deltaTime) {
     if (!gameStateStack.empty()) {
-      gameStateStack.peek().handleInput();
+      gameStateStack.peek().handleInput(deltaTime);
       gameStateStack.peek().update(deltaTime);
     } else {
       Gdx.app.error("game_state_manager:popGameState",

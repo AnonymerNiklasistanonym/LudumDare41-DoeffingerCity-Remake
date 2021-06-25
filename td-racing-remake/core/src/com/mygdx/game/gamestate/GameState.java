@@ -75,8 +75,10 @@ public abstract class GameState extends ControllerCallbackVariables {
 
   /**
    * Handle input
+   *
+   * @param deltaTime The time span between the current frame and the last frame in seconds
    */
-  protected abstract void handleInput();
+  protected abstract void handleInput(final float deltaTime);
 
   /**
    * Update everything to the current frame

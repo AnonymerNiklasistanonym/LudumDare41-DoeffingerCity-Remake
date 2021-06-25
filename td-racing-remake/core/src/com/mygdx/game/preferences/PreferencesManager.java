@@ -15,6 +15,10 @@ public class PreferencesManager {
   private static final boolean PREFERENCE_MUSIC_ON_BOOL_DEFAULT = true;
   private static final String PREFERENCE_SOUND_EFFECTS_ON_BOOL = "SOUND_EFFECTS_ON_BOOL";
   private static final boolean PREFERENCE_SOUND_EFFECTS_ON_BOOL_DEFAULT = true;
+  private static final String PREFERENCE_VSYNC_ON_BOOL = "VSYNC_ON_BOOL";
+  private static final boolean PREFERENCE_VSYNC_ON_BOOL_DEFAULT = true;
+  private static final String PREFERENCE_FPS_INT = "FPS_INT";
+  private static final int PREFERENCE_FPS_INT_DEFAULT = 60;
   private static final String PREFERENCE_HIGHSCORE_NAME_STRING_BASE = "HIGHSCORE_NAME_STRING_";
   private static final String PREFERENCE_HIGHSCORE_SCORE_VALUE_BASE = "HIGHSCORE_SCORE_VALUE_";
   private static final String PREFERENCE_HIGHSCORE_LEVEL_VALUE_BASE = "HIGHSCORE_LEVEL_VALUE_";
@@ -52,6 +56,10 @@ public class PreferencesManager {
       setMusicOn(PREFERENCE_MUSIC_ON_BOOL_DEFAULT);
       // Set sound effects to on
       setSoundEffectsOn(PREFERENCE_SOUND_EFFECTS_ON_BOOL_DEFAULT);
+      // Set vsync
+      setVsync(PREFERENCE_VSYNC_ON_BOOL_DEFAULT);
+      // Set fps
+      setFps(PREFERENCE_FPS_INT_DEFAULT);
       // Reset highscore list (which creates default entries)
       resetHighscore();
     }
@@ -184,6 +192,22 @@ public class PreferencesManager {
       }
     }
     return false;
+  }
+
+  public boolean getVsync() {
+    return prefs.getBoolean(PREFERENCE_VSYNC_ON_BOOL, PREFERENCE_VSYNC_ON_BOOL_DEFAULT);
+  }
+
+  public int getFps() {
+    return prefs.getInteger(PREFERENCE_FPS_INT, PREFERENCE_FPS_INT_DEFAULT);
+  }
+
+  public void setVsync(final boolean vsync) {
+    prefs.putBoolean(PREFERENCE_VSYNC_ON_BOOL, vsync).flush();
+  }
+
+  public void setFps(final int fps) {
+    prefs.putInteger(PREFERENCE_FPS_INT, fps).flush();
   }
 
   /**

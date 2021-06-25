@@ -24,8 +24,6 @@ public class Car extends Entity {
 	private final Body body;
 	private final Sprite sprite;
 
-	private float deltaTime;
-
 	public Car(final World world, final Sprite sprite, final Vector2 position, final float angle) {
 		super("car", world);
 		final BodyDef bodydef = new BodyDef();
@@ -43,31 +41,30 @@ public class Car extends Entity {
 		body.setUserData(this);
 		body.setAngularDamping(2);
 		this.sprite = sprite;
-		deltaTime = 0;
 
 		// turn the car at the beginning
 		body.setTransform(body.getPosition(), (float) Math.toRadians(angle));
 	}
 
-	public void accelarate() {
+	public void accelarate(float deltaTime) {
 		final Vector2 acc = new Vector2(ACCELERATION_FORWARD * deltaTime, 0);
 		acc.rotateRad(body.getAngle());
 		body.applyForceToCenter(acc, true);
 	}
 
-	public void brake() {
+	public void brake(float deltaTime) {
 		final Vector2 acc = new Vector2(
-				((getForwardVelocity().x >= 0) ? BRAKE_POWER : ACCELERATION_BACK) * -1 * deltaTime, 0);
+				((getForwardVelocity().x >= 0) ? BRAKE_POWER : ACCELERATION_BACK) * - deltaTime, 0);
 		acc.rotateRad(body.getAngle());
 		body.applyForceToCenter(acc, true);
 	}
 
-	public void steerLeft() {
+	public void steerLeft(float deltaTime) {
 		body.applyTorque(STEER_POWER * deltaTime * getTurnFactor(), true);
 	}
 
-	public void steerRight() {
-		body.applyTorque(STEER_POWER * -1 * deltaTime * getTurnFactor(), true);
+	public void steerRight(float deltaTime) {
+		body.applyTorque(STEER_POWER * - deltaTime * getTurnFactor(), true);
 	}
 
 	private float getNormalizedSpeed() {
@@ -81,14 +78,14 @@ public class Car extends Entity {
 		final float x = Math.abs(getNormalizedSpeed() * 2);
 		final float factor = (float) (1 - Math.exp(-3 * MathUtils.clamp(x, 0.05f, 1)));
 
-		if (factor < -1 || factor > 1)
-			System.out.println("Turnfactor ist falsch!");
+		if (factor < -1 || factor > 1) {
+			Gdx.app.debug("car:getTurnFactor", MainGame.getCurrentTimeStampLogString() + "Turn factor " + factor + " is bad");
+		}
 
 		return factor * mult;
 	}
 
 	public void update(final float deltaTime) {
-		this.deltaTime = deltaTime;
 		reduceToMaxSpeed(SPEED_MAX);
 		killLateral(0.95f);
 		sprite.setPosition(getX(), getY());

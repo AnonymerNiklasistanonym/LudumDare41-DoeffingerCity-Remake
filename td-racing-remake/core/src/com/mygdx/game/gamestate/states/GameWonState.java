@@ -52,10 +52,6 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
    * Variable for the texture of the game won background
    */
   private Texture backgroundGameWon;
-  /**
-   * Variable for the sound victory of the game won background
-   */
-  private Sound soundVictory;
 
   private static final String ASSET_ID_BACKGROUND_GAME_WON = MainGame.getGameBackgroundFilePath("game_won");
   private static final String ASSET_ID_SOUND_VICTORY = MainGame.getGameSoundFilePath("victory");
@@ -87,7 +83,7 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
   }
 
   @Override
-  public void handleInput() {
+  public void handleInput(final float deltaTime) {
     if (paused || !assetsLoaded) {
       // When the game is paused or still loading assets don't handle anything
       return;
@@ -140,7 +136,10 @@ public class GameWonState extends GameState implements IControllerCallbackGeneri
         getDebugOutputLoadedAssets();
 
         backgroundGameWon = assetManager.get(ASSET_ID_BACKGROUND_GAME_WON);
-        soundVictory = assetManager.get(ASSET_ID_SOUND_VICTORY);
+        /**
+         * Variable for the sound victory of the game won background
+         */
+        Sound soundVictory = assetManager.get(ASSET_ID_SOUND_VICTORY);
         if (gameStateManager.getPreferencesManager().getSoundEffectsOn()) {
           soundVictory.play();
         }

@@ -16,6 +16,7 @@ import com.mygdx.game.gamestate.GameState;
 import com.mygdx.game.gamestate.GameStateManager;
 import com.mygdx.game.gamestate.elements.button.MenuButton;
 import com.mygdx.game.gamestate.elements.button.MenuButtonBig;
+import com.mygdx.game.gamestate.elements.button.MenuButtonMini;
 import com.mygdx.game.gamestate.elements.button.MenuButtonSmall;
 import com.mygdx.game.helper.menu.HelperMenu;
 import com.mygdx.game.helper.menu.HelperMenuButtonNavigation;
@@ -51,6 +52,9 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
   private static final String TEXT_MENU_BUTTON_ABOUT = "ABOUT";
   private static final String TEXT_MENU_BUTTON_HIGHSCORES = "HIGHSCORES";
   private static final float FONT_SCALE_TEXT = 1;
+
+  private static final String SETTINGS_ID = "SETTINGS_ID";
+  private static final String TEXT_MENU_BUTTON_SETTINGS = "SETTINGS";
   /**
    * Controller callback class that gets this class in its constructor which implements some
    * callback methods and can then be added as a controller listener which can then call the
@@ -94,6 +98,9 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
     assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_FONT, BitmapFont.class);
     assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_DEFAULT, Texture.class);
     assetManager.load(MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED, Texture.class);
+    assetManager.load(MenuButtonMini.ASSET_MANAGER_ID_FONT, BitmapFont.class);
+    assetManager.load(MenuButtonMini.ASSET_MANAGER_ID_TEXTURE_DEFAULT, Texture.class);
+    assetManager.load(MenuButtonMini.ASSET_MANAGER_ID_TEXTURE_SELECTED, Texture.class);
     assetManager.load(ASSET_ID_BACKGROUND_STARS_TEXTURE, Texture.class);
     assetManager.load(ASSET_ID_LOGO_TNT_TEXTURE, Texture.class);
     assetManager.load(ASSET_MANAGER_ID_FONT_TEXT, BitmapFont.class);
@@ -104,7 +111,7 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
   }
 
   @Override
-  public void handleInput() {
+  public void handleInput(final float deltaTime) {
     if (paused || !assetsLoaded) {
       // When the game is paused or assets not loaded don't handle anything
       return;
@@ -299,8 +306,13 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
                     (float) MainGame.GAME_WIDTH / 4,
                     (float) MainGame.GAME_HEIGHT / 6 * 1),
                 new MenuButtonSmall(HIGHSCORE_ID, TEXT_MENU_BUTTON_HIGHSCORES, assetManager,
-                    (float) MainGame.GAME_WIDTH / 2 + (float) MainGame.GAME_WIDTH / 4,
+                    (float) MainGame.GAME_WIDTH / 2 + MainGame.GAME_WIDTH / 4f,
                     (float) MainGame.GAME_HEIGHT / 6 * 1)
+            },
+            {
+                new MenuButtonMini(SETTINGS_ID, TEXT_MENU_BUTTON_SETTINGS, assetManager,
+                    (float) MainGame.GAME_WIDTH / 1.15f,
+                    (float) MainGame.GAME_HEIGHT / 6 * 5f)
             }
         };
 
@@ -365,6 +377,9 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
         MenuButtonSmall.ASSET_MANAGER_ID_FONT,
         MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_DEFAULT,
         MenuButtonSmall.ASSET_MANAGER_ID_TEXTURE_SELECTED,
+        MenuButtonMini.ASSET_MANAGER_ID_FONT,
+        MenuButtonMini.ASSET_MANAGER_ID_TEXTURE_DEFAULT,
+        MenuButtonMini.ASSET_MANAGER_ID_TEXTURE_SELECTED,
         ASSET_ID_BACKGROUND_STARS_TEXTURE,
         ASSET_ID_LOGO_TNT_TEXTURE,
         ASSET_MANAGER_ID_FONT_TEXT,
@@ -386,6 +401,9 @@ public class MenuState extends GameState implements IControllerCallbackGenericMe
         break;
       case ABOUT_ID:
         gameStateManager.setGameState(new CreditState(gameStateManager));
+        break;
+      case SETTINGS_ID:
+        gameStateManager.setGameState(new SettingsState(gameStateManager));
         break;
       default:
         Gdx.app.error("menu_state:openMenuButtonById",

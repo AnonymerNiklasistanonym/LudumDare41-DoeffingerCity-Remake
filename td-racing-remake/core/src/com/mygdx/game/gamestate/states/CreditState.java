@@ -70,7 +70,7 @@ public class CreditState extends GameState implements IControllerCallbackGeneric
   }
 
   @Override
-  protected void handleInput() {
+  protected void handleInput(final float deltaTime) {
     if (paused || !assetsLoaded) {
       // When the game is paused or assets not loaded don't handle anything
       return;

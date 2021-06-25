@@ -27,8 +27,7 @@ public class MenuButtonBig extends MenuButton {
   }
 
   @Override
-  public void dispose() {
-    super.disposeMedia();
+  protected void disposeButtonResources() {
+    // Nothing to dispose
   }
-
 }

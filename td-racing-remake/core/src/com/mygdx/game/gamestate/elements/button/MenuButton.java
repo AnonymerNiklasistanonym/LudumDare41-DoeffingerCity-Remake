@@ -52,6 +52,10 @@ public abstract class MenuButton implements Disposable, IHelperMenuButton {
    * Indicator if the menu button is selected
    */
   private boolean selected;
+  /**
+   * Indicator if the menu button is disabled
+   */
+  private boolean disabled;
 
   /**
    * Super constructor for creating a new menu button
@@ -123,6 +127,9 @@ public abstract class MenuButton implements Disposable, IHelperMenuButton {
     } else {
       button.setAlpha(0.25f);
     }
+    if (disabled) {
+      button.setAlpha(0.35f);
+    }
     button.draw(spriteBatch);
 
     // Draw the text on top of the button
@@ -153,10 +160,20 @@ public abstract class MenuButton implements Disposable, IHelperMenuButton {
   }
 
   /**
-   * Dispose textures and fonts TODO Asset manager migration later? (https://github.com/libgdx/libgdx/wiki/Managing-your-assets)
+   * Dispose button resources
    */
-  public void disposeMedia() {
+  public final void dispose() {
+    // Dispose resources from the sub classes if there are any
+    disposeButtonResources();
     // No assets need to be disposed since they are all loaded via the asset manager
   }
 
+  /**
+   * Each button must implement a method to dispose resources
+   */
+  protected abstract void disposeButtonResources();
+
+  public void setDisabled(final boolean disabled) {
+    this.disabled = disabled;
+  }
 }

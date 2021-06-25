@@ -90,12 +90,12 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 	// TODO Make that and the physics implementation variable from this value so that the fps can
 	// TODO be set to other values like for example 240
-	public static final int foregroundFps = 60;
+	public final int foregroundFps;
 
 	// Identify collision entities
 	public static final short ZOMBIE_BICYCLE_BOX = 0x1; // 0001
 	public static final short CAR_BOX = 0x1 << 1; // 0010 or 0x2 in hex
-	public static final float TIME_STEP = (float) 1 / foregroundFps; // time for physics step
+	// public static final float TIME_STEP = (float) 1 / foregroundFps; // time for physics step
 	public static final float PIXEL_TO_METER = 0.05f;
 	public static final float METER_TO_PIXEL = 20f;
 
@@ -208,7 +208,8 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		camera.setToOrtho(false, MainGame.GAME_WIDTH, MainGame.GAME_HEIGHT);
 
 		// Set fps
-		Gdx.graphics.setVSync(true);
+		Gdx.graphics.setVSync(preferencesManager.getVsync());
+		foregroundFps = preferencesManager.getFps();
 		Gdx.graphics.setForegroundFPS(foregroundFps);
 
 		// Load assets used for rendering the loading screen
@@ -487,7 +488,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	}
 
 	@Override
-	protected void handleInput() {
+	protected void handleInput(final float deltaTime) {
 		if (paused || !assetsLoaded) {
 			// When the game is paused or assets not loaded don't handle anything
 			return;
@@ -570,16 +571,16 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		SteerCarLeftRight controllerSteerCarLeftRight = controllerCallbackPlayState.getSteerCarLeftRight();
 		SteerCarForwardsBackwards controllerSteerForwardsBackwards = controllerCallbackPlayState.getSteerCarForwardsBackwards();
 		if (Gdx.input.isKeyPressed(Keys.W) || Gdx.input.isKeyPressed(Keys.UP) || controllerSteerForwardsBackwards == SteerCarForwardsBackwards.FORWARDS) {
-			car.accelarate();
+			car.accelarate(deltaTime);
 		}
 		if (Gdx.input.isKeyPressed(Keys.S) || Gdx.input.isKeyPressed(Keys.DOWN) || controllerSteerForwardsBackwards == SteerCarForwardsBackwards.BACKWARDS) {
-			car.brake();
+			car.brake(deltaTime);
 		}
 		if (Gdx.input.isKeyPressed(Keys.A) || Gdx.input.isKeyPressed(Keys.LEFT) || controllerSteerCarLeftRight == SteerCarLeftRight.LEFT) {
-			car.steerLeft();
+			car.steerLeft(deltaTime);
 		}
 		if (Gdx.input.isKeyPressed(Keys.D) || Gdx.input.isKeyPressed(Keys.RIGHT) || controllerSteerCarLeftRight == SteerCarLeftRight.RIGHT) {
-			car.steerRight();
+			car.steerRight(deltaTime);
 		}
 
 		// Select tower to build
@@ -1199,12 +1200,15 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		if (pausedByUser)
 			return;
 
+		/*
 		// TODO What is this code section doing
 		physicsaccumulator += Math.min(deltaTime, 0.25f);
 		while (physicsaccumulator >= TIME_STEP) {
-			world.step(TIME_STEP * speedFactor, 6 * speedFactor, 2 * speedFactor);
 			physicsaccumulator -= TIME_STEP;
 		}
+		*/
+		world.step(deltaTime, 6 * speedFactor, 4 * speedFactor);
+
 	}
 
 	@Override
