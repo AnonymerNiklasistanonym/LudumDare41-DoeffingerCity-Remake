@@ -571,7 +571,7 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 		SteerCarLeftRight controllerSteerCarLeftRight = controllerCallbackPlayState.getSteerCarLeftRight();
 		SteerCarForwardsBackwards controllerSteerForwardsBackwards = controllerCallbackPlayState.getSteerCarForwardsBackwards();
 		if (Gdx.input.isKeyPressed(Keys.W) || Gdx.input.isKeyPressed(Keys.UP) || controllerSteerForwardsBackwards == SteerCarForwardsBackwards.FORWARDS) {
-			car.accelarate(deltaTime);
+			car.accelerate(deltaTime);
 		}
 		if (Gdx.input.isKeyPressed(Keys.S) || Gdx.input.isKeyPressed(Keys.DOWN) || controllerSteerForwardsBackwards == SteerCarForwardsBackwards.BACKWARDS) {
 			car.brake(deltaTime);

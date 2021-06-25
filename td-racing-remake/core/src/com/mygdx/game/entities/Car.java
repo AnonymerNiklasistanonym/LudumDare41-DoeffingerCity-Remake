@@ -46,7 +46,7 @@ public class Car extends Entity {
 		body.setTransform(body.getPosition(), (float) Math.toRadians(angle));
 	}
 
-	public void accelarate(float deltaTime) {
+	public void accelerate(float deltaTime) {
 		final Vector2 acc = new Vector2(ACCELERATION_FORWARD * deltaTime, 0);
 		acc.rotateRad(body.getAngle());
 		body.applyForceToCenter(acc, true);
@@ -87,6 +87,7 @@ public class Car extends Entity {
 
 	public void update(final float deltaTime) {
 		reduceToMaxSpeed(SPEED_MAX);
+		// What does this mean??????
 		killLateral(0.95f);
 		sprite.setPosition(getX(), getY());
 		sprite.setRotation(body.getAngle() * MathUtils.radDeg);
@@ -94,10 +95,11 @@ public class Car extends Entity {
 
 	private void reduceToMaxSpeed(float maxspeed) {
 		float speed = getForwardVelocity().x;
-		if (speed < maxspeed * -1)
-			speed = maxspeed * -1;
-		if (speed > maxspeed)
+		if (speed < - maxspeed)
+			speed = - maxspeed;
+		if (speed > maxspeed) {
 			speed = maxspeed;
+		}
 
 		final Vector2 newSpeed = new Vector2(speed, getForwardVelocity().y);
 		newSpeed.rotateRad(body.getAngle());
@@ -111,7 +113,7 @@ public class Car extends Entity {
 
 	private Vector2 getForwardVelocity() {
 		final Vector2 velo = getVelocityVector();
-		velo.rotateRad(body.getAngle() * -1);
+		velo.rotateRad(- body.getAngle());
 		return velo;
 	}
 
@@ -142,11 +144,12 @@ public class Car extends Entity {
 		return ort;
 	}
 
-	public float hitEnemy(final Zombie e) {
+	public float hitEnemy(final Zombie zombie) {
 		float damage = Math.abs(getForwardVelocity().x * 2f);
-		if (damage > 0.1f)
-			e.takeDamage(damage);
-		return e.getHealth();
+		if (damage > 0.1f) {
+			zombie.takeDamage(damage);
+		}
+		return zombie.getHealth();
 	}
 
 	@Override
