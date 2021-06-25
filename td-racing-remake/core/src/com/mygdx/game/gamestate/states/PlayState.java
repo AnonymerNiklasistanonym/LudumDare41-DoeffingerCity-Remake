@@ -195,6 +195,8 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	float mapEnemyGridNodeMinimumH;
 	float mapEnemyGridNodeMaximumH;
 
+	Vector2 healthBarPos;
+
 	public PlayState(final GameStateManager gameStateManager, final int levelNumberWithWhichTheStateWasCalled) {
 		super(gameStateManager, STATE_NAME);
 		this.levelNumberWithWhichTheStateWasCalled = levelNumberWithWhichTheStateWasCalled;
@@ -354,6 +356,8 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 			map.removeFromWorld();
 		}
 		map = new Map(currentLevelInfo, world, finishline.getBody(), spritePitStop.getHeight());
+		// Get the health bar position
+		healthBarPos = map.getHealthBarPos().cpy().scl(PIXEL_TO_METER);
 		// Calculate the average, maximum and minimum H (distance to map goal) value for debugging purposes
 		mapEnemyGridNodeAverageH = 0;
 		mapEnemyGridNodeMinimumH = Float.POSITIVE_INFINITY;
@@ -1038,11 +1042,11 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	}
 
 	private void drawPlayerHealthBar(final ShapeRenderer shapeRenderer) {
-		shapeRenderer.setColor(new Color(1, 0, 0, 1));
-		shapeRenderer.rect(map.getHealthBarPos().x * PIXEL_TO_METER, map.getHealthBarPos().y * PIXEL_TO_METER,
-				200 * PlayState.PIXEL_TO_METER, 6 * PlayState.PIXEL_TO_METER);
-		shapeRenderer.setColor(new Color(0, 1, 0, 1));
-		shapeRenderer.rect(map.getHealthBarPos().x * PIXEL_TO_METER, map.getHealthBarPos().y * PIXEL_TO_METER,
+		shapeRenderer.setColor(1, 0, 0, 1);
+		shapeRenderer.rect(healthBarPos.x, healthBarPos.y, 200 * PlayState.PIXEL_TO_METER,
+				6 * PlayState.PIXEL_TO_METER);
+		shapeRenderer.setColor(0, 1, 0, 1);
+		shapeRenderer.rect(healthBarPos.x, healthBarPos.y,
 				200 * PlayState.PIXEL_TO_METER * (scoreBoard.getHealth() / scoreBoard.getMaxHealth()),
 				6 * PlayState.PIXEL_TO_METER);
 	}
@@ -1050,13 +1054,12 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 	private void renderDebugWay(SpriteBatch spriteBatch) {
 		MainGame.font.getData().setScale(0.06f);
 		Vector2 currentNodePos;
-		for (final Zombie e : zombies) {
-			if (e.isSpawned() && !e.isDead()) {
-				MainGame.font.setColor(e.getColor());
-				for (final EnemyGridNode node : e.getPath()) {
-					currentNodePos = node.getPosition();
-					MainGame.font.draw(spriteBatch, "x", currentNodePos.x * PlayState.PIXEL_TO_METER,
-							currentNodePos.y * PlayState.PIXEL_TO_METER);
+		for (final Zombie zombie : zombies) {
+			if (zombie.isSpawned() && !zombie.isDead()) {
+				MainGame.font.setColor(zombie.getColor());
+				for (final EnemyGridNode node : zombie.getPath()) {
+					currentNodePos = node.getPosition().cpy().scl(PlayState.PIXEL_TO_METER);
+					MainGame.font.draw(spriteBatch, "x", currentNodePos.x, currentNodePos.y);
 				}
 			}
 		}
@@ -1092,18 +1095,17 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 			else if (nodeH <= mapEnemyGridNodeMaximumH) {
 				MainGame.font.setColor(1, 0, 0, 0.75f);
 			}
-			currentPosition = node.getPosition();
-			MainGame.font.draw(spriteBatch, "o", currentPosition.x * PlayState.PIXEL_TO_METER,
-					currentPosition.y * PlayState.PIXEL_TO_METER);
+			currentPosition = node.getPosition().cpy().scl(PlayState.PIXEL_TO_METER);
+			MainGame.font.draw(spriteBatch, "o", currentPosition.x, currentPosition.y);
 
 		}
 		// Draw map start and goal position
 		MainGame.font.getData().setScale(0.2f);
 		MainGame.font.setColor(0, 0, 0, 1);
-		MainGame.font.draw(spriteBatch, "START", map.getSpawnPosition().x * PlayState.PIXEL_TO_METER,
-				map.getSpawnPosition().y * PlayState.PIXEL_TO_METER);
-		MainGame.font.draw(spriteBatch, "GOAL", map.getTargetPosition().x,
-				map.getTargetPosition().y);
+		final Vector2 startPosition = map.getEnemyGridStartNode().getPosition().cpy().scl(PlayState.PIXEL_TO_METER);
+		MainGame.font.draw(spriteBatch, "START", startPosition.x, startPosition.y);
+		final Vector2 goalPosition = map.getEnemyGridGoalNode().getPosition().cpy().scl(PlayState.PIXEL_TO_METER);
+		MainGame.font.draw(spriteBatch, "GOAL", goalPosition.x, goalPosition.y);
 	}
 
 	private void renderDebugCollision(SpriteBatch spriteBatch) {
