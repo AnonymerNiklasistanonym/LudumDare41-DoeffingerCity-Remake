@@ -19,10 +19,7 @@ import com.mygdx.game.file.LevelInfoCsvFile;
 import com.mygdx.game.gamestate.states.PlayState;
 import com.mygdx.game.world.pathfinder.EnemyGridNode;
 import com.mygdx.game.world.pathfinder.PathFinder;
-import java.util.HashSet;
-import java.util.PriorityQueue;
 import java.util.Random;
-import java.util.Set;
 
 public class Map extends Entity {
 
@@ -37,13 +34,13 @@ public class Map extends Entity {
 	private final Vector2 spawnPosition = new Vector2();
 	private final Vector2 targetPosition;
 	private Sprite map;
-	private final Array<Array<EnemyGridNode>> paths = new Array<>();
-	private final Array<Array<EnemyGridNode>> motorPaths = new Array<>();
+	private final Array<Array<EnemyGridNode>> zombiePaths = new Array<>();
+	private final Array<Array<EnemyGridNode>> zombieMotorPaths = new Array<>();
 	private final float spawnHeight;
 	private final World world;
 
-	private EnemyGridNode enemyGridGoalNode = null;
-	private EnemyGridNode enemyGridStartNode = null;
+	private final EnemyGridNode enemyGridGoalNode;
+	private final EnemyGridNode enemyGridStartNode;
 
 	@Override
 	public void removeFromWorld() {
@@ -72,18 +69,37 @@ public class Map extends Entity {
 		spawnHeight = currentLevel.pitStopPosition.y * PlayState.PIXEL_TO_METER + sizePitStop;
 
 		// Create node array for path finding
-		createAStarArray();
+		createEnemyGridNodeArray();
 
-		// Find goal and start node of the map
-		findEnemyGridStartAndGoalNodes(currentLevel.enemySpawnPosition, targetPosition.cpy().scl(PlayState.METER_TO_PIXEL));
+		// Find start node of the map
+		final EnemyGridNode startNode = getNearestNodeAtPos(currentLevel.enemySpawnPosition);
+		if (startNode == null) {
+			Gdx.app.error("map:constructor", MainGame.getCurrentTimeStampLogString() + "Start node is null");
+			throw new RuntimeException("Start node is null");
+		}
+		enemyGridStartNode = startNode;
+		Gdx.app.debug("map:constructor", MainGame.getCurrentTimeStampLogString() + "Start node: " + startNode);
 
-		// Calculate zombie paths
-		for (int i = 0; i < 10; i++) {
-			motorPaths.add(getPath(100));
+		// Find goal node of the map
+		final EnemyGridNode goalNode = getNearestNodeAtPos(targetPosition.cpy().scl(PlayState.METER_TO_PIXEL));
+		if (goalNode == null) {
+			Gdx.app.error("map:constructor", MainGame.getCurrentTimeStampLogString() + "End node is null");
+			throw new RuntimeException("End node is null");
 		}
-		for (int i = 0; i < 200; i++) {
-			paths.add(getPath(200));
+		enemyGridGoalNode = goalNode;
+		Gdx.app.debug("map:constructor", MainGame.getCurrentTimeStampLogString() + "Goal node: " + goalNode);
+
+		// Calculate zombie paths (this would be faster when run via 2 threads but the badlogic array implementation doesn't support multithreading with for loops
+		long timeStampStateStarted = System.currentTimeMillis();
+		for (int i = 0; i < 25; i++) {
+			zombieMotorPaths.add(getPath(100));
 		}
+		Gdx.app.debug("map:constructor", MainGame.getCurrentTimeStampLogString() + zombieMotorPaths.size + " zombie motor paths were created in " + (System.currentTimeMillis() - timeStampStateStarted) + "ms");
+		timeStampStateStarted = System.currentTimeMillis();
+		for (int i = 0; i < 125; i++) {
+			zombiePaths.add(getPath(200));
+		}
+		Gdx.app.debug("map:constructor", MainGame.getCurrentTimeStampLogString() + zombiePaths.size + " zombie paths were created in " + (System.currentTimeMillis() - timeStampStateStarted) + "ms");
 	}
 
 	public Array<EnemyGridNode> getNodesList() {
@@ -102,24 +118,6 @@ public class Map extends Entity {
 			}
 		}
 		return nearestNode;
-	}
-
-	public EnemyGridNode getNodeAtPos(final Vector2 position) {
-		for (final EnemyGridNode node : nodesList) {
-			if (node.epsilonEquals(position)) {
-				return node;
-			}
-		}
-		return null;
-	}
-
-	public EnemyGridNode getNodeAtPos(final float x, final float y) {
-		for (final EnemyGridNode node : nodesList) {
-			if (node.epsilonEquals(new Vector2(x, y))) {
-				return node;
-			}
-		}
-		return null;
 	}
 
 	public void createSolidMap(String mapName, final World world) {
@@ -190,7 +188,7 @@ public class Map extends Entity {
 	/**
 	 * Create an array of nodes that is used for path finding
 	 */
-	private void createAStarArray() {
+	private void createEnemyGridNodeArray() {
 		// Fill node list with nodes that are in an area where zombies can move
 		long timeStampStateStarted = System.currentTimeMillis();
 		final Vector2 nodePosition = new Vector2();
@@ -203,7 +201,7 @@ public class Map extends Entity {
 				}
 			}
 		}
-		Gdx.app.debug("map:createAStarArray", MainGame.getCurrentTimeStampLogString() + nodesList.size + " nodes were created in " + (System.currentTimeMillis() - timeStampStateStarted) + "ms");
+		Gdx.app.debug("map:createEnemyGridNodeArray", MainGame.getCurrentTimeStampLogString() + nodesList.size + " nodes were created in " + (System.currentTimeMillis() - timeStampStateStarted) + "ms");
 
 		// Now add all neighbors of each node
 		timeStampStateStarted = System.currentTimeMillis();
@@ -224,7 +222,7 @@ public class Map extends Entity {
 				}
 			}
 		}
-		Gdx.app.debug("map:createAStarArray", MainGame.getCurrentTimeStampLogString() + "Every node knows it's neighbors after " + (System.currentTimeMillis() - timeStampStateStarted) + "ms");
+		Gdx.app.debug("map:createEnemyGridNodeArray", MainGame.getCurrentTimeStampLogString() + "Every node knows it's neighbors after " + (System.currentTimeMillis() - timeStampStateStarted) + "ms");
 	}
 
 	/**
@@ -279,40 +277,12 @@ public class Map extends Entity {
 	}
 
 	/**
-	 * TODO Add description
-	 *
-	 * @param startPosition The position from which the path should start
-	 * @param targetPosition The position to where the path should end
-	 */
-	private void findEnemyGridStartAndGoalNodes(final Vector2 startPosition, final Vector2 targetPosition) {
-		// Find the nearest nodes for the given start and target positions (throw exception if no node was found)
-		final EnemyGridNode startNode = getNearestNodeAtPos(startPosition);
-
-		if (startNode == null) {
-			Gdx.app.error("map:getPath", MainGame.getCurrentTimeStampLogString() + "Start node is null");
-			throw new RuntimeException("Start node is null");
-		}
-		enemyGridStartNode = startNode;
-
-		final EnemyGridNode goalNode = getNearestNodeAtPos(targetPosition);
-		if (goalNode == null) {
-			Gdx.app.error("map:getPath", MainGame.getCurrentTimeStampLogString() + "End node is null");
-			throw new RuntimeException("End node is null");
-		}
-		enemyGridGoalNode = goalNode;
-
-		Gdx.app.debug("map:getPath", MainGame.getCurrentTimeStampLogString() + "Start node: " + startNode);
-		Gdx.app.debug("map:getPath", MainGame.getCurrentTimeStampLogString() + "Goal node: " + goalNode);
-	}
-
-	/**
-	 * TODO Add description
-	 *
-	 * Search for a path from a given start position to the given target position using the A* algorithm and return this path.
-	 * If there is no path found then the method will throw an exception.
+	 * Search for a path from the in the constructor set start node to the goal node using an external path finding algorithm and return this path.
+	 * If there is no path found then the method will return null.
+	 * This method is not only creating paths but also PERMANENTLY updating the nodes with new additional difficulty values.
 	 *
 	 * @param maxRandomAdditionalDifficulty The maximum value of random additional difficulty that is added on the nodes of the found path so that other paths will be calculated on reruns of this method
-	 * @return The "shortest" (when taking into account the current additional difficulty on the nodes) path between the given start and target position
+	 * @return The "shortest" (when taking into account the current additional difficulty on the nodes) path between the given start and target position or null
 	 */
 	private Array<EnemyGridNode> getPath(float maxRandomAdditionalDifficulty) {
 		final float minAdditionalDifficulty = 20f;
@@ -345,11 +315,11 @@ public class Map extends Entity {
 	}
 
 	public Array<EnemyGridNode> getRandomPath() {
-		return new Array<>(paths.random());
+		return new Array<>(zombiePaths.random());
 	}
 	
 	public Array<EnemyGridNode> getRandomMotorPath() {
-		return new Array<>(motorPaths.random());
+		return new Array<>(zombieMotorPaths.random());
 	}
 
 	public Vector2 getHealthBarPos() {
