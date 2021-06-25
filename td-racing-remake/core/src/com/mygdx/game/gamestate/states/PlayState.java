@@ -623,24 +623,24 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 			scoreBoard.setDebugDisplay(!scoreBoard.getDebugDisplay());
 
 		// manually instantiate enemies
-		if (Gdx.input.isKeyJustPressed(Keys.F)) {
+		if (Gdx.input.isKeyJustPressed(Keys.G)) {
 			final Zombie zombie = new ZombieSmall(map.getSpawnPosition(), world, assetManager, map, 0, this, "[debug]");
 			zombies.add(zombie);
 		}
-		if (Gdx.input.isKeyJustPressed(Keys.G)) {
+		if (Gdx.input.isKeyJustPressed(Keys.H)) {
 			final Zombie zombie = new ZombieFat(map.getSpawnPosition(), world, assetManager, map, 0, this, "[debug]");
 			zombies.add(zombie);
 		}
-		if (Gdx.input.isKeyJustPressed(Keys.H)) {
-			final Zombie zombie = new ZombieBicycle(map.getSpawnPosition(), world, assetManager, map, 0, this, "[debug]");
-			zombies.add(zombie);
-		}
 		if (Gdx.input.isKeyJustPressed(Keys.J)) {
-			final Zombie zombie = new ZombieLincoln(map.getSpawnPosition(), world, assetManager, map, 0, this, "[debug]");
+			final Zombie zombie = new ZombieBicycle(map.getSpawnPosition(), world, assetManager, map, 0, this, "[debug]");
 			zombies.add(zombie);
 		}
 		if (Gdx.input.isKeyJustPressed(Keys.K)) {
 			final Zombie zombie = new ZombieSpider(map.getSpawnPosition(), world, assetManager, map, 0, this, "[debug]");
+			zombies.add(zombie);
+		}
+		if (Gdx.input.isKeyJustPressed(Keys.L)) {
+			final Zombie zombie = new ZombieLincoln(map.getSpawnPosition(), world, assetManager, map, 0, this, "[debug]");
 			zombies.add(zombie);
 		}
 
@@ -1004,8 +1004,9 @@ public class PlayState extends GameState implements CollisionCallbackInterface, 
 
 					spriteBatch.end();
 
-					if (debugBox2D)
+					if (debugBox2D) {
 						debugRender.render(world, camera.combined);
+					}
 
 					shapeRenderer.begin(ShapeType.Filled);
 					controllerCallbackPlayState.drawDebugInput(shapeRenderer);

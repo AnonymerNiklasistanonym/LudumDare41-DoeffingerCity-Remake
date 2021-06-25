@@ -63,11 +63,11 @@ public class ScoreBoard {
 				return;
 
 			MainGame.fontOutline.setColor(1, 0, 0, 1);
-			MainGame.fontOutline.draw(spriteBatch, "Spawn Small Enemy: F", 0.2f, 32);
-			MainGame.fontOutline.draw(spriteBatch, "Spawn Fat Enemy: G", 0.2f, 31);
-			MainGame.fontOutline.draw(spriteBatch, "Spawn Bycicle Enemy: H", 0.2f, 30);
-			MainGame.fontOutline.draw(spriteBatch, "Spawn Spider Enemy: J", 0.2f, 29);
-			MainGame.fontOutline.draw(spriteBatch, "Spawn Lincoln Enemy: K", 0.2f, 28);
+			MainGame.fontOutline.draw(spriteBatch, "Spawn Small Enemy: G", 0.2f, 32);
+			MainGame.fontOutline.draw(spriteBatch, "Spawn Fat Enemy: H", 0.2f, 31);
+			MainGame.fontOutline.draw(spriteBatch, "Spawn Bycicle Enemy: J", 0.2f, 30);
+			MainGame.fontOutline.draw(spriteBatch, "Spawn Spider Enemy: K", 0.2f, 29);
+			MainGame.fontOutline.draw(spriteBatch, "Spawn Lincoln Enemy: L", 0.2f, 28);
 
 			MainGame.fontOutline.draw(spriteBatch, "Debug Box2D: X", 0.2f, 26);
 			MainGame.fontOutline.draw(spriteBatch, "Debug Collision: C", 0.2f, 25);
