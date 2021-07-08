@@ -82,9 +82,13 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: binary-artifacts
-        path: |
-          ./td-racing-remake/bin/
-          ./td-racing-remake/javadoc/
+        path: ./td-racing-remake/bin/
+        retention-days: 7
+    - name: Temporarily save created JavaDoc files
+      uses: actions/upload-artifact@v2
+      with:
+        name: javadoc-artifacts
+        path: ./td-racing-remake/javadoc/
         retention-days: 7
 
   deploy:
@@ -99,9 +103,12 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: binary-artifacts
-        path: |
-          ./td-racing-remake/bin/
-          ./td-racing-remake/javadoc/
+        path: ./td-racing-remake/bin/
+    - name: Retrieve temporarily saved JavaDoc files from the build job
+      uses: actions/download-artifact@v2
+      with:
+        name: javadoc-artifacts
+        path: ./td-racing-remake/javadoc/
     - name: Create website
       working-directory: ./web-page
       run: make
