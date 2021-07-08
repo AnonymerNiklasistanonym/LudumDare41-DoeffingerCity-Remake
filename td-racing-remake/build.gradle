@@ -78,6 +78,11 @@ project(":html") {
 	apply plugin: "war"
 	apply plugin: "org.gretty"
 
+	// Fix gradle html javadoc issue (https://stackoverflow.com/questions/52788326/gradle-javadoc-gwt-error-cannot-access-event-in-import-com-google-gwt-user-cli)
+	javadoc {
+		options.addStringOption("sourcepath", "")
+	}
+
 	dependencies {
 		implementation project(":core")
 		api "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion"

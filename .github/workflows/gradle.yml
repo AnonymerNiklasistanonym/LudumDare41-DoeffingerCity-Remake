@@ -74,12 +74,17 @@ jobs:
     - name: Build with Gradle the android debug APK (via Makefile)
       working-directory: ./td-racing-remake/
       run: make build_android_debug
+    - name: Build with Gradle the JavaDoc documentations
+      working-directory: ./td-racing-remake/
+      run: make doc
     # This is used to share all created "binary" files between the separated jobs
     - name: Temporarily save created "binary" files
       uses: actions/upload-artifact@v2
       with:
         name: binary-artifacts
-        path: ./td-racing-remake/bin/
+        path: |
+          ./td-racing-remake/bin/
+          ./td-racing-remake/javadoc/
         retention-days: 7
 
   deploy:
@@ -94,7 +99,9 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: binary-artifacts
-        path: ./td-racing-remake/bin/
+        path: |
+          ./td-racing-remake/bin/
+          ./td-racing-remake/javadoc/
     - name: Create website
       working-directory: ./web-page
       run: make

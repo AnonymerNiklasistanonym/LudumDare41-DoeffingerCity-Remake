@@ -1,6 +1,7 @@
 .PHONY: clean clean_android clean_desktop clean_html
 .PHONY: build_android build_android_debug build_desktop build_html
 .PHONY: dist dist_android dist_desktop dist_html
+.PHONY: doc
 .PHONY: run_desktop run_html
 .PHONY: setup_gradle
 
@@ -11,6 +12,7 @@ DIST_FILE_ANDROID=$(DIST_DIR)/$(NAME)-android-$(VERSION).apk
 DIST_FILE_DESKTOP=$(DIST_DIR)/$(NAME)-desktop-$(VERSION).jar
 DIST_DIR_HTML=$(DIST_DIR)/$(NAME)-html-$(VERSION)
 DIST_ZIP_HTML=$(DIST_DIR)/$(NAME)-html-$(VERSION).zip
+JAVADOC_DIR=javadoc
 
 all: dist_desktop
 
@@ -19,6 +21,8 @@ clean: clean_android clean_desktop clean_html
 	./gradlew clean
 	# Remove the created dist directory
 	rm -rf "$(DIST_DIR)"
+	# Remove the created javadoc directory
+	rm -rf "$(JAVADOC_DIR)"
 	# Remove gradle build directory
 	rm -rf "build"
 	# Remove the gradle directory
@@ -94,6 +98,11 @@ dist_html: build_html
 	rm -rf "$(DIST_DIR_HTML)"
 	cp -R "html/build/dist" "$(DIST_DIR_HTML)"
 	cd "html/build/dist" && zip -r "../../../$(DIST_ZIP_HTML)" . -i "*"
+
+doc:
+	./gradlew core:javadoc desktop:javadoc html:javadoc
+	mkdir -p "$(JAVADOC_DIR)"
+	$(foreach SUB_PROJECT,html core desktop,cp -R "$(SUB_PROJECT)/build/docs/javadoc" "$(JAVADOC_DIR)/$(NAME)-$(SUB_PROJECT)-$(VERSION)";)
 
 run_desktop: dist_desktop
 	java -jar "$(DIST_FILE_DESKTOP)"
